@@ -1,0 +1,49 @@
+﻿@* Views/Shared/_ManagerSidebar.cshtml *@
+@{
+    var currentTitle = ViewData["Title"]?.ToString() ?? "";
+}
+
+<style>
+    .nav-link.active {
+        border-left: 4px solid #0d6efd; /* Blue line */
+        background-color: rgba(13, 110, 253, 0.1); /* Optional subtle background */
+        font-weight: 500;
+    }
+
+    .sidebar {
+        min-height: 100vh; /* Full height */
+        padding-top: 1rem;
+    }
+</style>
+
+<nav class="col-md-2 d-none d-md-block bg-dark sidebar text-white">
+    <div class="position-sticky">
+        <h4 class="px-3 text-white">Manager</h4>
+        <ul class="nav flex-column mt-4">
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Dashboard") ? "active" : "") text-white"
+                   href="@Url.Action("ManagerDashboard", "PropertyManager")">Dashboard</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Properties") ? "active" : "") text-white"
+                   href="@Url.Action("ManagerProperties", "PropertyManager")">Properties</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Leases") ? "active" : "") text-white"
+                   href="@Url.Action("ManagerLeases", "PropertyManager")">Leases</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Maintenance") ? "active" : "") text-white"
+                   href="@Url.Action("ManagerMaintenance", "PropertyManager")">Maintenance</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Escalations") ? "active" : "") text-white"
+                   href="@Url.Action("ManagerEscalations", "PropertyManager")">Escalations</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Settings") ? "active" : "") text-white"
+                   href="@Url.Action("ManagerSettings", "PropertyManager")">Settings</a>
+            </li>
+        </ul>
+    </div>
+</nav>

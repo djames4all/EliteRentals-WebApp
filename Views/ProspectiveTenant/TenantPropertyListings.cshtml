@@ -1,0 +1,173 @@
+﻿@{
+    ViewData["Title"] = "Property Listings - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid p-0">
+
+    <!-- Hero Section -->
+    <section class="bg-dark text-white text-center py-5"
+             style="background: linear-gradient(90deg, #0d6efd, #0b5ed7);">
+        <div class="container py-5">
+            <h1 class="display-3 fw-bold">Find Your Perfect Rental</h1>
+            <p class="lead mb-4">Browse verified properties across apartments, houses, and townhouses.</p>
+        </div>
+    </section>
+
+    <!-- Search & Filters -->
+    <section class="bg-light py-4 shadow-sm">
+        <div class="container">
+            <form class="row g-3" id="propertySearchForm">
+                <div class="col-md-3">
+                    <input type="text" class="form-control" id="searchLocation" placeholder="Search by Location...">
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterType">
+                        <option value="">Property Type</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="House">House</option>
+                        <option value="Townhouse">Townhouse</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterBedrooms">
+                        <option value="">Bedrooms</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="filterPrice">
+                        <option value="">Price Range</option>
+                        <option value="5000-8000">R5,000 - R8,000</option>
+                        <option value="8000-12000">R8,000 - R12,000</option>
+                        <option value="12000+">R12,000+</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="sortBy">
+                        <option value="">Sort By</option>
+                        <option value="newest">Newest</option>
+                        <option value="lowest">Lowest Price</option>
+                        <option value="highest">Highest Price</option>
+                    </select>
+                </div>
+                <div class="col-md-1 d-grid">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <div class="container my-5" id="propertyListingsContainer">
+        <!-- Property sections rendered via JS -->
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mock Data
+        const properties = [
+            // Apartments
+            { type: "Apartment", price: 7500, bedrooms: 1, address: "123 Main St", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { type: "Apartment", price: 8000, bedrooms: 2, address: "234 Oak St", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+            { type: "Apartment", price: 8500, bedrooms: 3, address: "345 Pine St", status: "Available", image: "https://via.placeholder.com/400x250" },
+
+            // Houses
+            { type: "House", price: 12000, bedrooms: 3, address: "101 Maple Ave", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { type: "House", price: 13000, bedrooms: 4, address: "202 Cedar Rd", status: "Unavailable", image: "https://via.placeholder.com/400x250" },
+
+            // Townhouses
+            { type: "Townhouse", price: 9000, bedrooms: 2, address: "11 Willow Ln", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { type: "Townhouse", price: 9500, bedrooms: 3, address: "22 Birch St", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+        ];
+
+        const container = document.getElementById("propertyListingsContainer");
+
+        function renderProperties(filteredProps) {
+            container.innerHTML = "";
+
+            const types = ["Apartment", "House", "Townhouse"];
+            types.forEach(type => {
+                const propsOfType = filteredProps.filter(p => p.type === type);
+                if (propsOfType.length === 0) return;
+
+                const section = document.createElement("div");
+                section.classList.add("mb-5");
+
+                const header = document.createElement("div");
+                header.className = "d-flex justify-content-between align-items-center mb-3";
+                header.innerHTML = `<h2 class="fw-bold">${type}s</h2><a href="/${type}s/All" class="btn btn-link">View All</a>`;
+                section.appendChild(header);
+
+                const row = document.createElement("div");
+                row.className = "row g-4";
+
+                propsOfType.forEach((prop, i) => {
+                    const col = document.createElement("div");
+                    col.className = "col-md-4";
+
+                    const badgeClass = prop.status === "Available" ? "bg-success" : "bg-warning text-dark";
+                    const applyBtnClass = prop.status === "Available" ? "btn-primary" : "btn-outline-secondary disabled";
+
+                    col.innerHTML = `
+                        <div class="card shadow-sm h-100">
+                            <img src="${prop.image}" class="card-img-top" alt="${prop.type} ${i+1}">
+                            <div class="card-body">
+                                <h5 class="card-title text-primary">R${prop.price.toLocaleString()} / month</h5>
+                                <p class="card-text">${prop.bedrooms}-Bedroom – ${prop.address}</p>
+                                <span class="badge ${badgeClass}">${prop.status}</span>
+                                <div class="mt-3">
+                                    <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
+                                    <a href="#" class="btn ${applyBtnClass} btn-sm">Apply Now</a>
+                                </div>
+                            </div>
+                        </div>
+                    `;
+                    row.appendChild(col);
+                });
+
+                section.appendChild(row);
+                container.appendChild(section);
+            });
+        }
+
+        // Initial render
+        renderProperties(properties);
+
+        // Search & Filter functionality
+        document.getElementById("propertySearchForm").addEventListener("submit", e => {
+            e.preventDefault();
+            let filtered = properties;
+
+            const location = document.getElementById("searchLocation").value.toLowerCase();
+            if (location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
+
+            const type = document.getElementById("filterType").value;
+            if (type) filtered = filtered.filter(p => p.type === type);
+
+            const bedrooms = document.getElementById("filterBedrooms").value;
+            if (bedrooms) filtered = filtered.filter(p => p.bedrooms >= parseInt(bedrooms));
+
+            const priceRange = document.getElementById("filterPrice").value;
+            if (priceRange) {
+                if (priceRange.includes("+")) {
+                    const min = parseInt(priceRange);
+                    filtered = filtered.filter(p => p.price >= min);
+                } else {
+                    const [min, max] = priceRange.split("-").map(Number);
+                    filtered = filtered.filter(p => p.price >= min && p.price <= max);
+                }
+            }
+
+            const sortBy = document.getElementById("sortBy").value;
+            if (sortBy === "lowest") filtered.sort((a,b) => a.price - b.price);
+            else if (sortBy === "highest") filtered.sort((a,b) => b.price - a.price);
+            else if (sortBy === "newest") filtered.sort((a,b) => b.price - a.price); // mock: newest = highest price
+
+            renderProperties(filtered);
+        });
+    </script>
+}

@@ -1,0 +1,279 @@
+﻿@{
+    ViewData["Title"] = "Manager Leases - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_ManagerSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Leases Overview</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addLeaseModal">
+                    Add New Lease
+                </button>
+            </div>
+
+            <!-- Leases Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle" id="leasesTable">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>Property</th>
+                                <th>Start Date</th>
+                                <th>End Date</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 1; i <= 6; i++)
+                            {
+                                <tr>
+                                    <td>Tenant @i</td>
+                                    <td>Property @i</td>
+                                    <td>@DateTime.Now.AddMonths(-i).ToString("yyyy-MM-dd")</td>
+                                    <td>@DateTime.Now.AddMonths(12 - i).ToString("yyyy-MM-dd")</td>
+                                    <td>
+                                        <span class="badge @(i % 2 == 0 ? "bg-warning text-dark" : "bg-success")">
+                                            @(i % 2 == 0 ? "Pending Approval" : "Active")
+                                        </span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info view-btn">View</button>
+                                        <button class="btn btn-sm btn-warning edit-btn">Edit</button>
+                                        <button class="btn btn-sm btn-success approve-btn">Approve</button>
+                                        <button class="btn btn-sm btn-danger terminate-btn">Terminate</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add Lease Modal -->
+<div class="modal fade" id="addLeaseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Lease</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addLeaseForm">
+                    <div class="mb-3">
+                        <label class="form-label">Tenant Name</label>
+                        <input type="text" class="form-control" id="newTenant" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Property</label>
+                        <input type="text" class="form-control" id="newProperty" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="newStartDate" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="newEndDate" required />
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Lease</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Lease Modal -->
+<div class="modal fade" id="viewLeaseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Lease Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Tenant:</strong> <span id="viewTenant"></span></p>
+                <p><strong>Property:</strong> <span id="viewProperty"></span></p>
+                <p><strong>Start Date:</strong> <span id="viewStart"></span></p>
+                <p><strong>End Date:</strong> <span id="viewEnd"></span></p>
+                <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Lease Modal -->
+<div class="modal fade" id="editLeaseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Lease</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editLeaseForm">
+                    <input type="hidden" id="editRowIndex" />
+                    <div class="mb-3">
+                        <label class="form-label">Tenant Name</label>
+                        <input type="text" class="form-control" id="editTenant" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Property</label>
+                        <input type="text" class="form-control" id="editProperty" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Start Date</label>
+                        <input type="date" class="form-control" id="editStartDate" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">End Date</label>
+                        <input type="date" class="form-control" id="editEndDate" required />
+                    </div>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Terminate Lease Modal -->
+<div class="modal fade" id="terminateLeaseModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Terminate Lease</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                Are you sure you want to terminate this lease?
+            </div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="confirmTerminateBtn">Terminate</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        let selectedRow;
+
+        // VIEW Lease
+        function attachViewHandlers() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    document.getElementById('viewTenant').innerText = selectedRow.cells[0].innerText;
+                    document.getElementById('viewProperty').innerText = selectedRow.cells[1].innerText;
+                    document.getElementById('viewStart').innerText = selectedRow.cells[2].innerText;
+                    document.getElementById('viewEnd').innerText = selectedRow.cells[3].innerText;
+                    document.getElementById('viewStatus').innerText = selectedRow.cells[4].innerText.trim();
+                    new bootstrap.Modal(document.getElementById('viewLeaseModal')).show();
+                };
+            });
+        }
+
+        // EDIT Lease
+        function attachEditHandlers() {
+            document.querySelectorAll('.edit-btn').forEach((btn, index) => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    document.getElementById('editRowIndex').value = index;
+                    document.getElementById('editTenant').value = selectedRow.cells[0].innerText;
+                    document.getElementById('editProperty').value = selectedRow.cells[1].innerText;
+                    document.getElementById('editStartDate').value = selectedRow.cells[2].innerText;
+                    document.getElementById('editEndDate').value = selectedRow.cells[3].innerText;
+                    new bootstrap.Modal(document.getElementById('editLeaseModal')).show();
+                };
+            });
+        }
+
+        // APPROVE Lease
+        function attachApproveHandlers() {
+            document.querySelectorAll('.approve-btn').forEach(btn => {
+                btn.onclick = function () {
+                    let row = this.closest('tr');
+                    row.cells[4].innerHTML = '<span class="badge bg-success">Active</span>';
+                };
+            });
+        }
+
+        // TERMINATE Lease
+        function attachTerminateHandlers() {
+            document.querySelectorAll('.terminate-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    new bootstrap.Modal(document.getElementById('terminateLeaseModal')).show();
+                };
+            });
+        }
+
+        // CONFIRM Terminate
+        document.getElementById('confirmTerminateBtn').addEventListener('click', function () {
+            selectedRow.cells[4].innerHTML = '<span class="badge bg-danger">Terminated</span>';
+            bootstrap.Modal.getInstance(document.getElementById('terminateLeaseModal')).hide();
+        });
+
+        // ADD Lease
+        document.getElementById('addLeaseForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            const tenant = document.getElementById('newTenant').value;
+            const property = document.getElementById('newProperty').value;
+            const startDate = document.getElementById('newStartDate').value;
+            const endDate = document.getElementById('newEndDate').value;
+
+            const table = document.querySelector('#leasesTable tbody');
+            const newRow = table.insertRow();
+
+            newRow.innerHTML = `
+                <td>${tenant}</td>
+                <td>${property}</td>
+                <td>${startDate}</td>
+                <td>${endDate}</td>
+                <td><span class="badge bg-warning text-dark">Pending Approval</span></td>
+                <td>
+                    <button class="btn btn-sm btn-info view-btn">View</button>
+                    <button class="btn btn-sm btn-warning edit-btn">Edit</button>
+                    <button class="btn btn-sm btn-success approve-btn">Approve</button>
+                    <button class="btn btn-sm btn-danger terminate-btn">Terminate</button>
+                </td>
+            `;
+
+            attachViewHandlers();
+            attachEditHandlers();
+            attachApproveHandlers();
+            attachTerminateHandlers();
+
+            bootstrap.Modal.getInstance(document.getElementById('addLeaseModal')).hide();
+            this.reset();
+        });
+
+        // EDIT Save Changes
+        document.getElementById('editLeaseForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+
+            selectedRow.cells[0].innerText = document.getElementById('editTenant').value;
+            selectedRow.cells[1].innerText = document.getElementById('editProperty').value;
+            selectedRow.cells[2].innerText = document.getElementById('editStartDate').value;
+            selectedRow.cells[3].innerText = document.getElementById('editEndDate').value;
+
+            bootstrap.Modal.getInstance(document.getElementById('editLeaseModal')).hide();
+        });
+
+        // Initial attach
+        attachViewHandlers();
+        attachEditHandlers();
+        attachApproveHandlers();
+        attachTerminateHandlers();
+    </script>
+}

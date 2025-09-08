@@ -1,0 +1,284 @@
+﻿@{
+    ViewData["Title"] = "Manager Maintenance - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_ManagerSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Maintenance Requests</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addTaskModal">
+                    Add New Task
+                </button>
+            </div>
+
+            <!-- Maintenance Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle" id="maintenanceTable">
+                        <thead>
+                            <tr>
+                                <th>Issue</th>
+                                <th>Property</th>
+                                <th>Reported By</th>
+                                <th>Status</th>
+                                <th>Priority</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 1; i <= 6; i++)
+                            {
+                                var status = i % 3 == 0 ? "Resolved" : (i % 2 == 0 ? "In Progress" : "Pending");
+                                var priority = i % 3 == 0 ? "High" : (i % 2 == 0 ? "Medium" : "Low");
+                                <tr>
+                                    <td>Issue @i</td>
+                                    <td>Property @i</td>
+                                    <td>Tenant @i</td>
+                                    <td>
+                                        <button class="btn btn-sm status-btn">@status</button>
+                                    </td>
+                                    <td>
+                                        <span class="priority-badge @(priority.ToLower())">@priority</span>
+                                    </td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info view-btn">View</button>
+                                        <button class="btn btn-sm btn-warning edit-btn">Edit</button>
+                                        <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add Task Modal -->
+<div class="modal fade" id="addTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Add New Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="addTaskForm">
+                    <div class="mb-3">
+                        <label class="form-label">Issue</label>
+                        <input type="text" class="form-control" id="newIssue" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Property</label>
+                        <input type="text" class="form-control" id="newProperty" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reported By</label>
+                        <input type="text" class="form-control" id="newReportedBy" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select id="newPriority" class="form-select">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Add Task</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Task Modal -->
+<div class="modal fade" id="viewTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Task Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Issue:</strong> <span id="viewIssue"></span></p>
+                <p><strong>Property:</strong> <span id="viewProperty"></span></p>
+                <p><strong>Reported By:</strong> <span id="viewReportedBy"></span></p>
+                <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+                <p><strong>Priority:</strong> <span id="viewPriority"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Edit Task Modal -->
+<div class="modal fade" id="editTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Edit Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="editTaskForm">
+                    <div class="mb-3">
+                        <label class="form-label">Issue</label>
+                        <input type="text" class="form-control" id="editIssue" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Property</label>
+                        <input type="text" class="form-control" id="editProperty" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Reported By</label>
+                        <input type="text" class="form-control" id="editReportedBy" required />
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Priority</label>
+                        <select id="editPriority" class="form-select">
+                            <option>Low</option>
+                            <option>Medium</option>
+                            <option>High</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-success">Save Changes</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Delete Confirm Modal -->
+<div class="modal fade" id="deleteTaskModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Delete Task</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">Are you sure you want to delete this task?</div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="confirmDeleteBtn">Delete</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* Priority Colors */
+    .priority-badge.low { color: white; background-color: green; padding: 3px 8px; border-radius: 5px; }
+    .priority-badge.medium { color: white; background-color: orange; padding: 3px 8px; border-radius: 5px; }
+    .priority-badge.high { color: white; background-color: red; padding: 3px 8px; border-radius: 5px; }
+</style>
+
+@section Scripts {
+    <script>
+        let selectedRow;
+        const statuses = ["Pending", "In Progress", "Resolved"];
+
+        function attachViewHandlers() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    document.getElementById('viewIssue').innerText = selectedRow.cells[0].innerText;
+                    document.getElementById('viewProperty').innerText = selectedRow.cells[1].innerText;
+                    document.getElementById('viewReportedBy').innerText = selectedRow.cells[2].innerText;
+                    document.getElementById('viewStatus').innerText = selectedRow.cells[3].innerText.trim();
+                    document.getElementById('viewPriority').innerText = selectedRow.cells[4].innerText;
+                    new bootstrap.Modal(document.getElementById('viewTaskModal')).show();
+                };
+            });
+        }
+
+        function attachEditHandlers() {
+            document.querySelectorAll('.edit-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    document.getElementById('editIssue').value = selectedRow.cells[0].innerText;
+                    document.getElementById('editProperty').value = selectedRow.cells[1].innerText;
+                    document.getElementById('editReportedBy').value = selectedRow.cells[2].innerText;
+                    document.getElementById('editPriority').value = selectedRow.cells[4].innerText;
+                    new bootstrap.Modal(document.getElementById('editTaskModal')).show();
+                };
+            });
+        }
+
+        function attachDeleteHandlers() {
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    new bootstrap.Modal(document.getElementById('deleteTaskModal')).show();
+                };
+            });
+        }
+
+        function attachStatusHandlers() {
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.onclick = function () {
+                    const currentStatus = this.innerText.trim();
+                    const nextIndex = (statuses.indexOf(currentStatus) + 1) % statuses.length;
+                    const nextStatus = statuses[nextIndex];
+                    this.innerText = nextStatus;
+                };
+            });
+        }
+
+        document.getElementById('confirmDeleteBtn').addEventListener('click', function () {
+            selectedRow.remove();
+            bootstrap.Modal.getInstance(document.getElementById('deleteTaskModal')).hide();
+        });
+
+        // Add Task
+        document.getElementById('addTaskForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            const issue = document.getElementById('newIssue').value;
+            const property = document.getElementById('newProperty').value;
+            const reportedBy = document.getElementById('newReportedBy').value;
+            const priority = document.getElementById('newPriority').value;
+
+            const table = document.querySelector('#maintenanceTable tbody');
+            const newRow = table.insertRow();
+            newRow.innerHTML = `
+                <td>${issue}</td>
+                <td>${property}</td>
+                <td>${reportedBy}</td>
+                <td><button class="btn btn-sm status-btn">Pending</button></td>
+                <td><span class="priority-badge ${priority.toLowerCase()}">${priority}</span></td>
+                <td>
+                    <button class="btn btn-sm btn-info view-btn">View</button>
+                    <button class="btn btn-sm btn-warning edit-btn">Edit</button>
+                    <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                </td>
+            `;
+            attachViewHandlers();
+            attachEditHandlers();
+            attachDeleteHandlers();
+            attachStatusHandlers();
+            bootstrap.Modal.getInstance(document.getElementById('addTaskModal')).hide();
+            this.reset();
+        });
+
+        // Edit Save
+        document.getElementById('editTaskForm').addEventListener('submit', function (e) {
+            e.preventDefault();
+            selectedRow.cells[0].innerText = document.getElementById('editIssue').value;
+            selectedRow.cells[1].innerText = document.getElementById('editProperty').value;
+            selectedRow.cells[2].innerText = document.getElementById('editReportedBy').value;
+
+            const priority = document.getElementById('editPriority').value;
+            selectedRow.cells[4].innerHTML = `<span class="priority-badge ${priority.toLowerCase()}">${priority}</span>`;
+
+            bootstrap.Modal.getInstance(document.getElementById('editTaskModal')).hide();
+        });
+
+        attachViewHandlers();
+        attachEditHandlers();
+        attachDeleteHandlers();
+        attachStatusHandlers();
+    </script>
+}

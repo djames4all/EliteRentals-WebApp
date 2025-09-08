@@ -1,0 +1,211 @@
+﻿@{
+    ViewData["Title"] = "Admin Reports - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Reports</h2>
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateReportModal">Generate New Report</button>
+            </div>
+
+            <!-- Charts Section -->
+            <div class="row g-4 mb-4">
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Monthly Rent Collection</h5>
+                            <canvas id="monthlyRentChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="card shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Lease Expiration Overview</h5>
+                            <canvas id="leaseReportChart"></canvas>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Reports Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Detailed Reports</h5>
+                    <table class="table table-hover align-middle" id="reportsTable">
+                        <thead>
+                            <tr>
+                                <th>Report Name</th>
+                                <th>Type</th>
+                                <th>Date Generated</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Generate Report Modal -->
+<div class="modal fade" id="generateReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Generate New Report</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="generateReportForm">
+                    <div class="mb-3">
+                        <label class="form-label">Report Name</label>
+                        <input type="text" class="form-control" id="reportName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Report Type</label>
+                        <select class="form-select" id="reportType">
+                            <option>Monthly Rent Collection</option>
+                            <option>Lease Expiration Overview</option>
+                            <option>Maintenance Summary</option>
+                            <option>Tenant Activity</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary">Generate</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Report Modal -->
+<div class="modal fade" id="viewReportModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="viewReportTitle">Report Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="viewReportBody">
+                <!-- Report content will appear here -->
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+    <script>
+        // Mock report data
+        let reports = [
+            {id:1, name:"January Rent Collection", type:"Monthly Rent Collection", date:"2025-01-31", status:"Completed"},
+            {id:2, name:"Feb Lease Expirations", type:"Lease Expiration Overview", date:"2025-02-28", status:"Completed"},
+            {id:3, name:"Maintenance Summary March", type:"Maintenance Summary", date:"2025-03-15", status:"Pending"},
+            {id:4, name:"Tenant Activity April", type:"Tenant Activity", date:"2025-04-20", status:"Completed"}
+        ];
+
+        const reportsTableBody = document.querySelector("#reportsTable tbody");
+        const viewReportModal = new bootstrap.Modal(document.getElementById('viewReportModal'));
+
+        function renderReports(){
+            reportsTableBody.innerHTML = "";
+            reports.forEach(r=>{
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${r.name}</td>
+                    <td>${r.type}</td>
+                    <td>${r.date}</td>
+                    <td>${r.status}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info view-btn">View</button>
+                        <button class="btn btn-sm btn-success download-btn">Download</button>
+                        <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                    </td>
+                `;
+                // View button
+                tr.querySelector('.view-btn').addEventListener('click', ()=>{
+                    document.getElementById('viewReportTitle').textContent = r.name;
+                    document.getElementById('viewReportBody').innerHTML = `
+                        <p><strong>Type:</strong> ${r.type}</p>
+                        <p><strong>Date Generated:</strong> ${r.date}</p>
+                        <p><strong>Status:</strong> ${r.status}</p>
+                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Report details would appear here.</p>
+                    `;
+                    viewReportModal.show();
+                });
+                // Download button
+                tr.querySelector('.download-btn').addEventListener('click', ()=>{
+                    alert(`Downloading report: ${r.name}`);
+                });
+                // Delete button
+                tr.querySelector('.delete-btn').addEventListener('click', ()=>{
+                    if(confirm(`Are you sure you want to delete "${r.name}"?`)){
+                        reports = reports.filter(rep=>rep.id!==r.id);
+                        renderReports();
+                    }
+                });
+
+                reportsTableBody.appendChild(tr);
+            });
+        }
+
+        renderReports();
+
+        // Generate report form
+        document.getElementById('generateReportForm').addEventListener('submit', e=>{
+            e.preventDefault();
+            const name = document.getElementById('reportName').value;
+            const type = document.getElementById('reportType').value;
+            const date = new Date().toISOString().split('T')[0];
+
+            const newReport = {
+                id: reports.length + 1,
+                name,
+                type,
+                date,
+                status: "Pending"
+            };
+
+            reports.push(newReport);
+            renderReports();
+            bootstrap.Modal.getInstance(document.getElementById('generateReportModal')).hide();
+            e.target.reset();
+        });
+
+        // Charts
+        const rentChart = new Chart(document.getElementById('monthlyRentChart').getContext('2d'), {
+            type: 'line',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                datasets: [{
+                    label: 'Rent Collected',
+                    data: [2000,2500,3000,3500,3200,4000],
+                    borderColor: '#0d6efd',
+                    backgroundColor: 'rgba(13,110,253,0.2)',
+                    fill: true
+                }]
+            }
+        });
+
+        const leaseChart = new Chart(document.getElementById('leaseReportChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
+                datasets: [{
+                    label: 'Expiring Leases',
+                    data: [2,5,3,8,4,6],
+                    backgroundColor: '#ffc107'
+                }]
+            }
+        });
+    </script>
+}

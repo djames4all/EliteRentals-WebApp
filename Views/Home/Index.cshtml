@@ -1,0 +1,167 @@
+﻿@{
+    ViewData["Title"] = "Home - Elite Rentals";
+}
+
+<div class="container-fluid p-0">
+
+    <!-- Hero Section -->
+    <section class="bg-dark text-white text-center py-5"
+             style="background: linear-gradient(90deg, #0d6efd, #0b5ed7);">
+        <div class="container py-5">
+            <h1 class="display-3 fw-bold">Elite Rentals</h1>
+            <p class="lead mb-4">Your trusted platform for renting, managing, and maintaining properties with ease.</p>
+            <div>
+                <a href="@Url.Action("TenantPropertyListings", "ProspectiveTenant")" class="btn btn-light btn-lg me-2">
+                    Browse Properties
+                </a>
+                <a href="@Url.Action("AdminDashboard", "Admin")" class="btn btn-outline-light btn-lg">
+                    Admin Dashboard
+                </a>
+                <a href="@Url.Action("ManagerDashboard", "PropertyManager")" class="btn btn-outline-light btn-lg">
+                    Manager Dashboard
+                </a>
+            </div>
+        </div>
+    </section>
+
+    <!-- Quick Search -->
+    <section class="bg-light py-4 shadow-sm">
+        <div class="container">
+            <form class="row g-3" id="homeSearchForm">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="searchLocation" placeholder="Search by Location...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterType">
+                        <option value="">Property Type</option>
+                        <option value="Apartment">Apartment</option>
+                        <option value="House">House</option>
+                        <option value="Townhouse">Townhouse</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterPrice">
+                        <option value="">Price Range</option>
+                        <option value="500-1000">$500 - $1,000</option>
+                        <option value="1000-2000">$1,000 - $2,000</option>
+                        <option value="2000+">$2,000+</option>
+                    </select>
+                </div>
+                <div class="col-md-2 d-grid">
+                    <button type="submit" class="btn btn-primary">Search</button>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Featured Listings -->
+    <section class="container my-5">
+        <h2 class="fw-bold mb-4">Featured Listings</h2>
+        <div class="row g-4" id="featuredListings">
+            <!-- Property cards rendered via JS -->
+        </div>
+    </section>
+
+    <!-- Platform Highlights -->
+    <section class="bg-light py-5 text-center">
+        <div class="container">
+            <div class="row g-4" id="platformStats">
+                <!-- Stats rendered via JS -->
+            </div>
+        </div>
+    </section>
+
+    <!-- CTA Section -->
+    <section class="bg-primary text-white text-center py-5">
+        <div class="container">
+            <h2 class="fw-bold">Ready to get started?</h2>
+            <p class="mb-4">Whether you are a tenant, manager, or admin, Elite Rentals makes rental management simple and efficient.</p>
+            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-light btn-lg">
+                Sign Up Now
+            </a>
+        </div>
+    </section>
+</div>
+
+@section Scripts {
+    <script>
+        // Mock Featured Properties
+        const featuredProperties = [
+            { type: "Apartment", price: 1200, bedrooms: 1, address: "123 Main St", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { type: "House", price: 950, bedrooms: 2, address: "456 Oak Ave", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { type: "Condo", price: 1500, bedrooms: 3, address: "780 Pine Rd", status: "Available", image: "https://via.placeholder.com/400x250" }
+        ];
+
+        const featuredContainer = document.getElementById("featuredListings");
+
+        function renderFeatured(properties) {
+            featuredContainer.innerHTML = '';
+            properties.forEach(p => {
+                const col = document.createElement("div");
+                col.className = "col-md-4";
+                col.innerHTML = `
+                    <div class="card h-100 shadow-sm">
+                        <img src="${p.image}" class="card-img-top" alt="${p.type}">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">$${p.price.toLocaleString()} / month</h5>
+                            <p class="card-text">${p.type} – ${p.address}</p>
+                            <a href="@Url.Action("TenantPropertyListings", "ProspectiveTenant")" class="btn btn-outline-primary btn-sm">View Details</a>
+                        </div>
+                    </div>
+                `;
+                featuredContainer.appendChild(col);
+            });
+        }
+
+        renderFeatured(featuredProperties);
+
+        // Platform stats mock data
+        const platformStats = [
+            { count: 500, label: "Active Listings" },
+            { count: 200, label: "Happy Property Owners" },
+            { count: 1000, label: "Tenants Served" }
+        ];
+
+        const statsContainer = document.getElementById("platformStats");
+
+        function renderStats(stats) {
+            statsContainer.innerHTML = '';
+            stats.forEach(s => {
+                const col = document.createElement("div");
+                col.className = "col-md-4";
+                col.innerHTML = `
+                    <h3 class="fw-bold text-primary">${s.count.toLocaleString()}+</h3>
+                    <p>${s.label}</p>
+                `;
+                statsContainer.appendChild(col);
+            });
+        }
+
+        renderStats(platformStats);
+
+        // Optional: Quick search form (filter featured properties)
+        document.getElementById("homeSearchForm").addEventListener("submit", e => {
+            e.preventDefault();
+            let filtered = featuredProperties;
+
+            const location = document.getElementById("searchLocation").value.toLowerCase();
+            if(location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
+
+            const type = document.getElementById("filterType").value;
+            if(type) filtered = filtered.filter(p => p.type === type);
+
+            const priceRange = document.getElementById("filterPrice").value;
+            if(priceRange) {
+                if(priceRange.includes("+")) {
+                    const min = parseInt(priceRange);
+                    filtered = filtered.filter(p => p.price >= min);
+                } else {
+                    const [min, max] = priceRange.split("-").map(Number);
+                    filtered = filtered.filter(p => p.price >= min && p.price <= max);
+                }
+            }
+
+            renderFeatured(filtered);
+        });
+    </script>
+}

@@ -1,0 +1,259 @@
+﻿@{
+    ViewData["Title"] = "Manager Escalations - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_ManagerSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="row mb-3">
+                <div class="col-md-3">
+                    <div class="list-group">
+                        <a href="#" class="list-group-item list-group-item-action active folder-link" data-folder="inbox">Inbox</a>
+                        <a href="#" class="list-group-item list-group-item-action folder-link" data-folder="resolved">Resolved</a>
+                        <a href="#" class="list-group-item list-group-item-action folder-link" data-folder="trash">Trash</a>
+                    </div>
+                    <button class="btn btn-primary mt-3 w-100" data-bs-toggle="modal" data-bs-target="#composeEscalationModal">Create Escalation</button>
+                </div>
+
+                <div class="col-md-9">
+                    <h2 class="h3 pb-2 mb-3 border-bottom" id="folderTitle">Inbox</h2>
+                    <div class="card shadow-sm">
+                        <div class="card-body p-0">
+                            <ul class="list-group" id="escalationsList"></ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Compose Escalation Modal -->
+<div class="modal fade" id="composeEscalationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Create New Escalation</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="composeForm">
+                    <div class="mb-3">
+                        <input type="text" class="form-control" id="composeProperty" placeholder="Property / Unit" required>
+                    </div>
+                    <div class="mb-3">
+                        <textarea class="form-control" id="composeContent" rows="4" placeholder="Describe the issue..." required></textarea>
+                    </div>
+                    <select class="form-select mb-3" id="composeSeverity" required>
+                        <option value="">Select Severity</option>
+                        <option value="Urgent">Urgent</option>
+                        <option value="Pending">Pending</option>
+                    </select>
+                    <button type="submit" class="btn btn-primary w-100">Submit Escalation</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- View Escalation Modal -->
+<div class="modal fade" id="viewEscalationModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-lg">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Escalation: <span id="modalProperty"></span></h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Property:</strong> <span id="modalProp"></span></p>
+                <p><strong>Issue:</strong> <span id="modalContentText"></span></p>
+                <p><strong>Severity:</strong> <span id="modalSeverity" class="badge"></span></p>
+                <p><strong>Status:</strong> <span id="modalStatus" class="badge"></span></p>
+            </div>
+            <div class="modal-footer" id="modalFooter"></div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mock data
+        let inboxEscalations = [
+            {id:1, property:"101 Pine St", content:"Broken Elevator", severity:"Urgent", status:"Open", read:false, date:"08/09/2025"},
+            {id:2, property:"789 Oak St", content:"Water Leakage", severity:"Pending", status:"Open", read:true, date:"07/09/2025"},
+        ];
+        let resolvedEscalations = [
+            {id:3, property:"456 Elm St", content:"Heating Issue", severity:"Pending", status:"Resolved", read:true, date:"06/09/2025"}
+        ];
+        let trashEscalations = [];
+
+        let currentFolder = 'inbox';
+        let selectedEscalation = null;
+
+        function renderEscalations(){
+            const list = document.getElementById('escalationsList');
+            list.innerHTML = '';
+
+            let escs = currentFolder==='inbox' ? inboxEscalations : currentFolder==='resolved' ? resolvedEscalations : trashEscalations;
+
+            escs.forEach(esc=>{
+                const li = document.createElement('li');
+                li.className = 'list-group-item d-flex justify-content-between align-items-center';
+                li.dataset.id = esc.id;
+
+                const isUnread = currentFolder==='inbox' && !esc.read;
+
+                li.innerHTML = `
+                    <div class="d-flex align-items-center">
+                        <div class="read-dot" style="width:12px; height:12px; border-radius:50%; background:${isUnread?'#0d6efd':'#6c757d'}; margin-right:8px; cursor:pointer;"></div>
+                        <div>
+                            <div class="fw-bold">${esc.property}</div>
+                            <div class="text-truncate" style="max-width:300px;">${esc.content}</div>
+                        </div>
+                    </div>
+                    <div class="d-flex align-items-center actions">
+                        <span class="me-2 text-muted">${esc.date}</span>
+                    </div>
+                `;
+
+                const dot = li.querySelector('.read-dot');
+                dot.addEventListener('click', ()=>{
+                    if(currentFolder==='inbox'){
+                        esc.read = !esc.read;
+                        renderEscalations();
+                    }
+                });
+
+                const actionsDiv = li.querySelector('.actions');
+
+                if(currentFolder==='inbox'){
+                    const viewBtn = document.createElement('button'); viewBtn.className='btn btn-sm btn-info me-1'; viewBtn.innerText='View';
+                    const resolveBtn = document.createElement('button'); resolveBtn.className='btn btn-sm btn-success me-1'; resolveBtn.innerText='Resolve';
+                    const deleteBtn = document.createElement('button'); deleteBtn.className='btn btn-sm btn-danger'; deleteBtn.innerText='Delete';
+                    actionsDiv.append(viewBtn, resolveBtn, deleteBtn);
+
+                    viewBtn.addEventListener('click',()=>openView(esc));
+                    resolveBtn.addEventListener('click',()=>resolveEscalation(esc.id));
+                    deleteBtn.addEventListener('click',()=>moveToTrash(esc.id));
+                }else if(currentFolder==='resolved'){
+                    const viewBtn = document.createElement('button'); viewBtn.className='btn btn-sm btn-info me-1'; viewBtn.innerText='View';
+                    const deleteBtn = document.createElement('button'); deleteBtn.className='btn btn-sm btn-danger'; deleteBtn.innerText='Delete';
+                    actionsDiv.append(viewBtn, deleteBtn);
+
+                    viewBtn.addEventListener('click',()=>openView(esc));
+                    deleteBtn.addEventListener('click',()=>moveToTrash(esc.id));
+                }else if(currentFolder==='trash'){
+                    const viewBtn = document.createElement('button'); viewBtn.className='btn btn-sm btn-info me-1'; viewBtn.innerText='View';
+                    const recoverBtn = document.createElement('button'); recoverBtn.className='btn btn-sm btn-success me-1'; recoverBtn.innerText='Recover';
+                    const deleteBtn = document.createElement('button'); deleteBtn.className='btn btn-sm btn-danger'; deleteBtn.innerText='Delete Permanently';
+                    actionsDiv.append(viewBtn, recoverBtn, deleteBtn);
+
+                    viewBtn.addEventListener('click',()=>openView(esc));
+                    recoverBtn.addEventListener('click',()=>recoverEscalation(esc.id));
+                    deleteBtn.addEventListener('click',()=>permanentDelete(esc.id));
+                }
+
+                list.appendChild(li);
+            });
+        }
+
+        function openView(esc){
+            selectedEscalation = esc;
+            document.getElementById('modalProperty').innerText = esc.property;
+            document.getElementById('modalProp').innerText = esc.property;
+            document.getElementById('modalContentText').innerText = esc.content;
+            document.getElementById('modalSeverity').innerText = esc.severity;
+            document.getElementById('modalSeverity').className = 'badge ' + (esc.severity==="Urgent"?"bg-danger":"bg-warning text-dark");
+            document.getElementById('modalStatus').innerText = esc.status;
+            document.getElementById('modalStatus').className = 'badge ' + (esc.status==="Open"?"bg-primary":"bg-success");
+
+            if(currentFolder==='inbox') esc.read = true;
+            renderEscalations();
+
+            const footer = document.getElementById('modalFooter');
+            footer.innerHTML = '';
+            if(currentFolder==='inbox' && esc.status==="Open"){
+                const resolveBtn = document.createElement('button'); resolveBtn.className='btn btn-success'; resolveBtn.innerText='Resolve';
+                resolveBtn.addEventListener('click',()=>resolveEscalation(esc.id));
+                const closeBtn = document.createElement('button'); closeBtn.className='btn btn-secondary'; closeBtn.setAttribute('data-bs-dismiss','modal'); closeBtn.innerText='Close';
+                footer.append(resolveBtn, closeBtn);
+            } else {
+                const closeBtn = document.createElement('button'); closeBtn.className='btn btn-secondary'; closeBtn.setAttribute('data-bs-dismiss','modal'); closeBtn.innerText='Close';
+                footer.append(closeBtn);
+            }
+
+            new bootstrap.Modal(document.getElementById('viewEscalationModal')).show();
+        }
+
+        function moveToTrash(id){
+            let idx;
+            if(currentFolder==='inbox'){
+                idx = inboxEscalations.findIndex(e=>e.id===id);
+                trashEscalations.push(inboxEscalations[idx]);
+                inboxEscalations.splice(idx,1);
+            } else if(currentFolder==='resolved'){
+                idx = resolvedEscalations.findIndex(e=>e.id===id);
+                trashEscalations.push(resolvedEscalations[idx]);
+                resolvedEscalations.splice(idx,1);
+            }
+            renderEscalations();
+        }
+
+        function resolveEscalation(id){
+            const esc = inboxEscalations.find(e=>e.id===id);
+            if(esc){
+                esc.status="Resolved";
+                resolvedEscalations.push(esc);
+                inboxEscalations = inboxEscalations.filter(e=>e.id!==id);
+                renderEscalations();
+            }
+        }
+
+        function recoverEscalation(id){
+            const idx = trashEscalations.findIndex(e=>e.id===id);
+            const esc = trashEscalations[idx];
+            if(esc.status==="Resolved") resolvedEscalations.push(esc);
+            else inboxEscalations.push(esc);
+            trashEscalations.splice(idx,1);
+            renderEscalations();
+        }
+
+        function permanentDelete(id){
+            trashEscalations = trashEscalations.filter(e=>e.id!==id);
+            renderEscalations();
+        }
+
+        // Folder switching
+        document.querySelectorAll('.folder-link').forEach(link=>{
+            link.addEventListener('click', e=>{
+                e.preventDefault();
+                document.querySelectorAll('.folder-link').forEach(l=>l.classList.remove('active'));
+                link.classList.add('active');
+                currentFolder = link.dataset.folder;
+                document.getElementById('folderTitle').innerText = link.innerText;
+                renderEscalations();
+            });
+        });
+
+        // Compose form submit
+        document.getElementById('composeForm').addEventListener('submit', function(e){
+            e.preventDefault();
+            const property = document.getElementById('composeProperty').value;
+            const content = document.getElementById('composeContent').value;
+            const severity = document.getElementById('composeSeverity').value;
+            const date = new Date().toLocaleDateString('en-GB');
+            const id = Date.now();
+
+            inboxEscalations.push({id, property, content, severity, status:"Open", read:false, date});
+            bootstrap.Modal.getInstance(document.getElementById('composeEscalationModal')).hide();
+            renderEscalations();
+            this.reset();
+            alert('Escalation submitted!');
+        });
+
+        renderEscalations();
+    </script>
+}

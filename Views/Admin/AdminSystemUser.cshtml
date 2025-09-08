@@ -1,0 +1,214 @@
+﻿@{
+    ViewData["Title"] = "Admin System Users - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <h2 class="h3 pb-2 mb-3 border-bottom">System Users Management</h2>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#addUserModal">Add New User</button>
+            </div>
+
+            <!-- Users Table -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle" id="usersTable">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Role</th>
+                                <th>Status</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <!-- Populated dynamically -->
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- Add/Edit User Modal -->
+<div class="modal fade" id="addUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title" id="userModalTitle">Add New User</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <form id="userForm">
+                    <input type="hidden" id="editUserId">
+                    <div class="mb-3">
+                        <label class="form-label">Full Name</label>
+                        <input type="text" class="form-control" id="userName" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Email</label>
+                        <input type="email" class="form-control" id="userEmail" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Password</label>
+                        <input type="password" class="form-control" id="userPassword" required>
+                    </div>
+                    <div class="mb-3">
+                        <label class="form-label">Role</label>
+                        <select class="form-select" id="userRole">
+                            <option>Tenant</option>
+                            <option>Caretaker</option>
+                            <option>Property Manager</option>
+                            <option>Admin</option>
+                        </select>
+                    </div>
+                    <div class="mb-3" id="tenantApprovalDiv">
+                        <label class="form-label">Tenant Approval</label>
+                        <select class="form-select" id="tenantApproval">
+                            <option>Pending</option>
+                            <option>Approved</option>
+                        </select>
+                    </div>
+                    <button type="submit" class="btn btn-primary" id="saveUserBtn">Save</button>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+
+<!-- Confirm Disable/Enable Modal -->
+<div class="modal fade" id="disableUserModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog modal-dialog-centered">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Change User Status</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body" id="disableUserBody"></div>
+            <div class="modal-footer">
+                <button class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                <button class="btn btn-danger" id="confirmDisableBtn">Confirm</button>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mock user data
+        let users = [
+            {id:1,name:"Tenant One",email:"tenant1@email.com",password:"pass123",role:"Tenant",status:"Active",tenantApproval:"Pending"},
+            {id:2,name:"Caretaker John",email:"caretaker1@email.com",password:"caret123",role:"Caretaker",status:"Active"},
+            {id:3,name:"Manager Jane",email:"manager1@email.com",password:"man123",role:"Property Manager",status:"Active"},
+            {id:4,name:"Admin Bob",email:"admin1@email.com",password:"admin123",role:"Admin",status:"Active"},
+            {id:5,name:"Tenant Two",email:"tenant2@email.com",password:"pass456",role:"Tenant",status:"Disabled",tenantApproval:"Pending"}
+        ];
+
+        const usersTableBody = document.querySelector("#usersTable tbody");
+        const addUserModal = new bootstrap.Modal(document.getElementById('addUserModal'));
+        const disableUserModal = new bootstrap.Modal(document.getElementById('disableUserModal'));
+        let userToDisable = null;
+
+        function renderUsers(){
+            usersTableBody.innerHTML = "";
+            users.forEach(u=>{
+                const tr = document.createElement("tr");
+                tr.innerHTML = `
+                    <td>${u.name}</td>
+                    <td>${u.email}</td>
+                    <td>${u.role}</td>
+                    <td>${u.status}${u.role==='Tenant'?' ('+u.tenantApproval+')':''}</td>
+                    <td>
+                        <button class="btn btn-sm btn-info edit-btn">Edit</button>
+                        ${u.status==="Active"?'<button class="btn btn-sm btn-warning disable-btn">Disable</button>':'<button class="btn btn-sm btn-success disable-btn">Enable</button>'}
+                    </td>
+                `;
+                // Edit button
+                tr.querySelector('.edit-btn').addEventListener('click', ()=>{
+                    document.getElementById('userModalTitle').textContent = "Edit User";
+                    document.getElementById('editUserId').value = u.id;
+                    document.getElementById('userName').value = u.name;
+                    document.getElementById('userEmail').value = u.email;
+                    document.getElementById('userPassword').value = u.password;
+                    document.getElementById('userRole').value = u.role;
+                    if(u.role==="Tenant"){
+                        document.getElementById('tenantApprovalDiv').style.display = "block";
+                        document.getElementById('tenantApproval').value = u.tenantApproval;
+                    } else {
+                        document.getElementById('tenantApprovalDiv').style.display = "none";
+                    }
+                    addUserModal.show();
+                });
+                // Disable/Enable button
+                tr.querySelector('.disable-btn').addEventListener('click', ()=>{
+                    userToDisable = u;
+                    document.getElementById('disableUserBody').textContent = `Are you sure you want to ${u.status==="Active"?"disable":"enable"} ${u.name}?`;
+                    disableUserModal.show();
+                });
+                usersTableBody.appendChild(tr);
+            });
+        }
+
+        renderUsers();
+
+        // Add/Edit User Form
+        const userForm = document.getElementById('userForm');
+        userForm.addEventListener('submit', e=>{
+            e.preventDefault();
+            const id = document.getElementById('editUserId').value;
+            const name = document.getElementById('userName').value;
+            const email = document.getElementById('userEmail').value;
+            const password = document.getElementById('userPassword').value;
+            const role = document.getElementById('userRole').value;
+            const tenantApproval = document.getElementById('tenantApproval').value;
+
+            if(id){ // Edit user
+                const user = users.find(u=>u.id==id);
+                user.name = name;
+                user.email = email;
+                user.password = password;
+                user.role = role;
+                if(role==="Tenant") user.tenantApproval = tenantApproval;
+                else delete user.tenantApproval;
+            } else { // Add new user
+                const newUser = {
+                    id: users.length+1,
+                    name,
+                    email,
+                    password,
+                    role,
+                    status:"Active"
+                };
+                if(role==="Tenant") newUser.tenantApproval = tenantApproval;
+                users.push(newUser);
+            }
+
+            addUserModal.hide();
+            renderUsers();
+            userForm.reset();
+            document.getElementById('editUserId').value = "";
+        });
+
+        // Show tenant approval only for tenants
+        document.getElementById('userRole').addEventListener('change', e=>{
+            if(e.target.value==="Tenant") document.getElementById('tenantApprovalDiv').style.display="block";
+            else document.getElementById('tenantApprovalDiv').style.display="none";
+        });
+
+        // Confirm Disable/Enable
+        document.getElementById('confirmDisableBtn').addEventListener('click', ()=>{
+            if(userToDisable){
+                userToDisable.status = userToDisable.status==="Active"?"Disabled":"Active";
+                disableUserModal.hide();
+                renderUsers();
+            }
+        });
+    </script>
+}

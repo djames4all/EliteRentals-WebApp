@@ -1,0 +1,130 @@
+﻿@{
+    ViewData["Title"] = "Manager Dashboard - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+
+        @await Html.PartialAsync("_ManagerSidebar")
+
+        <!-- Main Content -->
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <!-- Header -->
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Property Manager Dashboard</h2>
+                <div class="d-flex align-items-center">
+                    <span class="me-2">Jane Smith</span>
+                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Manager Avatar" />
+                </div>
+            </div>
+
+            <!-- KPI Cards -->
+            <div class="row mb-4">
+                <div class="col-md-4">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Managed Properties</h5>
+                            <p class="display-6 fw-bold text-primary" id="kpiProperties">12</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Active Leases</h5>
+                            <p class="display-6 fw-bold text-success" id="kpiLeases">28</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-4">
+                    <div class="card text-center shadow-sm">
+                        <div class="card-body">
+                            <h5 class="card-title">Open Maintenance</h5>
+                            <p class="display-6 fw-bold text-warning" id="kpiMaintenance">5</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Property Listings Table -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Property Listings</h5>
+                    <table class="table table-striped align-middle">
+                        <thead>
+                            <tr>
+                                <th>Thumbnail</th>
+                                <th>Address</th>
+                                <th>Rent</th>
+                                <th>Availability</th>
+                            </tr>
+                        </thead>
+                        <tbody id="propertiesBody"></tbody>
+                    </table>
+                </div>
+            </div>
+
+            <!-- Escalations -->
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <h5 class="card-title mb-3">Escalated Issues</h5>
+                    <ul class="list-group" id="escalationsList"></ul>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        // Mock Data
+        let properties = [
+            { thumbnail: "https://via.placeholder.com/60", address: "123 Main St", rent: "R8,500", status: "Available" },
+            { thumbnail: "https://via.placeholder.com/60", address: "456 Elm St", rent: "R9,200", status: "Occupied" },
+            { thumbnail: "https://via.placeholder.com/60", address: "789 Oak St", rent: "R7,800", status: "Available" }
+        ];
+
+        let escalations = [
+            { issue: "Broken Elevator - 101 Pine St", severity: "Urgent" },
+            { issue: "Water Leakage - 789 Oak St", severity: "Pending" }
+        ];
+
+        // Render Properties Table
+        const propertiesBody = document.getElementById('propertiesBody');
+        function renderProperties() {
+            propertiesBody.innerHTML = '';
+            properties.forEach(prop => {
+                const availabilityBadge = prop.status === "Available"
+                    ? `<span class="badge bg-success">${prop.status}</span>`
+                    : `<span class="badge bg-warning text-dark">${prop.status}</span>`;
+                const row = `<tr>
+                                <td><img src="${prop.thumbnail}" class="rounded" /></td>
+                                <td>${prop.address}</td>
+                                <td>${prop.rent}</td>
+                                <td>${availabilityBadge}</td>
+                             </tr>`;
+                propertiesBody.insertAdjacentHTML('beforeend', row);
+            });
+            document.getElementById('kpiProperties').textContent = properties.length;
+        }
+
+        // Render Escalations List
+        const escalationsList = document.getElementById('escalationsList');
+        function renderEscalations() {
+            escalationsList.innerHTML = '';
+            escalations.forEach(e => {
+                const badgeClass = e.severity === "Urgent" ? "bg-danger" : "bg-warning text-dark";
+                const item = `<li class="list-group-item d-flex justify-content-between align-items-center">
+                                ${e.issue}
+                                <span class="badge ${badgeClass}">${e.severity}</span>
+                              </li>`;
+                escalationsList.insertAdjacentHTML('beforeend', item);
+            });
+        }
+
+        // Render initial dashboard
+        renderProperties();
+        renderEscalations();
+    </script>
+}

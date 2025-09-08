@@ -1,0 +1,141 @@
+﻿@{
+    ViewData["Title"] = "Admin Payments - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <h2 class="h3 pb-2 mb-3 border-bottom">Payments</h2>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>Property</th>
+                                <th>Amount</th>
+                                <th>Description</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @for (int i = 1; i <= 6; i++)
+                            {
+                                var status = i % 3 == 0 ? "Paid" : (i % 2 == 0 ? "Pending" : "Revoked");
+                                var statusClass = status == "Paid" ? "bg-success" : (status == "Pending" ? "bg-warning text-dark" : "bg-danger");
+                                var description = i % 2 == 0 ? "Rent" : "Water & Lights";
+                                <tr>
+                                    <td>Tenant @i</td>
+                                    <td>Property @i</td>
+                                    <td>R@(5000 + i * 500)</td>
+                                    <td>@description</td>
+                                    <td>
+                                        <button class="btn btn-sm status-btn @statusClass">@status</button>
+                                    </td>
+                                    <td>@DateTime.Now.AddDays(-i).ToString("dd/MM/yyyy")</td>
+                                    <td>
+                                        <button class="btn btn-sm btn-info view-btn">View</button>
+                                        <button class="btn btn-sm btn-success confirm-btn">Confirm</button>
+                                        <button class="btn btn-sm btn-danger revoke-btn">Revoke</button>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- View Payment Modal -->
+<div class="modal fade" id="viewPaymentModal" tabindex="-1" aria-hidden="true">
+    <div class="modal-dialog">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h5 class="modal-title">Payment Details</h5>
+                <button type="button" class="btn-close" data-bs-dismiss="modal"></button>
+            </div>
+            <div class="modal-body">
+                <p><strong>Tenant:</strong> <span id="viewTenant"></span></p>
+                <p><strong>Property:</strong> <span id="viewProperty"></span></p>
+                <p><strong>Amount:</strong> R<span id="viewAmount"></span></p>
+                <p><strong>Description:</strong> <span id="viewDescription"></span></p>
+                <p><strong>Status:</strong> <span id="viewStatus"></span></p>
+                <p><strong>Date:</strong> <span id="viewDate"></span></p>
+            </div>
+        </div>
+    </div>
+</div>
+
+@section Scripts {
+    <script>
+        const paymentStatuses = ["Pending", "Paid", "Revoked"];
+        const statusClasses = {
+            "Pending": "bg-warning text-dark",
+            "Paid": "bg-success",
+            "Revoked": "bg-danger"
+        };
+        let selectedRow;
+
+        function attachViewHandlers() {
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    document.getElementById('viewTenant').innerText = selectedRow.cells[0].innerText;
+                    document.getElementById('viewProperty').innerText = selectedRow.cells[1].innerText;
+                    document.getElementById('viewAmount').innerText = selectedRow.cells[2].innerText.replace('R','');
+                    document.getElementById('viewDescription').innerText = selectedRow.cells[3].innerText;
+                    document.getElementById('viewStatus').innerText = selectedRow.querySelector('.status-btn').innerText;
+                    document.getElementById('viewDate').innerText = selectedRow.cells[5].innerText;
+                    new bootstrap.Modal(document.getElementById('viewPaymentModal')).show();
+                };
+            });
+        }
+
+        function attachStatusHandlers() {
+            document.querySelectorAll('.status-btn').forEach(btn => {
+                btn.onclick = function () {
+                    const currentStatus = this.innerText.trim();
+                    const nextIndex = (paymentStatuses.indexOf(currentStatus) + 1) % paymentStatuses.length;
+                    const nextStatus = paymentStatuses[nextIndex];
+                    this.innerText = nextStatus;
+                    this.className = 'btn btn-sm status-btn ' + statusClasses[nextStatus];
+                };
+            });
+        }
+
+        function attachConfirmHandlers() {
+            document.querySelectorAll('.confirm-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    const statusBtn = selectedRow.querySelector('.status-btn');
+                    statusBtn.innerText = "Paid";
+                    statusBtn.className = 'btn btn-sm status-btn ' + statusClasses["Paid"];
+                };
+            });
+        }
+
+        function attachRevokeHandlers() {
+            document.querySelectorAll('.revoke-btn').forEach(btn => {
+                btn.onclick = function () {
+                    selectedRow = this.closest('tr');
+                    const statusBtn = selectedRow.querySelector('.status-btn');
+                    statusBtn.innerText = "Revoked";
+                    statusBtn.className = 'btn btn-sm status-btn ' + statusClasses["Revoked"];
+                };
+            });
+        }
+
+        attachViewHandlers();
+        attachStatusHandlers();
+        attachConfirmHandlers();
+        attachRevokeHandlers();
+    </script>
+}
