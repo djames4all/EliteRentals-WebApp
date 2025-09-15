@@ -2,25 +2,69 @@
 
 @{
     ViewData["Title"] = "Login";
+    Layout = "_Layout";
 }
 
-<h2>Login</h2>
+<div class="container d-flex justify-content-center align-items-center" style="min-height: 80vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg rounded-4 border-0">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <img src="~/images/logo.jpg" alt="Elite Rentals Logo" class="mb-3" style="max-height: 70px;">
+                    <h2 class="fw-bold">@ViewData["Title"]</h2>
+                    <p class="text-muted">Welcome back! Please log in to continue.</p>
+                </div>
 
-<form asp-action="Login" method="post" class="mt-3">
-    <div class="mb-3">
-        <label asp-for="Email" class="form-label"></label>
-        <input asp-for="Email" class="form-control" placeholder="Enter your email" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-    <div class="mb-3">
-        <label asp-for="Password" class="form-label"></label>
-        <input asp-for="Password" type="password" class="form-control" placeholder="Enter your password" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-    <button type="submit" class="btn btn-primary">Login</button>
-    @* <a class="btn btn-danger" asp-controller="Account" asp-action="GoogleLogin">Login with Google</a> *@
+                <!-- Login Form -->
+                <form asp-action="Login" method="post">
+                    <!-- Email -->
+                    <div class="mb-3">
+                        <label asp-for="Email" class="form-label fw-semibold"></label>
+                        <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your email" />
+                        <span asp-validation-for="Email" class="text-danger small"></span>
+                    </div>
 
-</form>
+                    <!-- Password -->
+                    <div class="mb-3">
+                        <label asp-for="Password" class="form-label fw-semibold"></label>
+                        <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Enter your password" />
+                        <span asp-validation-for="Password" class="text-danger small"></span>
+                    </div>
+
+                    <!-- Buttons -->
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Login</button>
+
+                        <!-- Divider -->
+                        <div class="d-flex align-items-center my-3">
+                            <hr class="flex-grow-1">
+                            <span class="px-2 text-muted small">or</span>
+                            <hr class="flex-grow-1">
+                        </div>
+
+                        <!-- Google SSO Button -->
+                        <a asp-controller="Account" asp-action="GoogleLogin"
+                           class="btn btn-light btn-lg border d-flex align-items-center justify-content-center rounded-pill shadow-sm"
+                           style="font-weight: 500;">
+                            <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png"
+                                 alt="Google Logo" style="height: 24px; width: 24px; margin-right: 10px;">
+                            Continue with Google
+                        </a>
+                    </div>
+                </form>
+
+                <!-- Links -->
+                <div class="mt-4 text-center">
+                    @*  <p class="mb-1"><a asp-action="ForgotPassword" class="text-decoration-none">Forgot your password?</a></p> *@
+                    <p class="mb-0">
+                        Don’t have an account?
+                        <a asp-action="Register" class="fw-bold text-primary text-decoration-none">Register here</a>
+                    </p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

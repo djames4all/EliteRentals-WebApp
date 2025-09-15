@@ -92,6 +92,35 @@ namespace EliteRentals.Controllers
             return RedirectToAction("Login");
         }
 
+        // Mock Google Login Page (GET)
+        [HttpGet]
+        public IActionResult GoogleLogin()
+        {
+            // Display the Mock Google login page
+            return View();
+        }
+
+        // Mock Google Login Submission (POST)
+        [HttpPost]
+        public IActionResult GoogleLogin(string email)
+        {
+            if (!string.IsNullOrEmpty(email))
+            {
+                // Set mock session values for demo purposes
+                HttpContext.Session.SetString("JWT", "FAKE_GOOGLE_JWT_TOKEN");
+                HttpContext.Session.SetString("UserRole", "Admin");
+                HttpContext.Session.SetString("UserName", "Admin User");
+
+                // Redirect to home/dashboard
+                return RedirectToAction("AdminDashboard", "Admin");
+            }
+
+            // If email not provided, reload page with error
+            ViewBag.Error = "Please enter an email";
+            return View();
+        }
+
+
         //[HttpGet]
         //public async Task<IActionResult> GoogleResponse()
         //{

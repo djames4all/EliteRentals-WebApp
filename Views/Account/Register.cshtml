@@ -1,47 +1,78 @@
 ﻿@model EliteRentals.Models.RegisterViewModel
+
 @{
     ViewData["Title"] = "Register";
+    Layout = "_Layout";
 }
 
-<h2>Create an Account</h2>
+<div class="container py-5">
+    <div class="row justify-content-center">
+        <div class="col-md-6 col-lg-5">
+            <div class="card shadow-lg border-0 rounded-4">
+                <div class="card-body p-5">
+                    <!-- Header -->
+                    <div class="text-center mb-4">
+                        <img src="~/Images/logo.jpg" alt="Elite Rentals Logo" class="mb-3" style="max-height: 70px;">
+                        <h2 class="fw-bold">Create an Account</h2>
+                        <p class="text-muted">Join Elite Rentals and access our smart property management system.</p>
+                    </div>
 
-<form asp-action="Register" method="post">
-    <div class="mb-3">
-        <label asp-for="FirstName"></label>
-        <input asp-for="FirstName" class="form-control" />
-        <span asp-validation-for="FirstName" class="text-danger"></span>
+                    <!-- Register Form -->
+                    <form asp-action="Register" method="post">
+                        <div class="mb-3">
+                            <label asp-for="FirstName" class="form-label fw-semibold"></label>
+                            <input asp-for="FirstName" class="form-control form-control-lg" placeholder="Enter your first name" />
+                            <span asp-validation-for="FirstName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="LastName" class="form-label fw-semibold"></label>
+                            <input asp-for="LastName" class="form-control form-control-lg" placeholder="Enter your last name" />
+                            <span asp-validation-for="LastName" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Email" class="form-label fw-semibold"></label>
+                            <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your email" />
+                            <span asp-validation-for="Email" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Password" class="form-label fw-semibold"></label>
+                            <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Create a password" />
+                            <span asp-validation-for="Password" class="text-danger"></span>
+                        </div>
+
+                        <div class="mb-3">
+                            <label asp-for="Role" class="form-label fw-semibold"></label>
+                            <select asp-for="Role" class="form-select form-select-lg">
+                                <option value="">-- Select Role --</option>
+                                <option value="Tenant">Tenant</option>
+                                <option value="Caretaker">Caretaker</option>
+                                <option value="PropertyManager">Property Manager</option>
+                            </select>
+                            <span asp-validation-for="Role" class="text-danger"></span>
+                        </div>
+
+                        <!-- Buttons -->
+                        <div class="d-grid mt-4">
+                            <button type="submit" class="btn btn-primary btn-lg shadow-sm">Register</button>
+                        </div>
+                    </form>
+
+                    <!-- Footer Links -->
+                    <div class="text-center mt-4">
+                        <p class="mb-1">
+                            Already have an account?
+                            <a asp-controller="Account" asp-action="Login" class="fw-semibold text-primary">Login here</a>
+                        </p>
+                        <a asp-controller="Home" asp-action="Index" class="text-muted small">← Back to Home</a>
+                    </div>
+                </div>
+            </div>
+        </div>
     </div>
-
-    <div class="mb-3">
-        <label asp-for="LastName"></label>
-        <input asp-for="LastName" class="form-control" />
-        <span asp-validation-for="LastName" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Email"></label>
-        <input asp-for="Email" class="form-control" />
-        <span asp-validation-for="Email" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Password"></label>
-        <input asp-for="Password" type="password" class="form-control" />
-        <span asp-validation-for="Password" class="text-danger"></span>
-    </div>
-
-    <div class="mb-3">
-        <label asp-for="Role"></label>
-        <select asp-for="Role" class="form-select">
-            <option value="Tenant">Tenant</option>
-            <option value="Caretaker">Caretaker</option>
-            <option value="PropertyManager">Property Manager</option>
-        </select>
-        <span asp-validation-for="Role" class="text-danger"></span>
-    </div>
-
-    <button type="submit" class="btn btn-success">Register</button>
-</form>
+</div>
 
 @section Scripts {
     <partial name="_ValidationScriptsPartial" />

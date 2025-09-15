@@ -6,16 +6,25 @@
 <div class="container-fluid p-0">
 
     <!-- Hero Section -->
-    <section class="bg-dark text-white text-center py-5"
-             style="background: linear-gradient(90deg, #0d6efd, #0b5ed7);">
+    <section class="bg-primary text-white text-center py-5" style="background: url('https://via.placeholder.com/1600x600') center/cover no-repeat;">
         <div class="container py-5">
             <h1 class="display-3 fw-bold">Find Your Perfect Rental</h1>
             <p class="lead mb-4">Browse verified properties across apartments, houses, and townhouses.</p>
         </div>
     </section>
 
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="bg-light py-2 shadow-sm mb-4 rounded-3">
+        <div class="container">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item active" aria-current="page">Property Listings</li>
+            </ol>
+        </div>
+    </nav>
+
     <!-- Search & Filters -->
-    <section class="bg-light py-4 shadow-sm">
+    <section class="bg-light py-4 shadow-sm mb-5 rounded-4">
         <div class="container">
             <form class="row g-3" id="propertySearchForm">
                 <div class="col-md-3">
@@ -61,27 +70,23 @@
         </div>
     </section>
 
-    <div class="container my-5" id="propertyListingsContainer">
-        <!-- Property sections rendered via JS -->
-    </div>
+    <!-- Property Listings Container -->
+    <div class="container" id="propertyListingsContainer"></div>
 </div>
 
 @section Scripts {
     <script>
-        // Mock Data
+        // Expanded Property Mock Data
         const properties = [
-            // Apartments
-            { type: "Apartment", price: 7500, bedrooms: 1, address: "123 Main St", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { type: "Apartment", price: 8000, bedrooms: 2, address: "234 Oak St", status: "Occupied", image: "https://via.placeholder.com/400x250" },
-            { type: "Apartment", price: 8500, bedrooms: 3, address: "345 Pine St", status: "Available", image: "https://via.placeholder.com/400x250" },
-
-            // Houses
-            { type: "House", price: 12000, bedrooms: 3, address: "101 Maple Ave", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { type: "House", price: 13000, bedrooms: 4, address: "202 Cedar Rd", status: "Unavailable", image: "https://via.placeholder.com/400x250" },
-
-            // Townhouses
-            { type: "Townhouse", price: 9000, bedrooms: 2, address: "11 Willow Ln", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { type: "Townhouse", price: 9500, bedrooms: 3, address: "22 Birch St", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+            { id:101, type: "Apartment", price: 7500, bedrooms: 1, address: "123 Main St, Sandton", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:102, type: "Apartment", price: 8000, bedrooms: 2, address: "234 Oak St, Rosebank", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+            { id:103, type: "Apartment", price: 8500, bedrooms: 3, address: "345 Pine St, Midrand", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:201, type: "House", price: 12000, bedrooms: 3, address: "101 Maple Ave, Sandown", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:202, type: "House", price: 13000, bedrooms: 4, address: "202 Cedar Rd, Bryanston", status: "Unavailable", image: "https://via.placeholder.com/400x250" },
+            { id:203, type: "House", price: 15000, bedrooms: 5, address: "303 Birch St, Fourways", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:301, type: "Townhouse", price: 9000, bedrooms: 2, address: "11 Willow Ln, Sandton", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:302, type: "Townhouse", price: 9500, bedrooms: 3, address: "22 Birch St, Rosebank", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+            { id:303, type: "Townhouse", price: 10000, bedrooms: 3, address: "33 Maple Rd, Midrand", status: "Available", image: "https://via.placeholder.com/400x250" }
         ];
 
         const container = document.getElementById("propertyListingsContainer");
@@ -89,17 +94,17 @@
         function renderProperties(filteredProps) {
             container.innerHTML = "";
 
-            const types = ["Apartment", "House", "Townhouse"];
-            types.forEach(type => {
+            ["Apartment", "House", "Townhouse"].forEach(type => {
                 const propsOfType = filteredProps.filter(p => p.type === type);
-                if (propsOfType.length === 0) return;
+                if (!propsOfType.length) return;
 
                 const section = document.createElement("div");
                 section.classList.add("mb-5");
 
                 const header = document.createElement("div");
                 header.className = "d-flex justify-content-between align-items-center mb-3";
-                header.innerHTML = `<h2 class="fw-bold">${type}s</h2><a href="/${type}s/All" class="btn btn-link">View All</a>`;
+                header.innerHTML = `<h2 class="fw-bold">${type}s</h2>
+                                    <a href="/ProspectiveTenant/All${type}s" class="btn btn-outline-primary btn-sm">View All ${type}s</a>`;
                 section.appendChild(header);
 
                 const row = document.createElement("div");
@@ -113,15 +118,15 @@
                     const applyBtnClass = prop.status === "Available" ? "btn-primary" : "btn-outline-secondary disabled";
 
                     col.innerHTML = `
-                        <div class="card shadow-sm h-100">
-                            <img src="${prop.image}" class="card-img-top" alt="${prop.type} ${i+1}">
+                        <div class="card shadow-sm h-100 rounded-4 property-card">
+                            <img src="${prop.image}" class="card-img-top rounded-top-4" alt="${prop.type} ${i+1}">
                             <div class="card-body">
                                 <h5 class="card-title text-primary">R${prop.price.toLocaleString()} / month</h5>
                                 <p class="card-text">${prop.bedrooms}-Bedroom – ${prop.address}</p>
-                                <span class="badge ${badgeClass}">${prop.status}</span>
-                                <div class="mt-3">
-                                    <a href="#" class="btn btn-outline-primary btn-sm">View Details</a>
-                                    <a href="#" class="btn ${applyBtnClass} btn-sm">Apply Now</a>
+                                <span class="badge ${badgeClass} mb-3">${prop.status}</span>
+                                <div class="d-flex gap-2 mt-2">
+                                    <a href="/ProspectiveTenant/TenantListingDetails?propertyId=${prop.id}" class="btn btn-outline-primary btn-sm flex-fill">View Details</a>
+                                    <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=${prop.id}" class="btn ${applyBtnClass} btn-sm flex-fill">Apply Now</a>
                                 </div>
                             </div>
                         </div>
@@ -134,10 +139,9 @@
             });
         }
 
-        // Initial render
         renderProperties(properties);
 
-        // Search & Filter functionality
+        // Search & Filtering
         document.getElementById("propertySearchForm").addEventListener("submit", e => {
             e.preventDefault();
             let filtered = properties;
@@ -153,19 +157,17 @@
 
             const priceRange = document.getElementById("filterPrice").value;
             if (priceRange) {
-                if (priceRange.includes("+")) {
-                    const min = parseInt(priceRange);
-                    filtered = filtered.filter(p => p.price >= min);
-                } else {
-                    const [min, max] = priceRange.split("-").map(Number);
+                if (priceRange.includes("+")) filtered = filtered.filter(p => p.price >= parseInt(priceRange));
+                else {
+                    const [min,max] = priceRange.split("-").map(Number);
                     filtered = filtered.filter(p => p.price >= min && p.price <= max);
                 }
             }
 
             const sortBy = document.getElementById("sortBy").value;
-            if (sortBy === "lowest") filtered.sort((a,b) => a.price - b.price);
-            else if (sortBy === "highest") filtered.sort((a,b) => b.price - a.price);
-            else if (sortBy === "newest") filtered.sort((a,b) => b.price - a.price); // mock: newest = highest price
+            if(sortBy==="lowest") filtered.sort((a,b)=>a.price-b.price);
+            else if(sortBy==="highest") filtered.sort((a,b)=>b.price-a.price);
+            else if(sortBy==="newest") filtered.sort((a,b)=>b.id-b.id);
 
             renderProperties(filtered);
         });

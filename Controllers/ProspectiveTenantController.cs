@@ -16,5 +16,21 @@ namespace EliteRentals.Controllers
         {
             return View();
         }
+        public IActionResult AllApartments()
+        {
+            return View();
+        }
+        public IActionResult AllHouses()
+        {
+            return View();
+        }
+        public IActionResult AllTownhouses()
+        {
+            return View();
+        }
+        public IActionResult AllFeatured()
+        {
+            return View();
+        }
     }
 }

@@ -5,107 +5,142 @@
 <div class="container-fluid p-0">
 
     <!-- Hero Section -->
-    <section class="bg-dark text-white text-center py-5"
-             style="background: linear-gradient(90deg, #0d6efd, #0b5ed7);">
-        <div class="container py-5">
+    <section class="bg-primary text-white text-center py-5"
+             style="background: url('https://via.placeholder.com/1600x600') center/cover no-repeat; position: relative;">
+        <div style="background-color: rgba(13,110,253,0.6); position: absolute; top:0; left:0; width:100%; height:100%;"></div>
+        <div class="container py-5 position-relative">
             <h1 class="display-3 fw-bold">Elite Rentals</h1>
             <p class="lead mb-4">Your trusted platform for renting, managing, and maintaining properties with ease.</p>
-            <div>
-                <a href="@Url.Action("TenantPropertyListings", "ProspectiveTenant")" class="btn btn-light btn-lg me-2">
-                    Browse Properties
-                </a>
-                <a href="@Url.Action("AdminDashboard", "Admin")" class="btn btn-outline-light btn-lg">
-                    Admin Dashboard
-                </a>
-                <a href="@Url.Action("ManagerDashboard", "PropertyManager")" class="btn btn-outline-light btn-lg">
-                    Manager Dashboard
-                </a>
+            <div class="d-flex flex-wrap justify-content-center gap-2">
+                <a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings" class="btn btn-light btn-lg">Browse Properties</a>
+                <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-outline-light btn-lg">Admin Dashboard</a>
+                <a asp-controller="PropertyManager" asp-action="ManagerDashboard" class="btn btn-outline-light btn-lg">Manager Dashboard</a>
             </div>
-        </div>
-    </section>
-
-    <!-- Quick Search -->
-    <section class="bg-light py-4 shadow-sm">
-        <div class="container">
-            <form class="row g-3" id="homeSearchForm">
-                <div class="col-md-4">
-                    <input type="text" class="form-control" id="searchLocation" placeholder="Search by Location...">
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="filterType">
-                        <option value="">Property Type</option>
-                        <option value="Apartment">Apartment</option>
-                        <option value="House">House</option>
-                        <option value="Townhouse">Townhouse</option>
-                    </select>
-                </div>
-                <div class="col-md-3">
-                    <select class="form-select" id="filterPrice">
-                        <option value="">Price Range</option>
-                        <option value="500-1000">$500 - $1,000</option>
-                        <option value="1000-2000">$1,000 - $2,000</option>
-                        <option value="2000+">$2,000+</option>
-                    </select>
-                </div>
-                <div class="col-md-2 d-grid">
-                    <button type="submit" class="btn btn-primary">Search</button>
-                </div>
-            </form>
         </div>
     </section>
 
     <!-- Featured Listings -->
     <section class="container my-5">
-        <h2 class="fw-bold mb-4">Featured Listings</h2>
-        <div class="row g-4" id="featuredListings">
-            <!-- Property cards rendered via JS -->
+        <div class="d-flex justify-content-between align-items-center mb-4">
+            <h2 class="fw-bold">Featured Listings</h2>
+            <a asp-controller="ProspectiveTenant" asp-action="AllFeatured" class="btn btn-outline-primary btn-sm">View All Featured</a>
+        </div>
+        <div class="row g-4" id="featuredListings"></div>
+    </section>
+
+    <!-- Popular Locations -->
+    <section class="container my-5">
+        <h2 class="fw-bold mb-4">Popular Locations</h2>
+        <div class="row g-4">
+            @foreach (var loc in new[]{
+                        new { Name="Sandton", Count=25 },
+                        new { Name="Rosebank", Count=18 },
+                        new { Name="Midrand", Count=12 },
+                        new { Name="Bryanston", Count=8 }
+                        })
+            {
+                <div class="col-md-3">
+                    <div class="card shadow-sm rounded-4 p-3 text-center hover-shadow">
+                        <img src="https://via.placeholder.com/300x150" class="rounded-3 mb-2" />
+                        <h5>@loc.Name</h5>
+                        <p class="text-muted">@loc.Count Properties</p>
+                    </div>
+                </div>
+            }
         </div>
     </section>
 
-    <!-- Platform Highlights -->
-    <section class="bg-light py-5 text-center">
+    <!-- How It Works -->
+    <section class="bg-light py-5">
         <div class="container">
-            <div class="row g-4" id="platformStats">
-                <!-- Stats rendered via JS -->
+            <h2 class="fw-bold text-center mb-5">How Elite Rentals Works</h2>
+            <div class="row g-4 justify-content-center">
+                @foreach (var step in new[]{
+                                new { Icon="bi-search", Title="Search Properties", Text="Browse verified listings in apartments, houses, and townhouses quickly and easily." },
+                                new { Icon="bi-file-text", Title="Apply Online", Text="Complete rental applications securely with a few clicks, from anywhere." },
+                                new { Icon="bi-check2-circle", Title="Move In", Text="Get approved and move in quickly with seamless digital processes and instant notifications." }
+                                })
+                {
+                    <div class="col-md-4">
+                        <div class="card shadow-sm rounded-4 h-100 text-center p-4 border-0 hover-shadow animate__animated animate__fadeInUp">
+                            <div class="icon-circle mx-auto mb-3">
+                                <i class="bi @step.Icon display-4 text-primary"></i>
+                            </div>
+                            <h5 class="fw-bold mb-2">@step.Title</h5>
+                            <p class="text-muted">@step.Text</p>
+                        </div>
+                    </div>
+                }
             </div>
         </div>
     </section>
 
-    <!-- CTA Section -->
+    <!-- Testimonials -->
+    <section class="container my-5">
+        <h2 class="fw-bold mb-4 text-center">What Our Users Say</h2>
+        <div class="row g-4">
+            @foreach (var testimonial in new[]{
+                        new { Text="Elite Rentals made finding my apartment fast and stress-free. Highly recommend!", Author="Jane D." },
+                        new { Text="Applying and moving in was so smooth. The platform is very user-friendly.", Author="Mike S." },
+                        new { Text="Excellent listings and responsive support. I found my dream rental here!", Author="Sarah K." }
+                        })
+            {
+                <div class="col-md-4">
+                    <div class="card shadow-sm p-3 rounded-4 hover-shadow animate__animated animate__fadeInUp">
+                        <p>"@testimonial.Text"</p>
+                        <h6 class="fw-bold mt-3">– @testimonial.Author</h6>
+                    </div>
+                </div>
+            }
+        </div>
+    </section>
+
+    <!-- Platform Stats -->
+    <section class="bg-light py-5 text-center">
+        <div class="container">
+            <div class="row g-4" id="platformStats"></div>
+        </div>
+    </section>
+
+    <!-- Call to Action -->
     <section class="bg-primary text-white text-center py-5">
         <div class="container">
             <h2 class="fw-bold">Ready to get started?</h2>
             <p class="mb-4">Whether you are a tenant, manager, or admin, Elite Rentals makes rental management simple and efficient.</p>
-            <a asp-area="Identity" asp-page="/Account/Register" class="btn btn-light btn-lg">
-                Sign Up Now
-            </a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg">Sign Up Now</a>
         </div>
     </section>
 </div>
 
 @section Scripts {
     <script>
-        // Mock Featured Properties
+        // Featured Properties Mock Data (Expanded)
         const featuredProperties = [
-            { type: "Apartment", price: 1200, bedrooms: 1, address: "123 Main St", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { type: "House", price: 950, bedrooms: 2, address: "456 Oak Ave", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { type: "Condo", price: 1500, bedrooms: 3, address: "780 Pine Rd", status: "Available", image: "https://via.placeholder.com/400x250" }
+            { id:101, type:"Apartment", price:12000, bedrooms:1, address:"123 Main St, Sandton", status:"Available", image:"https://via.placeholder.com/400x250" },
+            { id:201, type:"House", price:22000, bedrooms:3, address:"101 Maple Ave, Sandown", status:"Available", image:"https://via.placeholder.com/400x250" },
+            { id:301, type:"Townhouse", price:18000, bedrooms:2, address:"11 Willow Ln, Sandton", status:"Available", image:"https://via.placeholder.com/400x250" }
         ];
 
         const featuredContainer = document.getElementById("featuredListings");
 
-        function renderFeatured(properties) {
-            featuredContainer.innerHTML = '';
-            properties.forEach(p => {
-                const col = document.createElement("div");
-                col.className = "col-md-4";
-                col.innerHTML = `
-                    <div class="card h-100 shadow-sm">
-                        <img src="${p.image}" class="card-img-top" alt="${p.type}">
+        function renderFeatured(properties){
+            featuredContainer.innerHTML='';
+            properties.forEach(p=>{
+                const col=document.createElement("div");
+                col.className="col-md-4";
+                const badgeClass = p.status==="Available" ? "bg-success" : "bg-warning text-dark";
+                const applyBtnClass = p.status==="Available" ? "btn-primary" : "btn-outline-secondary disabled";
+                col.innerHTML=`
+                    <div class="card shadow-sm rounded-4 h-100 hover-shadow">
+                        <img src="${p.image}" class="card-img-top rounded-top-4" alt="${p.type}">
                         <div class="card-body">
-                            <h5 class="card-title text-primary">$${p.price.toLocaleString()} / month</h5>
-                            <p class="card-text">${p.type} – ${p.address}</p>
-                            <a href="@Url.Action("TenantPropertyListings", "ProspectiveTenant")" class="btn btn-outline-primary btn-sm">View Details</a>
+                            <h5 class="card-title text-primary">R${p.price.toLocaleString()} / month</h5>
+                            <p class="card-text">${p.bedrooms}-Bedroom – ${p.address}</p>
+                            <span class="badge ${badgeClass} mb-3">${p.status}</span>
+                            <div class="d-flex gap-2 mt-2">
+                                <a href="/ProspectiveTenant/TenantListingDetails?propertyId=${p.id}" class="btn btn-outline-primary btn-sm flex-fill">View Details</a>
+                                <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=${p.id}" class="btn ${applyBtnClass} btn-sm flex-fill">Apply Now</a>
+                            </div>
                         </div>
                     </div>
                 `;
@@ -115,21 +150,22 @@
 
         renderFeatured(featuredProperties);
 
-        // Platform stats mock data
-        const platformStats = [
-            { count: 500, label: "Active Listings" },
-            { count: 200, label: "Happy Property Owners" },
-            { count: 1000, label: "Tenants Served" }
+        // Platform Stats Mock
+        const platformStats=[
+            { count:500, label:"Active Listings" },
+            { count:200, label:"Happy Property Owners" },
+            { count:1000, label:"Tenants Served" },
+            { count:150, label:"Trusted Managers" }
         ];
 
-        const statsContainer = document.getElementById("platformStats");
+        const statsContainer=document.getElementById("platformStats");
 
-        function renderStats(stats) {
-            statsContainer.innerHTML = '';
-            stats.forEach(s => {
-                const col = document.createElement("div");
-                col.className = "col-md-4";
-                col.innerHTML = `
+        function renderStats(stats){
+            statsContainer.innerHTML='';
+            stats.forEach(s=>{
+                const col=document.createElement("div");
+                col.className="col-md-3";
+                col.innerHTML=`
                     <h3 class="fw-bold text-primary">${s.count.toLocaleString()}+</h3>
                     <p>${s.label}</p>
                 `;
@@ -138,30 +174,5 @@
         }
 
         renderStats(platformStats);
-
-        // Optional: Quick search form (filter featured properties)
-        document.getElementById("homeSearchForm").addEventListener("submit", e => {
-            e.preventDefault();
-            let filtered = featuredProperties;
-
-            const location = document.getElementById("searchLocation").value.toLowerCase();
-            if(location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
-
-            const type = document.getElementById("filterType").value;
-            if(type) filtered = filtered.filter(p => p.type === type);
-
-            const priceRange = document.getElementById("filterPrice").value;
-            if(priceRange) {
-                if(priceRange.includes("+")) {
-                    const min = parseInt(priceRange);
-                    filtered = filtered.filter(p => p.price >= min);
-                } else {
-                    const [min, max] = priceRange.split("-").map(Number);
-                    filtered = filtered.filter(p => p.price >= min && p.price <= max);
-                }
-            }
-
-            renderFeatured(filtered);
-        });
     </script>
 }

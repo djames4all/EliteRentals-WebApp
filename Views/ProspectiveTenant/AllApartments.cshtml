@@ -1,0 +1,149 @@
+﻿@{
+    ViewData["Title"] = "All Apartments - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid p-0">
+
+    <!-- Hero Section -->
+    <section class="bg-primary text-white text-center py-5" style="background: url('https://via.placeholder.com/1600x600') center/cover no-repeat;">
+        <div class="container py-5">
+            <h1 class="display-3 fw-bold">All Apartments</h1>
+            <p class="lead mb-4">Browse all available apartments in our listings.</p>
+        </div>
+    </section>
+
+    <!-- Breadcrumb -->
+    <nav aria-label="breadcrumb" class="bg-light py-2 shadow-sm mb-4 rounded-3">
+        <div class="container">
+            <ol class="breadcrumb mb-0">
+                <li class="breadcrumb-item"><a href="/">Home</a></li>
+                <li class="breadcrumb-item"><a href="/ProspectiveTenant/TenantPropertyListings">Property Listings</a></li>
+                <li class="breadcrumb-item active" aria-current="page">All Apartments</li>
+            </ol>
+        </div>
+    </nav>
+
+    <!-- Search & Filters -->
+    <section class="bg-light py-4 shadow-sm mb-5 rounded-4">
+        <div class="container">
+            <form class="row g-3" id="propertySearchForm">
+                <div class="col-md-4">
+                    <input type="text" class="form-control" id="searchLocation" placeholder="Search by Location...">
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterBedrooms">
+                        <option value="">Bedrooms</option>
+                        <option value="1">1+</option>
+                        <option value="2">2+</option>
+                        <option value="3">3+</option>
+                        <option value="4">4+</option>
+                    </select>
+                </div>
+                <div class="col-md-3">
+                    <select class="form-select" id="filterPrice">
+                        <option value="">Price Range</option>
+                        <option value="5000-8000">R5,000 - R8,000</option>
+                        <option value="8000-12000">R8,000 - R12,000</option>
+                        <option value="12000+">R12,000+</option>
+                    </select>
+                </div>
+                <div class="col-md-2">
+                    <select class="form-select" id="sortBy">
+                        <option value="">Sort By</option>
+                        <option value="newest">Newest</option>
+                        <option value="lowest">Lowest Price</option>
+                        <option value="highest">Highest Price</option>
+                    </select>
+                </div>
+            </form>
+        </div>
+    </section>
+
+    <!-- Listings -->
+    <div class="container" id="propertyListingsContainer"></div>
+</div>
+
+@section Scripts {
+    <script>
+        const properties = [
+            { id:101, type: "Apartment", price: 7500, bedrooms: 1, address: "123 Main St, Sandton", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:102, type: "Apartment", price: 8000, bedrooms: 2, address: "234 Oak St, Rosebank", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+            { id:103, type: "Apartment", price: 8500, bedrooms: 3, address: "345 Pine St, Midrand", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:104, type: "Apartment", price: 9000, bedrooms: 2, address: "456 Cedar Rd, Sandton", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:105, type: "Apartment", price: 9500, bedrooms: 3, address: "567 Birch Ln, Bryanston", status: "Occupied", image: "https://via.placeholder.com/400x250" },
+            { id:106, type: "Apartment", price: 10000, bedrooms: 4, address: "678 Willow Rd, Sandown", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:107, type: "Apartment", price: 11000, bedrooms: 2, address: "789 Maple Ave, Midrand", status: "Available", image: "https://via.placeholder.com/400x250" },
+            { id:108, type: "Apartment", price: 12000, bedrooms: 3, address: "890 Cedar Ln, Rosebank", status: "Occupied", image: "https://via.placeholder.com/400x250" }
+        ];
+
+        const container = document.getElementById("propertyListingsContainer");
+
+        function renderProperties(filteredProps) {
+            container.innerHTML = "";
+
+            if (!filteredProps.length) {
+                container.innerHTML = '<div class="alert alert-warning text-center py-4">No apartments found.</div>';
+                return;
+            }
+
+            const row = document.createElement("div");
+            row.className = "row g-4";
+
+            filteredProps.forEach(prop => {
+                const col = document.createElement("div");
+                col.className = "col-md-4";
+
+                const badgeClass = prop.status === "Available" ? "bg-success" : "bg-warning text-dark";
+                const applyBtnClass = prop.status === "Available" ? "btn-primary" : "btn-outline-secondary disabled";
+
+                col.innerHTML = `
+                    <div class="card shadow-sm h-100 rounded-4 property-card">
+                        <img src="${prop.image}" class="card-img-top rounded-top-4" alt="Apartment">
+                        <div class="card-body">
+                            <h5 class="card-title text-primary">R${prop.price.toLocaleString()} / month</h5>
+                            <p class="card-text">${prop.bedrooms}-Bedroom – ${prop.address}</p>
+                            <span class="badge ${badgeClass} mb-3">${prop.status}</span>
+                            <div class="d-flex gap-2 mt-2">
+                                <a href="/ProspectiveTenant/TenantListingDetails?propertyId=${prop.id}" class="btn btn-outline-primary btn-sm flex-fill">View Details</a>
+                                <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=${prop.id}" class="btn ${applyBtnClass} btn-sm flex-fill">Apply Now</a>
+                            </div>
+                        </div>
+                    </div>
+                `;
+                row.appendChild(col);
+            });
+
+            container.appendChild(row);
+        }
+
+        renderProperties(properties);
+
+        // Filtering
+        document.getElementById("propertySearchForm").addEventListener("input", () => {
+            let filtered = properties;
+
+            const location = document.getElementById("searchLocation").value.toLowerCase();
+            if(location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
+
+            const bedrooms = document.getElementById("filterBedrooms").value;
+            if(bedrooms) filtered = filtered.filter(p => p.bedrooms >= parseInt(bedrooms));
+
+            const priceRange = document.getElementById("filterPrice").value;
+            if(priceRange) {
+                if(priceRange.includes("+")) filtered = filtered.filter(p => p.price >= parseInt(priceRange));
+                else {
+                    const [min,max] = priceRange.split("-").map(Number);
+                    filtered = filtered.filter(p => p.price >= min && p.price <= max);
+                }
+            }
+
+            const sortBy = document.getElementById("sortBy").value;
+            if(sortBy==="lowest") filtered.sort((a,b)=>a.price-b.price);
+            else if(sortBy==="highest") filtered.sort((a,b)=>b.price-a.price);
+            else if(sortBy==="newest") filtered.sort((a,b)=>b.id-b.id);
+
+            renderProperties(filtered);
+        });
+    </script>
+}

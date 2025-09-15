@@ -1,31 +1,83 @@
 html {
-  font-size: 14px;
+    font-size: 14px;
+    position: relative;
+    min-height: 100%;
 }
 
 @media (min-width: 768px) {
-  html {
-    font-size: 16px;
-  }
-}
-
-.btn:focus, .btn:active:focus, .btn-link.nav-link:focus, .form-control:focus, .form-check-input:focus {
-  box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
-}
-
-html {
-  position: relative;
-  min-height: 100%;
+    html {
+        font-size: 16px;
+    }
 }
 
 body {
-  margin-bottom: 60px;
+    margin-bottom: 60px;
 }
 
-.form-floating > .form-control-plaintext::placeholder, .form-floating > .form-control::placeholder {
-  color: var(--bs-secondary-color);
-  text-align: end;
+.btn:focus,
+.btn:active:focus,
+.btn-link.nav-link:focus,
+.form-control:focus,
+.form-check-input:focus {
+    box-shadow: 0 0 0 0.1rem white, 0 0 0 0.25rem #258cfb;
 }
 
-.form-floating > .form-control-plaintext:focus::placeholder, .form-floating > .form-control:focus::placeholder {
-  text-align: start;
+.form-floating > .form-control-plaintext::placeholder,
+.form-floating > .form-control::placeholder {
+    color: var(--bs-secondary-color);
+    text-align: end;
+}
+
+.form-floating > .form-control-plaintext:focus::placeholder,
+.form-floating > .form-control:focus::placeholder {
+    text-align: start;
+}
+
+/* Hover effect for generic cards */
+.hover-shadow:hover {
+    transform: translateY(-8px);
+    transition: all 0.3s ease;
+    box-shadow: 0 15px 25px rgba(0,0,0,0.1);
+}
+
+/* Property card styling */
+.property-card {
+    transition: all 0.3s ease;
+    cursor: pointer;
+}
+
+    .property-card:hover {
+        transform: translateY(-8px);
+        box-shadow: 0 20px 30px rgba(0,0,0,0.15);
+    }
+
+/* Rounded search & filter inputs */
+form#propertySearchForm .form-control,
+form#propertySearchForm .form-select,
+form#featuredSearchForm .form-control,
+form#featuredSearchForm .form-select {
+    border-radius: 0.5rem;
+}
+
+/* Hero section text shadow */
+section.bg-primary h1,
+section.bg-primary p {
+    text-shadow: 0 3px 8px rgba(0,0,0,0.3);
+}
+
+/* Icon circle for How It Works */
+.icon-circle {
+    width: 80px;
+    height: 80px;
+    background-color: #e7f1ff;
+    border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+/* Badges styling */
+.badge {
+    font-weight: 500;
+    font-size: 0.9rem;
 }
