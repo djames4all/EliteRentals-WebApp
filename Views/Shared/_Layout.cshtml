@@ -4,7 +4,6 @@
     <meta charset="utf-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>@ViewData["Title"] - Elite Rentals</title>
-    <script type="importmap"></script>
     <link rel="stylesheet" href="~/lib/bootstrap/dist/css/bootstrap.min.css" />
     <link rel="stylesheet" href="~/css/site.css" asp-append-version="true" />
     <link rel="stylesheet" href="~/EliteRentals.styles.css" asp-append-version="true" />
@@ -21,18 +20,19 @@
                 <div class="navbar-collapse collapse d-sm-inline-flex justify-content-between">
                     <ul class="navbar-nav flex-grow-1">
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Home" asp-action="Index">Home</a>
+                            <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">Home</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="Admin" asp-action="AdminDashboard">Admin Dashboard</a>
+                            <a class="nav-link text-dark" asp-controller="Admin" asp-action="AdminDashboard">Admin Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="PropertyManager" asp-action="ManagerDashboard">Manager Dashboard</a>
+                            <a class="nav-link text-dark" asp-controller="PropertyManager" asp-action="ManagerDashboard">Manager Dashboard</a>
                         </li>
                         <li class="nav-item">
-                            <a class="nav-link text-dark" asp-area="" asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings">Property Listings</a>
+                            <a class="nav-link text-dark" asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings">Property Listings</a>
                         </li>
                     </ul>
+
                     @{
                         var isLoggedIn = Context.Session.GetString("JWT") != null;
                         var userName = Context.Session.GetString("UserName");
@@ -52,9 +52,6 @@
                                 <li class="nav-item">
                                     <a class="nav-link text-dark" asp-controller="Home" asp-action="Index">My Dashboard</a>
                                 </li>
-@*                                 <li class="nav-item">
-                                    <a class="nav-link text-dark" asp-controller="Maintenance" asp-action="Submit">Report Maintenance</a>
-                                </li> *@
                             }
                             else if (userRole == "Caretaker")
                             {
@@ -86,20 +83,16 @@
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Login">Login</a>
                             </li>
-
                             <li class="nav-item">
                                 <a class="nav-link text-dark" asp-controller="Account" asp-action="Register">Register</a>
                             </li>
                         }
                     </ul>
-
-
-                    </ul>
-
                 </div>
             </div>
         </nav>
     </header>
+
     <div class="container">
         <main role="main" class="pb-3">
             @RenderBody()
@@ -111,6 +104,7 @@
             &copy; 2025 <strong>Elite Rentals</strong>. All Rights Reserved.
         </div>
     </footer>
+
     <script src="~/lib/jquery/dist/jquery.min.js"></script>
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>

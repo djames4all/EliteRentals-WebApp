@@ -16,7 +16,7 @@
                 </div>
 
                 <!-- Login Form -->
-                <form asp-action="Login" method="post">
+                <form asp-controller="Account" asp-action="Login" method="post">
                     <!-- Email -->
                     <div class="mb-3">
                         <label asp-for="Email" class="form-label fw-semibold"></label>
@@ -55,10 +55,9 @@
 
                 <!-- Links -->
                 <div class="mt-4 text-center">
-                    @*  <p class="mb-1"><a asp-action="ForgotPassword" class="text-decoration-none">Forgot your password?</a></p> *@
                     <p class="mb-0">
                         Don’t have an account?
-                        <a asp-action="Register" class="fw-bold text-primary text-decoration-none">Register here</a>
+                        <a asp-controller="Account" asp-action="Register" class="fw-bold text-primary text-decoration-none">Register here</a>
                     </p>
                 </div>
             </div>
