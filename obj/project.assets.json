@@ -60,6 +60,22 @@
           }
         }
       },
+      "Microsoft.AspNetCore.Authentication.Google/9.0.9": {
+        "type": "package",
+        "compile": {
+          "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "related": ".xml"
+          }
+        },
+        "runtime": {
+          "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.dll": {
+            "related": ".xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.AspNetCore.App"
+        ]
+      },
       "Microsoft.AspNetCore.Cryptography.Internal/9.0.8": {
         "type": "package",
         "compile": {
@@ -1828,6 +1844,21 @@
         "lib/netstandard2.0/Humanizer.dll",
         "lib/netstandard2.0/Humanizer.xml",
         "logo.png"
+      ]
+    },
+    "Microsoft.AspNetCore.Authentication.Google/9.0.9": {
+      "sha512": "cVElw5JwIib+frt6G/Zp4cSEFl1eE4gGIm0ICmkDJM16uePQDuWrFho5SoHHybnASspMyuI8y0S/miysHL1nmA==",
+      "type": "package",
+      "path": "microsoft.aspnetcore.authentication.google/9.0.9",
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "Icon.png",
+        "THIRD-PARTY-NOTICES.TXT",
+        "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.dll",
+        "lib/net9.0/Microsoft.AspNetCore.Authentication.Google.xml",
+        "microsoft.aspnetcore.authentication.google.9.0.9.nupkg.sha512",
+        "microsoft.aspnetcore.authentication.google.nuspec"
       ]
     },
     "Microsoft.AspNetCore.Cryptography.Internal/9.0.8": {
@@ -5157,6 +5188,7 @@
   },
   "projectFileDependencyGroups": {
     "net9.0": [
+      "Microsoft.AspNetCore.Authentication.Google >= 9.0.9",
       "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore >= 9.0.8",
       "Microsoft.AspNetCore.Identity.EntityFrameworkCore >= 9.0.8",
       "Microsoft.AspNetCore.Identity.UI >= 9.0.8",
@@ -5215,6 +5247,10 @@
       "net9.0": {
         "targetAlias": "net9.0",
         "dependencies": {
+          "Microsoft.AspNetCore.Authentication.Google": {
+            "target": "Package",
+            "version": "[9.0.9, )"
+          },
           "Microsoft.AspNetCore.Diagnostics.EntityFrameworkCore": {
             "target": "Package",
             "version": "[9.0.8, )"

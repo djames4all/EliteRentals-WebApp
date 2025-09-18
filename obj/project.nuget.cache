@@ -1,12 +1,13 @@
 {
   "version": 2,
-  "dgSpecHash": "AD9xseBMzFI=",
+  "dgSpecHash": "1Nl/iyXU2hk=",
   "success": true,
   "projectFilePath": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\EliteRentals.csproj",
   "expectedPackageFiles": [
     "C:\\Users\\dasha\\.nuget\\packages\\azure.core\\1.38.0\\azure.core.1.38.0.nupkg.sha512",
     "C:\\Users\\dasha\\.nuget\\packages\\azure.identity\\1.11.4\\azure.identity.1.11.4.nupkg.sha512",
     "C:\\Users\\dasha\\.nuget\\packages\\humanizer.core\\2.14.1\\humanizer.core.2.14.1.nupkg.sha512",
+    "C:\\Users\\dasha\\.nuget\\packages\\microsoft.aspnetcore.authentication.google\\9.0.9\\microsoft.aspnetcore.authentication.google.9.0.9.nupkg.sha512",
     "C:\\Users\\dasha\\.nuget\\packages\\microsoft.aspnetcore.cryptography.internal\\9.0.8\\microsoft.aspnetcore.cryptography.internal.9.0.8.nupkg.sha512",
     "C:\\Users\\dasha\\.nuget\\packages\\microsoft.aspnetcore.cryptography.keyderivation\\9.0.8\\microsoft.aspnetcore.cryptography.keyderivation.9.0.8.nupkg.sha512",
     "C:\\Users\\dasha\\.nuget\\packages\\microsoft.aspnetcore.diagnostics.entityframeworkcore\\9.0.8\\microsoft.aspnetcore.diagnostics.entityframeworkcore.9.0.8.nupkg.sha512",

@@ -1,4 +1,6 @@
-﻿<!DOCTYPE html>
+﻿@inject Microsoft.AspNetCore.Http.IHttpContextAccessor HttpContextAccessor
+
+<!DOCTYPE html>
 <html lang="en">
 <head>
     <meta charset="utf-8" />
@@ -34,10 +36,11 @@
                     </ul>
 
                     @{
-                        var isLoggedIn = Context.Session.GetString("JWT") != null;
-                        var userName = Context.Session.GetString("UserName");
-                        var userRole = Context.Session.GetString("UserRole");
+                        var isLoggedIn = HttpContextAccessor.HttpContext?.Session.GetString("JWT") != null;
+                        var userName = HttpContextAccessor.HttpContext?.Session.GetString("UserName") ?? "";
+                        var userRole = HttpContextAccessor.HttpContext?.Session.GetString("UserRole") ?? "";
                     }
+
 
                     <ul class="navbar-nav">
                         @if (isLoggedIn)
@@ -88,6 +91,7 @@
                             </li>
                         }
                     </ul>
+
                 </div>
             </div>
         </nav>

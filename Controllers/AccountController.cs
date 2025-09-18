@@ -1,10 +1,13 @@
 ﻿using EliteRentals.Models;
 using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
+using Microsoft.AspNetCore.Authentication.Google;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using Microsoft.AspNetCore.Http;
 
 namespace EliteRentals.Controllers
 {
@@ -92,75 +95,91 @@ namespace EliteRentals.Controllers
             return RedirectToAction("Login");
         }
 
-        // Mock Google Login Page (GET)
+        private async Task SignInWithCookie(LoginResponseDto loginResponse)
+        {
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, loginResponse.User.UserId.ToString()),
+        new Claim(ClaimTypes.Name, loginResponse.User.FirstName),
+        new Claim(ClaimTypes.Email, loginResponse.User.Email),
+        new Claim(ClaimTypes.Role, loginResponse.User.Role),
+        new Claim("JWT", loginResponse.Token) // keep token available for API calls
+    };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
+            // Also keep session values if you want to read them later
+            HttpContext.Session.SetString("JWT", loginResponse.Token);
+            HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
+            HttpContext.Session.SetString("UserName", loginResponse.User.FirstName);
+        }
+
+
+        // Start Google login
         [HttpGet]
         public IActionResult GoogleLogin()
         {
-            // Display the Mock Google login page
-            return View();
+            var redirectUrl = Url.Action("GoogleResponse", "Account", null, Request.Scheme);
+            var properties = new AuthenticationProperties { RedirectUri = redirectUrl };
+            return Challenge(properties, GoogleDefaults.AuthenticationScheme);
         }
 
-        // Mock Google Login Submission (POST)
-        [HttpPost]
-        public IActionResult GoogleLogin(string email)
+        [HttpGet]
+        public async Task<IActionResult> GoogleResponse()
         {
-            if (!string.IsNullOrEmpty(email))
-            {
-                // Set mock session values for demo purposes
-                HttpContext.Session.SetString("JWT", "FAKE_GOOGLE_JWT_TOKEN");
-                HttpContext.Session.SetString("UserRole", "Admin");
-                HttpContext.Session.SetString("UserName", "Admin User");
+            var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            if (!result.Succeeded)
+                return RedirectToAction("Login");
 
-                // Redirect to home/dashboard
-                return RedirectToAction("AdminDashboard", "Admin");
-            }
+            var idToken = result.Properties.GetTokenValue("id_token");
 
-            // If email not provided, reload page with error
-            ViewBag.Error = "Please enter an email";
-            return View();
+            using var client = _clientFactory.CreateClient();
+            var response = await client.PostAsJsonAsync("https://localhost:7196/api/Users/sso",
+                new { Provider = "Google", Token = idToken });
+
+            if (!response.IsSuccessStatusCode)
+                return RedirectToAction("Login");
+
+            var responseBody = await response.Content.ReadAsStringAsync();
+            var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(
+                responseBody,
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
+
+            // Sign in with cookie
+            await SignInWithCookie(loginResponse);
+
+            // Save session values so navbar can detect login
+            HttpContext.Session.SetString("JWT", loginResponse.Token);
+            HttpContext.Session.SetString("UserName", loginResponse.User.FirstName);
+            HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
+
+            return RedirectToDashboard(loginResponse.User.Role);
         }
 
 
-        //[HttpGet]
-        //public async Task<IActionResult> GoogleResponse()
-        //{
-        //    var result = await HttpContext.AuthenticateAsync(CookieAuthenticationDefaults.AuthenticationScheme);
-        //    if (!result.Succeeded) return RedirectToAction("Login");
-
-        //    var claims = result.Principal.Identities.First().Claims;
-        //    var email = claims.FirstOrDefault(c => c.Type == ClaimTypes.Email)?.Value;
-        //    var name = claims.FirstOrDefault(c => c.Type == ClaimTypes.Name)?.Value;
-
-        //    var client = _clientFactory.CreateClient("EliteRentalsAPI");
-
-        //    var ssoPayload = new
-        //    {
-        //        Provider = "Google",
-        //        Token = result.Properties.GetTokenValue("id_token") ?? "",
-        //        Email = email,
-        //        FirstName = name?.Split(" ").FirstOrDefault() ?? "",
-        //        LastName = name?.Split(" ").Skip(1).FirstOrDefault() ?? "",
-        //        Role = "Tenant"
-        //    };
-
-        //    var json = JsonSerializer.Serialize(ssoPayload);
-        //    var content = new StringContent(json, Encoding.UTF8, "application/json");
-
-        //    var response = await client.PostAsync("api/Users/sso", content);
-        //    if (!response.IsSuccessStatusCode) return RedirectToAction("Login");
-
-        //    var responseBody = await response.Content.ReadAsStringAsync();
-        //    var loginResponse = JsonSerializer.Deserialize<LoginResponseDto>(
-        //        responseBody,
-        //        new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
-
-        //    HttpContext.Session.SetString("JWT", loginResponse.Token);
-        //    HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
-        //    HttpContext.Session.SetString("UserName", loginResponse.User.FirstName);
-
-        //    return RedirectToAction("Index", "Home");
-        //}
 
 
+
+        private void SaveSession(LoginResponseDto loginResponse)
+        {
+            HttpContext.Session.SetString("JWT", loginResponse.Token);
+            HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
+            HttpContext.Session.SetString("UserName", loginResponse.User.FirstName);
+        }
+
+        private IActionResult RedirectToDashboard(string role) =>
+            role switch
+            {
+                "Tenant" => RedirectToAction("Index", "Home"),
+                "Caretaker" => RedirectToAction("Index", "Home"),
+                "PropertyManager" => RedirectToAction("ManagerDashboard", "PropertyManager"),
+                "Admin" => RedirectToAction("AdminDashboard", "Admin"),
+                _ => RedirectToAction("Index", "Home")
+            };
     }
+
 }
+

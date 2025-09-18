@@ -3,20 +3,60 @@
   "WorkspaceRootPath": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\account\\googlelogin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\account\\googlelogin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\account\\login.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:controllers\\accountcontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:appsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\registerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\registerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\areas\\identity\\pages\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:areas\\identity\\pages\\_viewstart.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\account\\googlelogin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\account\\googlelogin.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:properties\\launchsettings.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\errorviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\properties\\servicedependencies.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:properties\\servicedependencies.json||{90A6B3A7-C1A3-4009-A288-E2FF89E96FA0}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\account\\register.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\shared\\_adminsidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
@@ -25,26 +65,6 @@
     {
       "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
       "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\shared\\_validationscriptspartial.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\shared\\_layout.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\registerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\registerviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\loginviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\models\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\loginresponsedto.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:program.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -54,7 +74,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 6,
+          "SelectedChildIndex": 11,
           "Children": [
             {
               "$type": "Bookmark",
@@ -78,40 +98,15 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "_Layout.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_Layout.cshtml",
-              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_Layout.cshtml",
-              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAHEAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-09-15T06:19:14.146Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 0,
-              "Title": "Register.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\Register.cshtml",
-              "RelativeDocumentMoniker": "Views\\Account\\Register.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\Register.cshtml",
-              "RelativeToolTip": "Views\\Account\\Register.cshtml",
-              "ViewState": "AgIAADAAAAAAAAAAAAAmwEoAAAAGAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-09-15T06:18:54.179Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "GoogleLogin.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\GoogleLogin.cshtml",
-              "RelativeDocumentMoniker": "Views\\Account\\GoogleLogin.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\GoogleLogin.cshtml",
-              "RelativeToolTip": "Views\\Account\\GoogleLogin.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAkAAABTAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-09-15T06:18:34.915Z"
+              "DocumentIndex": 2,
+              "Title": "Program.cs",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Program.cs",
+              "RelativeDocumentMoniker": "Program.cs",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Program.cs",
+              "RelativeToolTip": "Program.cs",
+              "ViewState": "AgIAAFAAAAAAAAAAAAAmwFMAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T06:14:05.025Z"
             },
             {
               "$type": "Document",
@@ -127,7 +122,7 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 8,
+              "DocumentIndex": 6,
               "Title": "LoginViewModel.cs",
               "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Models\\LoginViewModel.cs",
               "RelativeDocumentMoniker": "Models\\LoginViewModel.cs",
@@ -139,55 +134,56 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "AccountController.cs",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\AccountController.cs",
-              "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\AccountController.cs",
-              "RelativeToolTip": "Controllers\\AccountController.cs",
-              "ViewState": "AgIAAHgAAAAAAAAAAAAmwI0AAAA7AAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T06:09:23.261Z"
+              "DocumentIndex": 4,
+              "Title": "appsettings.json",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\appsettings.json",
+              "RelativeDocumentMoniker": "appsettings.json",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\appsettings.json",
+              "RelativeToolTip": "appsettings.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA8AAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-17T16:57:38.693Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 3,
               "Title": "Login.cshtml",
               "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\Login.cshtml",
               "RelativeDocumentMoniker": "Views\\Account\\Login.cshtml",
               "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\Login.cshtml",
               "RelativeToolTip": "Views\\Account\\Login.cshtml",
-              "ViewState": "AgIAABsAAAAAAAAAAAAmwEAAAAAKAAAAAAAAAA==",
+              "ViewState": "AgIAACEAAAAAAAAAAAAAAEEAAAAGAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
               "WhenOpened": "2025-09-15T06:02:03.473Z"
             },
             {
               "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "_AdminSidebar.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_AdminSidebar.cshtml",
-              "RelativeDocumentMoniker": "Views\\Shared\\_AdminSidebar.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_AdminSidebar.cshtml",
-              "RelativeToolTip": "Views\\Shared\\_AdminSidebar.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "DocumentIndex": 1,
+              "Title": "_Layout.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_Layout.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_Layout.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_Layout.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_Layout.cshtml",
+              "ViewState": "AgIAABwAAAAAAAAAAAAmwCoAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-09-15T06:19:17.171Z"
+              "WhenOpened": "2025-09-15T06:19:14.146Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 0,
+              "Title": "AccountController.cs",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\AccountController.cs",
+              "RelativeDocumentMoniker": "Controllers\\AccountController.cs",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\AccountController.cs",
+              "RelativeToolTip": "Controllers\\AccountController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAA0AAAAvAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-09-15T06:09:23.261Z",
+              "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 5,
-              "Title": "_ValidationScriptsPartial.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "RelativeDocumentMoniker": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "RelativeToolTip": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
-              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-09-15T06:25:17.895Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
               "Title": "LoginResponseDto.cs",
               "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Models\\LoginResponseDto.cs",
               "RelativeDocumentMoniker": "Models\\LoginResponseDto.cs",
@@ -199,15 +195,99 @@
             },
             {
               "$type": "Document",
+              "DocumentIndex": 9,
+              "Title": "GoogleLogin.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\GoogleLogin.cshtml",
+              "RelativeDocumentMoniker": "Views\\Account\\GoogleLogin.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\GoogleLogin.cshtml",
+              "RelativeToolTip": "Views\\Account\\GoogleLogin.cshtml",
+              "ViewState": "AgIAAAwAAAAAAAAAAAAAAAkAAABTAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-15T06:18:34.915Z"
+            },
+            {
+              "$type": "Document",
               "DocumentIndex": 10,
-              "Title": "Program.cs",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Program.cs",
-              "RelativeDocumentMoniker": "Program.cs",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Program.cs",
-              "RelativeToolTip": "Program.cs",
-              "ViewState": "AgIAACQAAAAAAAAAAAAmwDgAAAAAAAAAAAAAAA==",
+              "Title": "launchSettings.json",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Properties\\launchSettings.json",
+              "RelativeDocumentMoniker": "Properties\\launchSettings.json",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Properties\\launchSettings.json",
+              "RelativeToolTip": "Properties\\launchSettings.json",
+              "ViewState": "AgIAAAYAAAAAAAAAAAAkwBoAAAAFAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-17T16:33:26.388Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 8,
+              "Title": "_ViewStart.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
+              "RelativeDocumentMoniker": "Areas\\Identity\\Pages\\_ViewStart.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Areas\\Identity\\Pages\\_ViewStart.cshtml",
+              "RelativeToolTip": "Areas\\Identity\\Pages\\_ViewStart.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-18T10:17:59.688Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 11,
+              "Title": "ErrorViewModel.cs",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Models\\ErrorViewModel.cs",
+              "RelativeDocumentMoniker": "Models\\ErrorViewModel.cs",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Models\\ErrorViewModel.cs",
+              "RelativeToolTip": "Models\\ErrorViewModel.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2025-09-15T06:14:05.025Z"
+              "WhenOpened": "2025-09-17T18:02:15.069Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 12,
+              "Title": "serviceDependencies.json",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Properties\\serviceDependencies.json",
+              "RelativeDocumentMoniker": "Properties\\serviceDependencies.json",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Properties\\serviceDependencies.json",
+              "RelativeToolTip": "Properties\\serviceDependencies.json",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.001642|",
+              "WhenOpened": "2025-09-17T16:33:29.052Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 13,
+              "Title": "Register.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\Register.cshtml",
+              "RelativeDocumentMoniker": "Views\\Account\\Register.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Account\\Register.cshtml",
+              "RelativeToolTip": "Views\\Account\\Register.cshtml",
+              "ViewState": "AgIAADAAAAAAAAAAAAAmwEoAAAAGAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-15T06:18:54.179Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 14,
+              "Title": "_AdminSidebar.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_AdminSidebar.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_AdminSidebar.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_AdminSidebar.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_AdminSidebar.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-15T06:19:17.171Z"
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 15,
+              "Title": "_ValidationScriptsPartial.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "RelativeDocumentMoniker": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "RelativeToolTip": "Views\\Shared\\_ValidationScriptsPartial.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-09-15T06:25:17.895Z"
             }
           ]
         }
