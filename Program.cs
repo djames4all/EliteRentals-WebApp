@@ -16,9 +16,10 @@ namespace EliteRentals
             // Add session backing store
             builder.Services.AddDistributedMemoryCache();
 
+            var apiBaseUrl = builder.Configuration["ApiSettings:BaseUrl"];
             builder.Services.AddHttpClient("EliteRentalsAPI", client =>
             {
-                client.BaseAddress = new Uri("https://localhost:7196/"); 
+                client.BaseAddress = new Uri(apiBaseUrl!);
             });
 
             builder.Services.AddAuthentication(options =>

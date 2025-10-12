@@ -1,0 +1,145 @@
+﻿@model EliteRentals.Models.DTOs.MaintenanceDto
+
+@{
+    ViewData["Title"] = "Maintenance Details - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between align-items-center pb-3 mb-3 border-bottom">
+                <h2 class="h3">Maintenance Request Details</h2>
+                <a asp-action="AdminMaintenance" class="btn btn-secondary btn-sm">← Back to List</a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+
+                    <h4 class="mb-3 text-primary">Issue Information</h4>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Issue Description:</dt>
+                        <dd class="col-sm-9">@Model.Issue</dd>
+
+                        <dt class="col-sm-3">Category:</dt>
+                        <dd class="col-sm-9">@Model.Priority</dd>
+
+                        <dt class="col-sm-3">Status:</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge
+                                @(Model.Status == "Resolved" ? "bg-success" :
+                                                                    Model.Status == "In Progress" ? "bg-warning text-dark" :
+                                                                    "bg-secondary")">
+                                @Model.Status
+                            </span>
+                        </dd>
+
+                        <dt class="col-sm-3">Urgency:</dt>
+                        <dd class="col-sm-9">
+                            <span class="priority-badge @(Model.Priority?.ToLower() ?? "low")">
+                                @Model.Priority
+                            </span>
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <h4 class="mb-3 text-primary">Assignment</h4>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Assigned Caretaker:</dt>
+                        <dd class="col-sm-9">
+                            @if (!string.IsNullOrEmpty(Model.AssignedCaretakerName))
+                            {
+                                @Model.AssignedCaretakerName
+                            }
+                            else
+                            {
+                                <span class="text-muted">Not yet assigned</span>
+                            }
+                        </dd>
+                    </dl>
+
+                    <hr />
+
+                    <h4 class="mb-3 text-primary">Property & Tenant</h4>
+
+                    <dl class="row">
+                        <dt class="col-sm-3">Property:</dt>
+                        <dd class="col-sm-9">@Model.PropertyName</dd>
+
+                        <dt class="col-sm-3">Reported By:</dt>
+                        <dd class="col-sm-9">@Model.ReportedBy</dd>
+
+                        <dt class="col-sm-3">Created:</dt>
+                        <dd class="col-sm-9">@Model.CreatedAt.ToLocalTime().ToString("f")</dd>
+
+                        @if (Model.UpdatedAt.HasValue)
+                        {
+                            <dt class="col-sm-3">Last Updated:</dt>
+                            <dd class="col-sm-9">@Model.UpdatedAt.Value.ToLocalTime().ToString("f")</dd>
+                        }
+                    </dl>
+
+                    <hr />
+
+                    <h4 class="mb-3 text-primary">Proof Image</h4>
+
+                    @if (Model.ProofData != null && Model.ProofType != null)
+                    {
+                        var base64 = Convert.ToBase64String(Model.ProofData);
+                        <img src="data:@Model.ProofType;base64,@base64"
+                             alt="Proof Image"
+                             class="img-fluid rounded shadow-sm mb-3"
+                             style="max-height:400px; object-fit:contain;" />
+                    }
+                    else
+                    {
+                        <p class="text-muted">No proof image uploaded.</p>
+                    }
+
+                    <hr />
+
+                    <div class="d-flex justify-content-end">
+                        <form asp-action="UpdateMaintenanceStatus" method="post" class="me-2">
+                            <input type="hidden" name="maintenanceId" value="@Model.MaintenanceId" />
+                            <select name="status" class="form-select form-select-sm d-inline w-auto me-2">
+                                <option value="Pending" selected="@(Model.Status == "Pending")">Pending</option>
+                                <option value="In Progress" selected="@(Model.Status == "In Progress")">In Progress</option>
+                                <option value="Resolved" selected="@(Model.Status == "Resolved")">Resolved</option>
+                            </select>
+                            <button type="submit" class="btn btn-primary btn-sm">Update Status</button>
+                        </form>
+                        <a asp-action="AdminMaintenance" class="btn btn-outline-secondary btn-sm">Close</a>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<style>
+    .priority-badge.low {
+        color: white;
+        background: green;
+        padding: 3px 8px;
+        border-radius: 5px;
+    }
+
+    .priority-badge.medium {
+        color: white;
+        background: orange;
+        padding: 3px 8px;
+        border-radius: 5px;
+    }
+
+    .priority-badge.high {
+        color: white;
+        background: red;
+        padding: 3px 8px;
+        border-radius: 5px;
+    }
+</style>

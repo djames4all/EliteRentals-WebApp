@@ -44,6 +44,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AddLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRkTGVhc2UuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AddUser.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRkVXNlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -88,8 +92,28 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5TeXN0ZW1Vc2VyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/DeleteLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGVsZXRlTGVhc2UuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/DeleteLeaseConfirmed.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGVsZXRlTGVhc2VDb25maXJtZWQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/EditLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdExlYXNlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/EditUser.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdFVzZXIuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/ViewLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVmlld0xlYXNlLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/ViewMaintenance.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVmlld01haW50ZW5hbmNlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Home/Index.cshtml]

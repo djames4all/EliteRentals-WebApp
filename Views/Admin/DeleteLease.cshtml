@@ -1,0 +1,47 @@
+﻿@model EliteRentals.Models.DTOs.LeaseDto
+
+@{
+    ViewData["Title"] = "Delete Lease";
+    var tenants = ViewBag.Tenants as List<EliteRentals.Models.DTOs.TenantDto> ?? new List<EliteRentals.Models.DTOs.TenantDto>();
+    var properties = ViewBag.Properties as List<EliteRentals.Models.DTOs.PropertyDto> ?? new List<EliteRentals.Models.DTOs.PropertyDto>();
+
+    var tenantName = tenants.FirstOrDefault(t => t.UserId == Model.TenantId)?.FirstName ?? $"Tenant ID: {Model.TenantId}";
+    var propertyName = properties.FirstOrDefault(p => p.PropertyId == Model.PropertyId)?.Title ?? $"Property ID: {Model.PropertyId}";
+}
+
+<h2>Delete Lease</h2>
+
+<div class="alert alert-warning">
+    <strong>Warning!</strong> You are about to delete this lease permanently.
+</div>
+
+<div class="card mt-3 p-3">
+    <dl class="row">
+        <dt class="col-sm-3">Lease ID</dt>
+        <dd class="col-sm-9">@Model.LeaseId</dd>
+
+        <dt class="col-sm-3">Property</dt>
+        <dd class="col-sm-9">@propertyName</dd>
+
+        <dt class="col-sm-3">Tenant</dt>
+        <dd class="col-sm-9">@tenantName</dd>
+
+        <dt class="col-sm-3">Start Date</dt>
+        <dd class="col-sm-9">@Model.StartDate.ToString("yyyy-MM-dd")</dd>
+
+        <dt class="col-sm-3">End Date</dt>
+        <dd class="col-sm-9">@Model.EndDate.ToString("yyyy-MM-dd")</dd>
+
+        <dt class="col-sm-3">Deposit</dt>
+        <dd class="col-sm-9">@Model.Deposit.ToString("C")</dd>
+
+        <dt class="col-sm-3">Status</dt>
+        <dd class="col-sm-9">@Model.Status</dd>
+    </dl>
+</div>
+
+<form asp-action="DeleteLease" method="post">
+    <input type="hidden" asp-for="LeaseId" />
+    <button type="submit" class="btn btn-danger">Delete Lease</button>
+    <a asp-action="AdminLeases" class="btn btn-secondary">Cancel</a>
+</form>
