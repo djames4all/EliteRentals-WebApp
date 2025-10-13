@@ -23,7 +23,7 @@ namespace EliteRentals.Controllers
         public IActionResult AdminDashboard() => View();
         public IActionResult AdminChatbot() => View();
         public IActionResult AdminMessages() => View();
-        public IActionResult AdminPayments() => View();
+       
         public IActionResult AdminProperties() => View();
         public IActionResult AdminReports() => View();
         public IActionResult AdminSettings() => View();
@@ -425,6 +425,75 @@ namespace EliteRentals.Controllers
 
             return View(dto);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> AdminPayments()
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync("api/payment");
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Failed to load payments.";
+                return View(new List<PaymentDto>());
+            }
+
+            var json = await resp.Content.ReadAsStringAsync();
+            var payments = JsonSerializer.Deserialize<List<PaymentDto>>(json, _jsonOptions) ?? new List<PaymentDto>();
+
+            // Optionally fetch tenants to display names
+            var tenants = await FetchTenants();
+
+            // Combine tenant name into each payment
+            foreach (var p in payments)
+            {
+                var tenant = tenants.FirstOrDefault(t => t.UserId == p.TenantId);
+                if (tenant != null)
+                {
+                    p.TenantName = $"{tenant.FirstName} {tenant.LastName}";
+                }
+            }
+
+            return View(payments);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewPayment(int id)
+        {
+            var client = await CreateApiClient();
+            var response = await client.GetAsync($"api/payment/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Unable to fetch payment details.";
+                return RedirectToAction("AdminPayments"); 
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var payment = JsonSerializer.Deserialize<PaymentDto>(json, _jsonOptions);
+
+            return View(payment);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePaymentStatus(int id, string status)
+        {
+            var client = await CreateApiClient();
+
+            var dto = new { Status = status };
+            var json = JsonSerializer.Serialize(dto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var resp = await client.PutAsync($"api/payment/{id}/status", content);
+
+            if (!resp.IsSuccessStatusCode)
+                TempData["Error"] = "Failed to update payment status.";
+
+            return RedirectToAction("AdminPayments");
+        }
+
+
 
 
 
