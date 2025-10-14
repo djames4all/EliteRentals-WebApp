@@ -1,0 +1,111 @@
+@model EliteRentals.Models.DTOs.PropertyUploadDto
+@{
+    ViewData["Title"] = "Manager • Properties • Create";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<style>
+    :root { --mgr-sidebar-w: 240px; --mgr-navbar-h: 56px; }
+    @@media (min-width: 768px) { .manager-main { margin-left: var(--mgr-sidebar-w); padding: 1.25rem 1.5rem; } }
+    @@media (max-width: 767.98px) { .manager-main { padding: 1rem; } }
+</style>
+
+@await Html.PartialAsync("_ManagerSidebar")
+
+<div class="manager-main">
+    <h2 class="fw-semibold mb-3">Add Property</h2>
+
+    <form asp-action="ManagerPropertyCreate" method="post" enctype="multipart/form-data" class="card border-0 shadow-sm p-4 rounded-4">
+        @Html.AntiForgeryToken()
+        <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+        <div class="row g-3">
+            <div class="col-md-6">
+                <label class="form-label">Title</label>
+                <input asp-for="Title" class="form-control" />
+                <span asp-validation-for="Title" class="text-danger"></span>
+            </div>
+            <div class="col-md-6">
+                <label class="form-label">Status</label>
+                <select asp-for="Status" class="form-select">
+                    <option value="Available">Available</option>
+                    <option value="Occupied">Occupied</option>
+                </select>
+                <span asp-validation-for="Status" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Description</label>
+                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                <span asp-validation-for="Description" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-6">
+                <label class="form-label">Address</label>
+                <input asp-for="Address" class="form-control" />
+                <span asp-validation-for="Address" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">City</label>
+                <input asp-for="City" class="form-control" />
+                <span asp-validation-for="City" class="text-danger"></span>
+            </div>
+            <div class="col-md-3">
+                <label class="form-label">Province</label>
+                <input asp-for="Province" class="form-control" />
+                <span asp-validation-for="Province" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Country</label>
+                <input asp-for="Country" class="form-control" />
+                <span asp-validation-for="Country" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Rent Amount</label>
+                <input asp-for="RentAmount" class="form-control" type="number" step="0.01" />
+                <span asp-validation-for="RentAmount" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Pet Friendly</label>
+                <select asp-for="PetFriendly" class="form-select">
+                    <option value="true">Yes</option>
+                    <option value="false">No</option>
+                </select>
+                <span asp-validation-for="PetFriendly" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Bedrooms</label>
+                <input asp-for="NumOfBedrooms" class="form-control" type="number" min="0" />
+                <span asp-validation-for="NumOfBedrooms" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Bathrooms</label>
+                <input asp-for="NumOfBathrooms" class="form-control" type="number" min="0" />
+                <span asp-validation-for="NumOfBathrooms" class="text-danger"></span>
+            </div>
+            <div class="col-md-4">
+                <label class="form-label">Parking Type</label>
+                <input asp-for="ParkingType" class="form-control" placeholder="Garage / Carport / Street / None" />
+                <span asp-validation-for="ParkingType" class="text-danger"></span>
+            </div>
+
+            <div class="col-md-4">
+                <label class="form-label">Number of Parking Spots</label>
+                <input asp-for="NumOfParkingSpots" class="form-control" type="number" min="0" />
+                <span asp-validation-for="NumOfParkingSpots" class="text-danger"></span>
+            </div>
+
+            <div class="col-12">
+                <label class="form-label">Cover Image (optional)</label>
+                <input name="image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+            </div>
+
+            <div class="col-12 d-flex gap-2 mt-3">
+                <button class="btn btn-primary">Create Property</button>
+                <a asp-action="ManagerProperties" class="btn btn-outline-secondary">Cancel</a>
+            </div>
+        </div>
+    </form>
+</div>

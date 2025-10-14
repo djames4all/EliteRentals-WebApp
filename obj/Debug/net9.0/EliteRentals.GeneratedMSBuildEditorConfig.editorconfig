@@ -17,193 +17,201 @@ build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property._SupportedPlatformList = Linux,macOS,Windows
 build_property.RootNamespace = EliteRentals
 build_property.RootNamespace = EliteRentals
-build_property.ProjectDir = C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\
+build_property.ProjectDir = /Users/ayush/C#_Projects/EliteRentals-WebApp/Untitled/
 build_property.EnableComHosting = 
 build_property.EnableGeneratedComInterfaceComImportInterop = 
 build_property.RazorLangVersion = 9.0
 build_property.SupportLocalizedComponentNames = 
 build_property.GenerateRazorMetadataSourceChecksumAttributes = 
-build_property.MSBuildProjectDirectory = C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp
+build_property.MSBuildProjectDirectory = /Users/ayush/C#_Projects/EliteRentals-WebApp/Untitled
 build_property._RazorSourceGeneratorDebug = 
 build_property.EffectiveAnalysisLevelStyle = 9.0
 build_property.EnableCodeStyleSeverity = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Areas/Identity/Pages/_ViewStart.cshtml]
-build_metadata.AdditionalFiles.TargetPath = QXJlYXNcSWRlbnRpdHlcUGFnZXNcX1ZpZXdTdGFydC5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Areas/Identity/Pages/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = QXJlYXMvSWRlbnRpdHkvUGFnZXMvX1ZpZXdTdGFydC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Account/GoogleLogin.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxHb29nbGVMb2dpbi5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Account/GoogleLogin.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Hb29nbGVMb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Account/Login.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxMb2dpbi5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Account/Login.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9Mb2dpbi5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Account/Register.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWNjb3VudFxSZWdpc3Rlci5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Account/Register.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWNjb3VudC9SZWdpc3Rlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AddLease.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRkTGVhc2UuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AddLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRkTGVhc2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AddUser.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRkVXNlci5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AddUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRkVXNlci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminChatbot.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5DaGF0Ym90LmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminChatbot.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5DaGF0Ym90LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminDashboard.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5EYXNoYm9hcmQuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminDashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5EYXNoYm9hcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminLeases.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5MZWFzZXMuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminLeases.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5MZWFzZXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminMaintenance.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5NYWludGVuYW5jZS5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminMaintenance.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5NYWludGVuYW5jZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminMessages.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5NZXNzYWdlcy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminMessages.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5NZXNzYWdlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminPayments.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5QYXltZW50cy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminPayments.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5QYXltZW50cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminProperties.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5Qcm9wZXJ0aWVzLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminProperties.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5Qcm9wZXJ0aWVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminReports.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5SZXBvcnRzLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminReports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5SZXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminSettings.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5TZXR0aW5ncy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminSettings.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5TZXR0aW5ncy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/AdminSystemUser.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cQWRtaW5TeXN0ZW1Vc2VyLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminSystemUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5TeXN0ZW1Vc2VyLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/DeleteLease.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGVsZXRlTGVhc2UuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/DeleteLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vRGVsZXRlTGVhc2UuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/DeleteLeaseConfirmed.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRGVsZXRlTGVhc2VDb25maXJtZWQuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/DeleteLeaseConfirmed.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vRGVsZXRlTGVhc2VDb25maXJtZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/EditLease.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdExlYXNlLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/EditLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vRWRpdExlYXNlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/EditUser.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cRWRpdFVzZXIuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/EditUser.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vRWRpdFVzZXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/ViewLease.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVmlld0xlYXNlLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/ViewLease.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vVmlld0xlYXNlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/ViewMaintenance.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVmlld01haW50ZW5hbmNlLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/ViewMaintenance.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vVmlld01haW50ZW5hbmNlLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Admin/ViewPayment.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcQWRtaW5cVmlld1BheW1lbnQuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/ViewPayment.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vVmlld1BheW1lbnQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Home/Index.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxJbmRleC5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Home/Index.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9JbmRleC5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Home/Privacy.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcSG9tZVxQcml2YWN5LmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Home/Privacy.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvSG9tZS9Qcml2YWN5LmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerDashboard.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJEYXNoYm9hcmQuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerDashboard.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJEYXNoYm9hcmQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerEscalations.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJFc2NhbGF0aW9ucy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerEscalations.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJFc2NhbGF0aW9ucy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerLeases.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJMZWFzZXMuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerLeases.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJMZWFzZXMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerMaintenance.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJNYWludGVuYW5jZS5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerMaintenance.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJNYWludGVuYW5jZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerProperties.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJQcm9wZXJ0aWVzLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerProperties.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJQcm9wZXJ0aWVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerSettings.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJTZXR0aW5ncy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerPropertyCreate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJQcm9wZXJ0eUNyZWF0ZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/AllApartments.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcQWxsQXBhcnRtZW50cy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerPropertyEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJQcm9wZXJ0eUVkaXQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/AllFeatured.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcQWxsRmVhdHVyZWQuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/PropertyManager/ManagerSettings.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvcGVydHlNYW5hZ2VyL01hbmFnZXJTZXR0aW5ncy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/AllHouses.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcQWxsSG91c2VzLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/AllApartments.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvQWxsQXBhcnRtZW50cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/AllTownhouses.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcQWxsVG93bmhvdXNlcy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/AllFeatured.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvQWxsRmVhdHVyZWQuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/TenantApplicationForm.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcVGVuYW50QXBwbGljYXRpb25Gb3JtLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/AllHouses.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvQWxsSG91c2VzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/TenantListingDetails.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcVGVuYW50TGlzdGluZ0RldGFpbHMuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/AllTownhouses.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvQWxsVG93bmhvdXNlcy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/ProspectiveTenant/TenantPropertyListings.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvc3BlY3RpdmVUZW5hbnRcVGVuYW50UHJvcGVydHlMaXN0aW5ncy5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/TenantApplicationForm.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvVGVuYW50QXBwbGljYXRpb25Gb3JtLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Shared/Error.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXEVycm9yLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/TenantListingDetails.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvVGVuYW50TGlzdGluZ0RldGFpbHMuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Shared/_AdminSidebar.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9BZG1pblNpZGViYXIuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/ProspectiveTenant/TenantPropertyListings.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvUHJvc3BlY3RpdmVUZW5hbnQvVGVuYW50UHJvcGVydHlMaXN0aW5ncy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Shared/_ManagerSidebar.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9NYW5hZ2VyU2lkZWJhci5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Shared/Error.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL0Vycm9yLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Shared/_ValidationScriptsPartial.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Shared/_AdminSidebar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19BZG1pblNpZGViYXIuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/_ViewImports.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Shared/_ManagerSidebar.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19NYW5hZ2VyU2lkZWJhci5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/_ViewStart.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcX1ZpZXdTdGFydC5jc2h0bWw=
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Shared/_ValidationScriptsPartial.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19WYWxpZGF0aW9uU2NyaXB0c1BhcnRpYWwuY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
-[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/Shared/_Layout.cshtml]
-build_metadata.AdditionalFiles.TargetPath = Vmlld3NcU2hhcmVkXF9MYXlvdXQuY3NodG1s
-build_metadata.AdditionalFiles.CssScope = b-252h1bq4aq
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/_ViewImports.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdJbXBvcnRzLmNzaHRtbA==
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/_ViewStart.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvX1ZpZXdTdGFydC5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Shared/_Layout.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvU2hhcmVkL19MYXlvdXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = b-qd0oonxy5a

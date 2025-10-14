@@ -1,151 +1,89 @@
-﻿@{
-    ViewData["Title"] = "Property Details - EliteRentals";
+﻿@model EliteRentals.Models.DTOs.PropertyReadDto
+@{
+    ViewData["Title"] = (Model?.Title ?? "Property Details") + " - EliteRentals";
     Layout = "~/Views/Shared/_Layout.cshtml";
+    var apiBase = (string)(ViewData["ApiBaseUrl"] ?? "");
+    var imgSrc = (Model != null) ? $"{apiBase}api/Property/{Model.PropertyId}/image" : "https://via.placeholder.com/1200x900?text=No+Image";
+}
 
-    var propertyIdStr = Context.Request.Query["propertyId"].ToString();
-    int propertyId = 0;
-    int.TryParse(propertyIdStr, out propertyId);
-
-    // Full expanded mock data
-    var properties = new[]
-    {
-        // Apartments
-        new { Id =101, Type="Apartment", Price=12000, Bedrooms=1, Address="123 Main St, Sandton", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =102, Type="Apartment", Price=14000, Bedrooms=2, Address="234 Oak Ave, Rosebank", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =103, Type="Apartment", Price=15000, Bedrooms=3, Address="345 Pine Rd, Midrand", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =104, Type="Apartment", Price=11000, Bedrooms=2, Address="321 Birch St, Sandton", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =105, Type="Apartment", Price=9500, Bedrooms=3, Address="567 Birch Ln, Bryanston", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =106, Type="Apartment", Price=10000, Bedrooms=4, Address="678 Willow Rd, Sandown", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =107, Type="Apartment", Price=11000, Bedrooms=2, Address="789 Maple Ave, Midrand", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =108, Type="Apartment", Price=12000, Bedrooms=3, Address="890 Cedar Ln, Rosebank", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-
-        // Houses
-        new { Id =201, Type="House", Price=12000, Bedrooms=3, Address="101 Maple Ave, Sandton", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =202, Type="House", Price=13000, Bedrooms=4, Address="202 Cedar Rd, Rosebank", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =203, Type="House", Price=14000, Bedrooms=4, Address="303 Elm St, Midrand", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =204, Type="House", Price=15000, Bedrooms=5, Address="404 Pine Ln, Sandown", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =205, Type="House", Price=16000, Bedrooms=5, Address="505 Oak St, Bryanston", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =206, Type="House", Price=17000, Bedrooms=6, Address="606 Willow Rd, Sandton", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =207, Type="House", Price=18000, Bedrooms=4, Address="707 Birch Ln, Rosebank", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =208, Type="House", Price=19000, Bedrooms=5, Address="808 Maple St, Midrand", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-
-        // Townhouses
-        new { Id =301, Type="Townhouse", Price=9000, Bedrooms=2, Address="11 Willow Ln, Sandton", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =302, Type="Townhouse", Price=9500, Bedrooms=3, Address="22 Birch St, Rosebank", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =303, Type="Townhouse", Price=10000, Bedrooms=3, Address="33 Maple Ln, Midrand", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =304, Type="Townhouse", Price=10500, Bedrooms=4, Address="44 Cedar St, Bryanston", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =305, Type="Townhouse", Price=11000, Bedrooms=4, Address="55 Pine Ave, Sandown", Status="Occupied", Image="https://via.placeholder.com/800x500" },
-        new { Id =306, Type="Townhouse", Price=11500, Bedrooms=3, Address="66 Oak Rd, Sandton", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =307, Type="Townhouse", Price=12000, Bedrooms=4, Address="77 Elm St, Rosebank", Status="Available", Image="https://via.placeholder.com/800x500" },
-        new { Id =308, Type="Townhouse", Price=12500, Bedrooms=5, Address="88 Maple Ln, Midrand", Status="Occupied", Image="https://via.placeholder.com/800x500" }
-    };
-
-    var property = properties.FirstOrDefault(p => p.Id == propertyId);
+@if (TempData["AppSubmitted"] is string ok && !string.IsNullOrWhiteSpace(ok))
+{
+    <div class="container mt-3">
+        <div class="alert alert-success shadow-sm rounded-3">@ok</div>
+    </div>
 }
 
 <section class="bg-primary text-white text-center py-5 mb-4">
     <div class="container">
-        <h1 class="display-4 fw-bold">@((property != null) ? property.Type : "Property Details")</h1>
-        <p class="lead">@((property != null) ? property.Address : "View all information about this rental property.")</p>
+        <h1 class="display-4 fw-bold">@(!string.IsNullOrWhiteSpace(Model?.Title) ? Model!.Title : "Property Details")</h1>
+        <p class="lead">@((Model != null) ? $"{Model.Address}, {Model.City}, {Model.Province}" : "View all information about this rental property.")</p>
     </div>
 </section>
 
 <nav aria-label="breadcrumb" class="bg-light py-2 shadow-sm mb-4 rounded-3">
     <div class="container">
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/ProspectiveTenant/TenantPropertyListings">Property Listings</a></li>
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings">Property Listings</a></li>
             <li class="breadcrumb-item active" aria-current="page">Property Details</li>
         </ol>
     </div>
 </nav>
 
 <div class="container my-5">
-    @if (property != null)
+    @if (Model == null)
+    {
+        <div class="alert alert-danger text-center py-4 shadow-sm rounded-3">
+            <h4 class="alert-heading">Property Not Found</h4>
+            <p>The property could not be found.</p>
+            <a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings" class="btn btn-secondary btn-lg">Back to Listings</a>
+        </div>
+    }
+    else
     {
         <div class="row g-4 align-items-start">
             <div class="col-lg-6">
                 <div class="card shadow-sm rounded-4">
-                    <img src="@property.Image" class="card-img-top rounded-top-4" alt="@property.Type">
+                    <img src="@imgSrc" class="card-img-top rounded-top-4"
+                         alt="Property @Model.PropertyId"
+                         onerror="this.src='https://via.placeholder.com/1200x900?text=No+Image';">
                 </div>
             </div>
 
             <div class="col-lg-6">
-                <h1 class="fw-bold">@property.Type</h1>
-                <h3 class="text-primary mb-3">R @property.Price.ToString("N0") / month</h3>
+                <h1 class="fw-bold mb-1">@(!string.IsNullOrWhiteSpace(Model.Title) ? Model.Title : "Untitled Listing")</h1>
+                <div class="text-muted mb-2">@Model.Address, @Model.City, @Model.Province</div>
+                <span class="badge bg-@(Model.Status?.ToLower()=="available"?"success":(Model.Status?.ToLower()=="rented"?"secondary":"warning"))">@Model.Status</span>
+
+                <div class="display-6 my-3">R @Model.RentAmount</div>
 
                 <ul class="list-unstyled mb-3">
-                    <li><strong>Bedrooms:</strong> @property.Bedrooms</li>
-                    <li><strong>Address:</strong> @property.Address</li>
-                    <li>
-                        <strong>Status:</strong>
-                        <span class="badge @(property.Status == "Available" ? "bg-success" : "bg-warning text-dark")">@property.Status</span>
-                    </li>
+                    <li><strong>Bedrooms:</strong> @Model.NumOfBedrooms</li>
+                    <li><strong>Bathrooms:</strong> @Model.NumOfBathrooms</li>
+                    <li><strong>Parking:</strong> @Model.ParkingType (@Model.NumOfParkingSpots)</li>
+                    <li><strong>Pet friendly:</strong> @(Model.PetFriendly ? "Yes" : "No")</li>
                 </ul>
 
+                <p class="mt-3">@Model.Description</p>
+
                 <div class="mt-4 d-flex flex-wrap gap-3">
-                    @if (property.Status == "Available")
+                    @if ((Model.Status ?? "").Equals("Available", StringComparison.OrdinalIgnoreCase))
                     {
-                        <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=@property.Id" class="btn btn-primary btn-lg">Apply Now</a>
+                        <a asp-controller="ProspectiveTenant"
+                           asp-action="TenantApplicationForm"
+                           asp-route-propertyId="@Model.PropertyId"
+                           class="btn btn-primary btn-lg">Apply Now</a>
                     }
                     else
                     {
                         <button class="btn btn-outline-secondary btn-lg" disabled>Not Available</button>
                     }
-                    <a href="/ProspectiveTenant/TenantPropertyListings" class="btn btn-outline-secondary btn-lg">Back to Listings</a>
-                </div>
 
-                <div class="mt-5">
-                    <h4 class="fw-bold">Property Description</h4>
-                    <p>Fully furnished property with modern amenities, ideal for families or young professionals.</p>
-
-                    <h5 class="fw-bold mt-4">Features:</h5>
-                    <ul class="list-unstyled">
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Secure building with 24/7 access control</li>
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Parking space included</li>
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>Close to public transport and shopping</li>
-                        <li><i class="bi bi-check-circle-fill text-success me-2"></i>High-speed internet ready</li>
-                    </ul>
+                    <a asp-controller="ProspectiveTenant"
+                       asp-action="TenantPropertyListings"
+                       class="btn btn-outline-secondary btn-lg">Back to Listings</a>
                 </div>
             </div>
-        </div>
-
-        <section class="mt-5">
-            <h3 class="fw-bold mb-4">Similar Properties</h3>
-            <div class="row g-4">
-                @foreach (var prop in properties.Where(p => p.Id != property.Id && p.Type == property.Type).Take(3))
-                {
-                    <div class="col-md-4">
-                        <div class="card shadow-sm rounded-4 h-100">
-                            <img src="@prop.Image" class="card-img-top rounded-top-4" alt="@prop.Type">
-                            <div class="card-body">
-                                <h5 class="card-title text-primary">R @prop.Price.ToString("N0") / month</h5>
-                                <p class="card-text">@prop.Bedrooms-Bedroom – @prop.Address</p>
-                                <span class="badge @(prop.Status == "Available" ? "bg-success" : "bg-warning text-dark")">@prop.Status</span>
-                                <div class="mt-3 d-flex gap-2">
-                                    <a href="/ProspectiveTenant/TenantListingDetails?propertyId=@prop.Id" class="btn btn-outline-primary btn-sm flex-fill">View Details</a>
-                                    @if (prop.Status == "Available")
-                                    {
-                                        <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=@prop.Id" class="btn btn-primary btn-sm flex-fill">Apply Now</a>
-                                    }
-                                    else
-                                    {
-                                        <button class="btn btn-outline-secondary btn-sm flex-fill" disabled>Not Available</button>
-                                    }
-                                </div>
-                            </div>
-                        </div>
-                    </div>
-                }
-            </div>
-        </section>
-    }
-    else
-    {
-        <div class="alert alert-danger text-center py-4 shadow-sm rounded-3">
-            <h4 class="alert-heading">Property Not Found</h4>
-            <p>The property with ID <strong>@propertyId</strong> does not exist or has been removed.</p>
-            <a href="/ProspectiveTenant/TenantPropertyListings" class="btn btn-secondary btn-lg">Back to Listings</a>
         </div>
     }
 </div>

@@ -1,53 +1,16 @@
-﻿@{
+﻿@model EliteRentals.Models.ViewModels.RentalApplicationPageViewModel
+@{
     ViewData["Title"] = "Rental Application - EliteRentals";
     Layout = "~/Views/Shared/_Layout.cshtml";
-
-    var propertyIdStr = Context.Request.Query["propertyId"].ToString();
-    int propertyId = 0;
-    int.TryParse(propertyIdStr, out propertyId);
-
-    // Full mock data (same as TenantListingDetails)
-    var properties = new[]
-    {
-        // Apartments
-        new { Id = 101, Type = "Apartment", Price = 7500, Bedrooms = 1, Address = "123 Main St, Sandton" },
-        new { Id = 102, Type = "Apartment", Price = 8000, Bedrooms = 2, Address = "234 Oak St, Rosebank" },
-        new { Id = 103, Type = "Apartment", Price = 8500, Bedrooms = 3, Address = "345 Pine St, Midrand" },
-        new { Id = 104, Type = "Apartment", Price = 9000, Bedrooms = 2, Address = "456 Cedar Rd, Sandton" },
-        new { Id = 105, Type = "Apartment", Price = 9500, Bedrooms = 3, Address = "567 Birch Ln, Bryanston" },
-        new { Id = 106, Type = "Apartment", Price = 10000, Bedrooms = 4, Address = "678 Willow Rd, Sandown" },
-        new { Id = 107, Type = "Apartment", Price = 11000, Bedrooms = 2, Address = "789 Maple Ave, Midrand" },
-        new { Id = 108, Type = "Apartment", Price = 12000, Bedrooms = 3, Address = "890 Cedar Ln, Rosebank" },
-
-        // Houses
-        new { Id = 201, Type = "House", Price = 12000, Bedrooms = 3, Address = "101 Maple Ave, Sandton" },
-        new { Id = 202, Type = "House", Price = 13000, Bedrooms = 4, Address = "202 Cedar Rd, Rosebank" },
-        new { Id = 203, Type = "House", Price = 14000, Bedrooms = 4, Address = "303 Elm St, Midrand" },
-        new { Id = 204, Type = "House", Price = 15000, Bedrooms = 5, Address = "404 Pine Ln, Sandown" },
-        new { Id = 205, Type = "House", Price = 16000, Bedrooms = 5, Address = "505 Oak St, Bryanston" },
-        new { Id = 206, Type = "House", Price = 17000, Bedrooms = 6, Address = "606 Willow Rd, Sandton" },
-        new { Id = 207, Type = "House", Price = 18000, Bedrooms = 4, Address = "707 Birch Ln, Rosebank" },
-        new { Id = 208, Type = "House", Price = 19000, Bedrooms = 5, Address = "808 Maple St, Midrand" },
-
-        // Townhouses
-        new { Id = 301, Type = "Townhouse", Price = 9000, Bedrooms = 2, Address = "11 Willow Ln, Sandton" },
-        new { Id = 302, Type = "Townhouse", Price = 9500, Bedrooms = 3, Address = "22 Birch St, Rosebank" },
-        new { Id = 303, Type = "Townhouse", Price = 10000, Bedrooms = 3, Address = "33 Maple Ln, Midrand" },
-        new { Id = 304, Type = "Townhouse", Price = 10500, Bedrooms = 4, Address = "44 Cedar St, Bryanston" },
-        new { Id = 305, Type = "Townhouse", Price = 11000, Bedrooms = 4, Address = "55 Pine Ave, Sandown" },
-        new { Id = 306, Type = "Townhouse", Price = 11500, Bedrooms = 3, Address = "66 Oak Rd, Sandton" },
-        new { Id = 307, Type = "Townhouse", Price = 12000, Bedrooms = 4, Address = "77 Elm St, Rosebank" },
-        new { Id = 308, Type = "Townhouse", Price = 12500, Bedrooms = 5, Address = "88 Maple Ln, Midrand" }
-    };
-
-    var property = properties.FirstOrDefault(p => p.Id == propertyId);
+    var p = Model.Property;
 }
 
 <section class="bg-primary text-white text-center py-5 mb-4">
     <div class="container">
         <h1 class="display-4 fw-bold">Rental Application</h1>
         <p class="lead">
-            @(property != null ? $"Apply for {property.Type} at {property.Address}" : "Complete the form to apply for this property.")
+            Apply for @(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "this property")
+            @if(!string.IsNullOrWhiteSpace(p.Address)){<text> at @p.Address</text>}
         </p>
     </div>
 </section>
@@ -55,89 +18,79 @@
 <nav aria-label="breadcrumb" class="bg-light py-2 shadow-sm mb-4 rounded-3">
     <div class="container">
         <ol class="breadcrumb mb-0">
-            <li class="breadcrumb-item"><a href="/">Home</a></li>
-            <li class="breadcrumb-item"><a href="/ProspectiveTenant/TenantPropertyListings">Property Listings</a></li>
-            @if (property != null)
-            {
-                <li class="breadcrumb-item"><a href="/ProspectiveTenant/TenantListingDetails?propertyId=@property.Id">Property Details</a></li>
-            }
+            <li class="breadcrumb-item"><a asp-controller="Home" asp-action="Index">Home</a></li>
+            <li class="breadcrumb-item"><a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings">Property Listings</a></li>
+            <li class="breadcrumb-item">
+                <a asp-controller="ProspectiveTenant" asp-action="TenantListingDetails" asp-route-id="@p.PropertyId">Property Details</a>
+            </li>
             <li class="breadcrumb-item active" aria-current="page">Application Form</li>
         </ol>
     </div>
 </nav>
 
 <div class="container my-5">
-    @if (property != null)
-    {
-        <div class="card shadow-sm rounded-4 p-4">
-            <h2 class="fw-bold mb-4">Apply for @property.Type – @property.Address</h2>
-            <h4 class="text-primary mb-4">Rental Price: R @property.Price.ToString("N0") / month</h4>
-            <form id="applicationForm" class="row g-3">
-                <div class="col-md-6">
-                    <label class="form-label">Full Name</label>
-                    <input type="text" class="form-control" placeholder="John Doe" required>
+    <div class="row g-4">
+        <div class="col-lg-5">
+            <div class="card shadow-sm rounded-4">
+                <div class="card-body">
+                    <h5 class="fw-bold mb-2">@(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "Untitled Listing")</h5>
+                    <div class="text-muted mb-2">@p.Address, @p.City, @p.Province</div>
+                    <div class="mb-2"><span class="badge bg-@(p.Status?.ToLower()=="available"?"success":(p.Status?.ToLower()=="rented"?"secondary":"warning"))">@p.Status</span></div>
+                    <div class="h4">R @p.RentAmount</div>
+                    <div class="small text-muted">
+                        <span class="me-3">@p.NumOfBedrooms bed</span>
+                        <span class="me-3">@p.NumOfBathrooms bath</span>
+                        <span>@(p.PetFriendly ? "Pet friendly" : "No pets")</span>
+                    </div>
                 </div>
-                <div class="col-md-6">
-                    <label class="form-label">Email</label>
-                    <input type="email" class="form-control" placeholder="example@email.com" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Phone Number</label>
-                    <input type="tel" class="form-control" placeholder="+27 82 123 4567" required>
-                </div>
-                <div class="col-md-6">
-                    <label class="form-label">Monthly Income</label>
-                    <input type="number" class="form-control" placeholder="R10,000" required>
-                </div>
-                <div class="col-12">
-                    <label class="form-label">Additional Notes</label>
-                    <textarea class="form-control" rows="4" placeholder="Any comments or questions"></textarea>
-                </div>
-                <div class="col-12 d-flex flex-wrap gap-2 mt-3">
-                    <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
-                    <a href="/ProspectiveTenant/TenantListingDetails?propertyId=@property.Id" class="btn btn-outline-secondary btn-lg">Back to Property</a>
+            </div>
+        </div>
+
+        <div class="col-lg-7">
+            <form asp-action="TenantApplicationForm" method="post" enctype="multipart/form-data" class="card shadow-sm rounded-4 p-4">
+                @Html.AntiForgeryToken()
+                <input type="hidden" asp-for="Form.PropertyId" />
+
+                <div asp-validation-summary="ModelOnly" class="text-danger mb-2"></div>
+
+                <div class="row g-3">
+                    <div class="col-md-6">
+                        <label asp-for="Form.ApplicantName" class="form-label"></label>
+                        <input asp-for="Form.ApplicantName" class="form-control" placeholder="John Doe" />
+                        <span asp-validation-for="Form.ApplicantName" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Form.Email" class="form-label"></label>
+                        <input asp-for="Form.Email" class="form-control" placeholder="example@email.com" />
+                        <span asp-validation-for="Form.Email" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Form.Phone" class="form-label"></label>
+                        <input asp-for="Form.Phone" class="form-control" placeholder="+27 82 123 4567" />
+                        <span asp-validation-for="Form.Phone" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-md-6">
+                        <label asp-for="Form.Notes" class="form-label"></label>
+                        <input asp-for="Form.Notes" class="form-control" placeholder="Optional note" />
+                        <span asp-validation-for="Form.Notes" class="text-danger"></span>
+                    </div>
+
+                    <div class="col-12">
+                        <label class="form-label">Supporting Document (PDF/JPG/PNG)</label>
+                        <input name="document" type="file" class="form-control" accept=".pdf,.jpg,.jpeg,.png" />
+                    </div>
+
+                    <div class="col-12 d-flex flex-wrap gap-2 mt-3">
+                        <button type="submit" class="btn btn-primary btn-lg">Submit Application</button>
+                        <a asp-controller="ProspectiveTenant" asp-action="TenantListingDetails" asp-route-id="@p.PropertyId" class="btn btn-outline-secondary btn-lg">Back to Property</a>
+                    </div>
                 </div>
             </form>
-        </div>
-    }
-    else
-    {
-        <div class="alert alert-danger text-center py-4 shadow-sm rounded-3">
-            <h4 class="alert-heading">Property Not Found</h4>
-            <p>The property you are trying to apply for does not exist or has been removed.</p>
-            <a href="/ProspectiveTenant/TenantPropertyListings" class="btn btn-secondary btn-lg">Back to Listings</a>
-        </div>
-    }
-</div>
-
-<!-- Success Modal -->
-<div class="modal fade" id="successModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-dialog-centered">
-        <div class="modal-content rounded-4 shadow">
-            <div class="modal-header bg-success text-white">
-                <h5 class="modal-title">Application Submitted!</h5>
-                <button type="button" class="btn-close btn-close-white" data-bs-dismiss="modal"></button>
-            </div>
-            <div class="modal-body">
-                <p>Your rental application has been successfully submitted. Our team will contact you soon.</p>
-            </div>
-            <div class="modal-footer">
-                <a href="/ProspectiveTenant/TenantPropertyListings" class="btn btn-primary btn-lg">Back to Listings</a>
-            </div>
         </div>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        const form = document.getElementById("applicationForm");
-        if (form) {
-            form.addEventListener("submit", function(e) {
-                e.preventDefault();
-                const successModal = new bootstrap.Modal(document.getElementById("successModal"));
-                successModal.show();
-                form.reset();
-            });
-        }
-    </script>
-}
+@section Scripts { <partial name="_ValidationScriptsPartial" /> }

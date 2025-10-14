@@ -1,175 +1,154 @@
-﻿@{
+﻿@model EliteRentals.Models.ViewModels.PropertyListViewModel
+@{
     ViewData["Title"] = "Property Listings - EliteRentals";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container-fluid p-0">
-
-    <!-- Hero Section -->
-    <section class="bg-primary text-white text-center py-5" style="background: url('https://via.placeholder.com/1600x600') center/cover no-repeat;">
-        <div class="container py-5">
-            <h1 class="display-3 fw-bold">Find Your Perfect Rental</h1>
-            <p class="lead mb-4">Browse verified properties across apartments, houses, and townhouses.</p>
+    <section class="bg-primary text-white text-center py-5" style="background: linear-gradient(90deg, rgba(0,123,255,0.9), rgba(0,86,179,0.9)), url('https://via.placeholder.com/1600x600') center/cover no-repeat;">
+        <div class="container py-4">
+            <h1 class="display-4 fw-bold">Find Your Perfect Rental</h1>
+            <p class="lead mb-0">Browse verified properties.</p>
         </div>
     </section>
 
-    <!-- Breadcrumb -->
-    <nav aria-label="breadcrumb" class="bg-light py-2 shadow-sm mb-4 rounded-3">
+    <section class="bg-light py-3 shadow-sm mb-4">
         <div class="container">
-            <ol class="breadcrumb mb-0">
-                <li class="breadcrumb-item"><a href="/">Home</a></li>
-                <li class="breadcrumb-item active" aria-current="page">Property Listings</li>
-            </ol>
-        </div>
-    </nav>
+            <form method="get" class="row g-3 align-items-end">
+                <div class="col-md-4">
+                    <label class="form-label">Location</label>
+                    <input type="text" name="Location" value="@Model.Query.Location" class="form-control" placeholder="City, province, or address" />
+                </div>
 
-    <!-- Search & Filters -->
-    <section class="bg-light py-4 shadow-sm mb-5 rounded-4">
-        <div class="container">
-            <form class="row g-3" id="propertySearchForm">
-                <div class="col-md-3">
-                    <input type="text" class="form-control" id="searchLocation" placeholder="Search by Location...">
-                </div>
                 <div class="col-md-2">
-                    <select class="form-select" id="filterType">
-                        <option value="">Property Type</option>
-                        <option value="Apartment">Apartment</option>
-                        <option value="House">House</option>
-                        <option value="Townhouse">Townhouse</option>
+                    <label class="form-label">Min Bedrooms</label>
+                    <select class="form-select" name="MinBedrooms">
+                        <option value="">Any</option>
+                        @for (var b = 1; b <= 5; b++)
+                        {
+                            <option value="@b" selected="@(Model.Query.MinBedrooms == b ? "selected" : null)">@b+</option>
+                        }
                     </select>
                 </div>
+
                 <div class="col-md-2">
-                    <select class="form-select" id="filterBedrooms">
-                        <option value="">Bedrooms</option>
-                        <option value="1">1+</option>
-                        <option value="2">2+</option>
-                        <option value="3">3+</option>
-                        <option value="4">4+</option>
+                    <label class="form-label">Pet Friendly</label>
+                    <select class="form-select" name="PetFriendly">
+                        <option value="">Any</option>
+                        <option value="true" selected="@(Model.Query.PetFriendly == true ? "selected" : null)">Yes</option>
+                        <option value="false" selected="@(Model.Query.PetFriendly == false ? "selected" : null)">No</option>
                     </select>
                 </div>
+
                 <div class="col-md-2">
-                    <select class="form-select" id="filterPrice">
-                        <option value="">Price Range</option>
-                        <option value="5000-8000">R5,000 - R8,000</option>
-                        <option value="8000-12000">R8,000 - R12,000</option>
-                        <option value="12000+">R12,000+</option>
+                    <label class="form-label">Sort By</label>
+                    <select class="form-select" name="SortBy">
+                        <option value="newest" selected="@(Model.Query.SortBy=="newest" ? "selected" : null)">Newest</option>
+                        <option value="lowest" selected="@(Model.Query.SortBy=="lowest" ? "selected" : null)">Price: Low to High</option>
+                        <option value="highest" selected="@(Model.Query.SortBy=="highest" ? "selected" : null)">Price: High to Low</option>
                     </select>
                 </div>
-                <div class="col-md-2">
-                    <select class="form-select" id="sortBy">
-                        <option value="">Sort By</option>
-                        <option value="newest">Newest</option>
-                        <option value="lowest">Lowest Price</option>
-                        <option value="highest">Highest Price</option>
-                    </select>
-                </div>
-                <div class="col-md-1 d-grid">
-                    <button type="submit" class="btn btn-primary">Search</button>
+
+                <div class="col-md-2 d-flex gap-2">
+                    <button class="btn btn-primary w-100">Apply</button>
                 </div>
             </form>
         </div>
     </section>
 
-    <!-- Property Listings Container -->
-    <div class="container" id="propertyListingsContainer"></div>
-</div>
-
-@section Scripts {
-    <script>
-        // Expanded Property Mock Data
-        const properties = [
-            { id:101, type: "Apartment", price: 7500, bedrooms: 1, address: "123 Main St, Sandton", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { id:102, type: "Apartment", price: 8000, bedrooms: 2, address: "234 Oak St, Rosebank", status: "Occupied", image: "https://via.placeholder.com/400x250" },
-            { id:103, type: "Apartment", price: 8500, bedrooms: 3, address: "345 Pine St, Midrand", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { id:201, type: "House", price: 12000, bedrooms: 3, address: "101 Maple Ave, Sandown", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { id:202, type: "House", price: 13000, bedrooms: 4, address: "202 Cedar Rd, Bryanston", status: "Unavailable", image: "https://via.placeholder.com/400x250" },
-            { id:203, type: "House", price: 15000, bedrooms: 5, address: "303 Birch St, Fourways", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { id:301, type: "Townhouse", price: 9000, bedrooms: 2, address: "11 Willow Ln, Sandton", status: "Available", image: "https://via.placeholder.com/400x250" },
-            { id:302, type: "Townhouse", price: 9500, bedrooms: 3, address: "22 Birch St, Rosebank", status: "Occupied", image: "https://via.placeholder.com/400x250" },
-            { id:303, type: "Townhouse", price: 10000, bedrooms: 3, address: "33 Maple Rd, Midrand", status: "Available", image: "https://via.placeholder.com/400x250" }
-        ];
-
-        const container = document.getElementById("propertyListingsContainer");
-
-        function renderProperties(filteredProps) {
-            container.innerHTML = "";
-
-            ["Apartment", "House", "Townhouse"].forEach(type => {
-                const propsOfType = filteredProps.filter(p => p.type === type);
-                if (!propsOfType.length) return;
-
-                const section = document.createElement("div");
-                section.classList.add("mb-5");
-
-                const header = document.createElement("div");
-                header.className = "d-flex justify-content-between align-items-center mb-3";
-                header.innerHTML = `<h2 class="fw-bold">${type}s</h2>
-                                    <a href="/ProspectiveTenant/All${type}s" class="btn btn-outline-primary btn-sm">View All ${type}s</a>`;
-                section.appendChild(header);
-
-                const row = document.createElement("div");
-                row.className = "row g-4";
-
-                propsOfType.forEach((prop, i) => {
-                    const col = document.createElement("div");
-                    col.className = "col-md-4";
-
-                    const badgeClass = prop.status === "Available" ? "bg-success" : "bg-warning text-dark";
-                    const applyBtnClass = prop.status === "Available" ? "btn-primary" : "btn-outline-secondary disabled";
-
-                    col.innerHTML = `
-                        <div class="card shadow-sm h-100 rounded-4 property-card">
-                            <img src="${prop.image}" class="card-img-top rounded-top-4" alt="${prop.type} ${i+1}">
+    <div class="container pb-5">
+        @if (Model.Items.Count == 0)
+        {
+            <div class="text-center py-5">
+                <h4 class="fw-bold">No properties found</h4>
+                <p class="text-muted">Try clearing filters or checking back later.</p>
+            </div>
+        }
+        else
+        {
+            <div class="row g-4">
+                @foreach (var p in Model.Items)
+                {
+                    var imgSrc = $"{Model.ApiBaseUrl}api/Property/{p.PropertyId}/image";
+                    <div class="col-12 col-sm-6 col-lg-4">
+                        <div class="card h-100 shadow-sm border-0">
+                            <img src="@imgSrc" class="card-img-top" alt="Property @p.PropertyId"
+                                 onerror="this.src='https://via.placeholder.com/800x600?text=No+Image';" />
                             <div class="card-body">
-                                <h5 class="card-title text-primary">R${prop.price.toLocaleString()} / month</h5>
-                                <p class="card-text">${prop.bedrooms}-Bedroom – ${prop.address}</p>
-                                <span class="badge ${badgeClass} mb-3">${prop.status}</span>
-                                <div class="d-flex gap-2 mt-2">
-                                    <a href="/ProspectiveTenant/TenantListingDetails?propertyId=${prop.id}" class="btn btn-outline-primary btn-sm flex-fill">View Details</a>
-                                    <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=${prop.id}" class="btn ${applyBtnClass} btn-sm flex-fill">Apply Now</a>
+                                <div class="d-flex justify-content-between align-items-start">
+                                    <h5 class="card-title mb-1">@(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "Untitled")</h5>
+                                    <span class="badge bg-@(p.Status?.ToLower()=="available"?"success":(p.Status?.ToLower()=="rented"?"secondary":"warning"))">
+                                        @(p.Status ?? "Unknown")
+                                    </span>
                                 </div>
+                                <p class="mb-2 text-muted">@p.Address, @p.City</p>
+                                <div class="small text-muted mb-2">
+                                    <span class="me-3">@p.NumOfBedrooms bed</span>
+                                    <span class="me-3">@p.NumOfBathrooms bath</span>
+                                    <span>@(p.PetFriendly ? "Pet friendly" : "No pets")</span>
+                                </div>
+                                <div class="h5 mb-3">R @p.RentAmount</div>
+                                <a class="btn btn-outline-primary w-100"
+                                   asp-controller="ProspectiveTenant"
+                                   asp-action="TenantListingDetails"
+                                   asp-route-id="@p.PropertyId">
+                                    View details
+                                </a>
                             </div>
                         </div>
-                    `;
-                    row.appendChild(col);
-                });
-
-                section.appendChild(row);
-                container.appendChild(section);
-            });
-        }
-
-        renderProperties(properties);
-
-        // Search & Filtering
-        document.getElementById("propertySearchForm").addEventListener("submit", e => {
-            e.preventDefault();
-            let filtered = properties;
-
-            const location = document.getElementById("searchLocation").value.toLowerCase();
-            if (location) filtered = filtered.filter(p => p.address.toLowerCase().includes(location));
-
-            const type = document.getElementById("filterType").value;
-            if (type) filtered = filtered.filter(p => p.type === type);
-
-            const bedrooms = document.getElementById("filterBedrooms").value;
-            if (bedrooms) filtered = filtered.filter(p => p.bedrooms >= parseInt(bedrooms));
-
-            const priceRange = document.getElementById("filterPrice").value;
-            if (priceRange) {
-                if (priceRange.includes("+")) filtered = filtered.filter(p => p.price >= parseInt(priceRange));
-                else {
-                    const [min,max] = priceRange.split("-").map(Number);
-                    filtered = filtered.filter(p => p.price >= min && p.price <= max);
+                    </div>
                 }
-            }
+            </div>
 
-            const sortBy = document.getElementById("sortBy").value;
-            if(sortBy==="lowest") filtered.sort((a,b)=>a.price-b.price);
-            else if(sortBy==="highest") filtered.sort((a,b)=>b.price-a.price);
-            else if(sortBy==="newest") filtered.sort((a,b)=>b.id-b.id);
+            <nav class="mt-4">
+                <ul class="pagination justify-content-center">
+                    @{
+                        int curr = Model.Query.Page;
+                        int total = Model.TotalPages;
+                        bool prevDisabled = curr <= 1;
+                        bool nextDisabled = curr >= total || total == 0;
+                    }
 
-            renderProperties(filtered);
-        });
-    </script>
-}
+                    <li class="page-item @(prevDisabled ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-controller="ProspectiveTenant"
+                           asp-action="TenantPropertyListings"
+                           asp-route-Location="@Model.Query.Location"
+                           asp-route-MinBedrooms="@Model.Query.MinBedrooms"
+                           asp-route-PetFriendly="@Model.Query.PetFriendly"
+                           asp-route-SortBy="@Model.Query.SortBy"
+                           asp-route-PageSize="@Model.Query.PageSize"
+                           asp-route-Page="@(curr - 1)">&laquo;</a>
+                    </li>
+
+                    @for (var i = 1; i <= total; i++)
+                    {
+                        <li class="page-item @(i==curr?"active":"")">
+                            <a class="page-link"
+                               asp-controller="ProspectiveTenant"
+                               asp-action="TenantPropertyListings"
+                               asp-route-Location="@Model.Query.Location"
+                               asp-route-MinBedrooms="@Model.Query.MinBedrooms"
+                               asp-route-PetFriendly="@Model.Query.PetFriendly"
+                               asp-route-SortBy="@Model.Query.SortBy"
+                               asp-route-PageSize="@Model.Query.PageSize"
+                               asp-route-Page="@i">@i</a>
+                        </li>
+                    }
+
+                    <li class="page-item @(nextDisabled ? "disabled" : "")">
+                        <a class="page-link"
+                           asp-controller="ProspectiveTenant"
+                           asp-action="TenantPropertyListings"
+                           asp-route-Location="@Model.Query.Location"
+                           asp-route-MinBedrooms="@Model.Query.MinBedrooms"
+                           asp-route-PetFriendly="@Model.Query.PetFriendly"
+                           asp-route-SortBy="@Model.Query.SortBy"
+                           asp-route-PageSize="@Model.Query.PageSize"
+                           asp-route-Page="@(curr + 1)">&raquo;</a>
+                    </li>
+                </ul>
+            </nav>
+        }
+    </div>
+</div>
