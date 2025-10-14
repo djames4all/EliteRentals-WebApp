@@ -2,6 +2,7 @@
 using EliteRentals.Models.DTOs;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
+using System.Net.Http.Headers;
 using System.Text;
 using System.Text.Json;
 
@@ -89,6 +90,8 @@ namespace EliteRentals.Controllers
                 Console.WriteLine($"Error fetching maintenance: {ex.Message}");
             }
 
+            var now = DateTime.UtcNow;
+
             // --- Occupancy Rate ---
             var leasedPropertyIds = leases
                 .Where(l => l.Status?.Equals("Active", StringComparison.OrdinalIgnoreCase) == true)
@@ -115,6 +118,63 @@ namespace EliteRentals.Controllers
 
             var pendingRequests = maintenance.Count(m =>
                 m.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true);
+
+            // --- Lease Health Summary ---
+            var expiring30 = leases.Count(l => l.EndDate <= now.AddDays(30) && l.EndDate > now);
+            var expiring60 = leases.Count(l => l.EndDate <= now.AddDays(60) && l.EndDate > now.AddDays(30));
+            var expiring90 = leases.Count(l => l.EndDate <= now.AddDays(90) && l.EndDate > now.AddDays(60));
+
+            var leasesMissingDocuments = leases.Count(l => l.DocumentData == null || l.DocumentData.Length == 0);
+
+            var leasesWithOverduePayments = leases.Count(l =>
+                payments.Any(p => p.TenantId == l.TenantId && !p.Status?.Equals("Paid", StringComparison.OrdinalIgnoreCase) == true));
+
+            // --- Maintenance Aging Tracker ---
+            var maintenanceAgingBuckets = maintenance
+                .Where(m => m.Status != "Completed")
+                .GroupBy(m => (DateTime.UtcNow - m.CreatedAt).Days / 7)
+                .Select(g => new MaintenanceAgingDto
+                {
+                    WeeksOpen = g.Key,
+                    Count = g.Count()
+                })
+                .OrderBy(g => g.WeeksOpen)
+                .ToList();
+
+            // --- Alerts & Notifications ---
+            var leasesExpiringSoon = leases
+                .Where(l => l.EndDate <= now.AddDays(30) && l.EndDate > now)
+                .Select(l => new AlertDto
+                {
+                    Type = "Lease Expiring",
+                    Message = $"{l.TenantName} - {l.PropertyTitle} expires on {l.EndDate:dd MMM yyyy}",
+                    Severity = "warning"
+                }).ToList();
+
+            var propertiesWithNoLease = properties
+                .Where(p => !leases.Any(l => l.PropertyId == p.PropertyId && l.Status?.Equals("Active", StringComparison.OrdinalIgnoreCase) == true))
+                .Select(p => new AlertDto
+                {
+                    Type = "Vacant Property",
+                    Message = $"{p.Title} has no active lease",
+                    Severity = "danger"
+                }).ToList();
+
+            var tenantsWithMultipleOverdues = payments
+                .Where(p => !p.Status?.Equals("Paid", StringComparison.OrdinalIgnoreCase) == true)
+                .GroupBy(p => p.TenantId)
+                .Where(g => g.Count() >= 2)
+                .Select(g => new AlertDto
+                {
+                    Type = "Overdue Payments",
+                    Message = $"Tenant ID {g.Key} has {g.Count()} overdue payments",
+                    Severity = "danger"
+                }).ToList();
+
+            var alerts = leasesExpiringSoon
+                .Concat(propertiesWithNoLease)
+                .Concat(tenantsWithMultipleOverdues)
+                .ToList();
 
             // --- Recent Activities ---
             var recentActivities = payments.Select(p =>
@@ -147,7 +207,7 @@ namespace EliteRentals.Controllers
             .Take(6)
             .ToList();
 
-            // --- Rent Trends (Month + Year) ---
+            // --- Rent Trends ---
             var rentTrends = payments
                 .Where(p => p.Date != default)
                 .GroupBy(p => new { p.Date.Year, p.Date.Month })
@@ -180,11 +240,99 @@ namespace EliteRentals.Controllers
                 PendingRequests = pendingRequests,
                 RecentActivities = recentActivities,
                 RentTrends = rentTrends,
-                LeaseExpirations = leaseExpirations
+                LeaseExpirations = leaseExpirations,
+                ExpiringLeases30Days = expiring30,
+                ExpiringLeases60Days = expiring60,
+                ExpiringLeases90Days = expiring90,
+                LeasesMissingDocuments = leasesMissingDocuments,
+                LeasesWithOverduePayments = leasesWithOverduePayments,
+                MaintenanceAgingBuckets = maintenanceAgingBuckets,
+                Alerts = alerts
             };
 
             return View(model);
         }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportActivities()
+        {
+            var client = _clientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://eliterentalsapi-czckh7fadmgbgtgf.southafricanorth-01.azurewebsites.net/");
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var leases = await client.GetFromJsonAsync<List<LeaseDto>>("api/lease");
+            var payments = await client.GetFromJsonAsync<List<PaymentDto>>("api/payment");
+            var maintenance = await client.GetFromJsonAsync<List<MaintenanceDto>>("api/maintenance");
+
+            var activities = payments.Select(p =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == p.TenantId);
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Payment",
+                    Date = p.Date,
+                    Status = p.Status ?? "Unknown"
+                };
+            })
+            .Concat(maintenance.Select(m =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == m.TenantId);
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Maintenance",
+                    Date = m.CreatedAt,
+                    Status = m.Status ?? "Pending"
+                };
+            }))
+            .OrderByDescending(a => a.Date)
+            .ToList();
+
+            var csv = new StringBuilder();
+            csv.AppendLine("Tenant,Property,Action,Date,Status");
+            foreach (var act in activities)
+            {
+                csv.AppendLine($"\"{Escape(act.Tenant)}\",\"{Escape(act.Property)}\",\"{Escape(act.Action)}\",\"{act.Date:yyyy-MM-dd}\",\"{Escape(act.Status)}\"");
+
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", "RecentActivities.csv");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ExportMaintenance()
+        {
+            var client = _clientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://eliterentalsapi-czckh7fadmgbgtgf.southafricanorth-01.azurewebsites.net/");
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var leases = await client.GetFromJsonAsync<List<LeaseDto>>("api/lease");
+            var maintenance = await client.GetFromJsonAsync<List<MaintenanceDto>>("api/maintenance");
+
+            var csv = new StringBuilder();
+            csv.AppendLine("Tenant,Property,Status,CreatedAt");
+
+            foreach (var m in maintenance)
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == m.TenantId);
+                var tenant = lease?.TenantName ?? "Unknown Tenant";
+                var property = lease?.PropertyTitle ?? "Unknown Property";
+                csv.AppendLine($"\"{Escape(tenant)}\",\"{Escape(property)}\",\"{Escape(m.Status)}\",\"{m.CreatedAt:yyyy-MM-dd}\"");
+
+            }
+
+            var bytes = Encoding.UTF8.GetBytes(csv.ToString());
+            return File(bytes, "text/csv", "MaintenanceRequests.csv");
+        }
+
 
 
         public async Task<IActionResult> AdminSystemUser()
@@ -340,7 +488,7 @@ namespace EliteRentals.Controllers
 
             return RedirectToAction("AdminLeases");
         }
-
+        // GET: Edit Lease
         [HttpGet]
         public async Task<IActionResult> EditLease(int id)
         {
@@ -350,7 +498,6 @@ namespace EliteRentals.Controllers
 
             var json = await resp.Content.ReadAsStringAsync();
             var lease = JsonSerializer.Deserialize<LeaseDto>(json, _jsonOptions);
-
             if (lease == null)
             {
                 TempData["Error"] = "Lease not found.";
@@ -362,6 +509,7 @@ namespace EliteRentals.Controllers
 
             var dto = new LeaseCreateUpdateDto
             {
+                LeaseId = lease.LeaseId,
                 PropertyId = lease.PropertyId,
                 TenantId = lease.TenantId,
                 StartDate = lease.StartDate,
@@ -370,43 +518,58 @@ namespace EliteRentals.Controllers
                 Status = lease.Status
             };
 
-            ViewBag.LeaseId = id;
             return View(dto);
         }
 
-
+        // POST: Edit Lease
         [HttpPost]
-        public async Task<IActionResult> EditLease(int id, LeaseCreateUpdateDto dto)
+        public async Task<IActionResult> EditLease(LeaseCreateUpdateDto dto)
         {
             var client = await CreateApiClient();
 
-            // Map DTO to API Lease model
-            var lease = new EliteRentals.Models.Lease
+            // attach JWT
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // Only send allowed fields
+            var updatePayload = new
             {
-                LeaseId = id,
-                TenantId = dto.TenantId,
-                PropertyId = dto.PropertyId,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
-                MonthlyRent = dto.Deposit ?? 0,    // Map Deposit -> MonthlyRent
-                LeaseStatus = dto.Status           // Map Status -> LeaseStatus
+                Deposit = dto.Deposit,
+                Status = dto.Status
             };
 
-            var json = JsonSerializer.Serialize(lease);
+            var json = JsonSerializer.Serialize(updatePayload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            var resp = await client.PutAsync($"api/lease/{id}", content);
+            Console.WriteLine($"➡️ PUT api/lease/{dto.LeaseId} payload: {json}");
+
+            var resp = await client.PutAsync($"api/lease/{dto.LeaseId}", content);
+
+            Console.WriteLine($"⬅️ Response Status: {resp.StatusCode}");
 
             if (!resp.IsSuccessStatusCode)
             {
-                TempData["Error"] = "Failed to update lease.";
+                var respBody = await resp.Content.ReadAsStringAsync();
+                Console.WriteLine($"❌ Response Body: {respBody}");
+                TempData["Error"] = $"Failed to update lease. ({resp.StatusCode})";
+
                 ViewBag.Tenants = await FetchTenants();
                 ViewBag.Properties = await FetchProperties();
                 return View(dto);
             }
 
+            Console.WriteLine("✅ Lease updated successfully!");
             return RedirectToAction("AdminLeases");
         }
+
+
+
+
+
 
 
 
@@ -574,7 +737,7 @@ namespace EliteRentals.Controllers
                 AssignedCaretakerId = m.AssignedCaretakerId,
                 AssignedCaretakerName = m.AssignedCaretaker != null
                     ? $"{m.AssignedCaretaker.FirstName} {m.AssignedCaretaker.LastName}"
-                    : caretakerName, // ✅ fallback name if fetched separately
+                    : caretakerName, 
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt,
                 ProofData = m.ProofData,
@@ -720,6 +883,13 @@ namespace EliteRentals.Controllers
                 return new List<Models.DTOs.UserDto>();
             }
         }
+
+        private static string Escape(string? value)
+        {
+            if (string.IsNullOrEmpty(value)) return "";
+            return value.Replace("\"", "\"\"");
+        }
+
 
 
     }

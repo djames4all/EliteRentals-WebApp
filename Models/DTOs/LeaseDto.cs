@@ -22,11 +22,12 @@
 
     public class LeaseCreateUpdateDto
     {
+        public int LeaseId { get; set; }
         public int PropertyId { get; set; }
         public int TenantId { get; set; }
         public DateTime StartDate { get; set; }
         public DateTime EndDate { get; set; }
-        public decimal? Deposit { get; set; } // nullable
+        public decimal Deposit { get; set; } // nullable
         public string Status { get; set; }
     }
 

@@ -48,6 +48,11 @@
                     </div>
                 </div>
             </div>
+            <div class="d-flex justify-content-end mb-3">
+                <a class="btn btn-outline-secondary me-2" href="@Url.Action("ExportActivities", "Admin")">Export Activities</a>
+                <a class="btn btn-outline-secondary" href="@Url.Action("ExportMaintenance", "Admin")">Export Maintenance</a>
+            </div>
+
 
             <!-- Recent Activities Table -->
             <div class="card shadow-sm mb-4">
@@ -68,8 +73,8 @@
                                 @foreach (var act in Model.RecentActivities)
                                 {
                                     <tr>
-                                        <td>@(!string.IsNullOrEmpty(act.Tenant) ? act.Tenant : "Unknown Tenant")</td>
-                                        <td>@(!string.IsNullOrEmpty(act.Property) ? act.Property : "Unknown Property")</td>
+                                        <td>@(string.IsNullOrEmpty(act.Tenant) ? "Unknown Tenant" : act.Tenant)</td>
+                                        <td>@(string.IsNullOrEmpty(act.Property) ? "Unknown Property" : act.Property)</td>
                                         <td>@act.Action</td>
                                         <td>@act.Date.ToString("dd/MM/yyyy")</td>
                                         <td>
@@ -79,7 +84,6 @@
                                                 : (act.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true ? "bg-warning text-dark" : "bg-primary");
                                             }
                                             <span class="badge @badgeClass">@((act.Status ?? "Unknown"))</span>
-
                                         </td>
                                     </tr>
                                 }
@@ -109,6 +113,57 @@
                 </div>
             </div>
 
+            <!-- Lease Health Summary -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Lease Health Summary</h5>
+                    <ul class="list-group list-group-flush">
+                        <li class="list-group-item">Expiring in 30 days: <strong>@Model.ExpiringLeases30Days</strong></li>
+                        <li class="list-group-item">Expiring in 60 days: <strong>@Model.ExpiringLeases60Days</strong></li>
+                        <li class="list-group-item">Expiring in 90 days: <strong>@Model.ExpiringLeases90Days</strong></li>
+                        <li class="list-group-item">Leases missing documents: <strong>@Model.LeasesMissingDocuments</strong></li>
+                        <li class="list-group-item">Leases with overdue payments: <strong>@Model.LeasesWithOverduePayments</strong></li>
+                    </ul>
+                </div>
+            </div>
+
+            <!-- Maintenance Aging Tracker -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Maintenance Aging Tracker</h5>
+                    <canvas id="maintenanceAgingChart"></canvas>
+                </div>
+            </div>
+
+            <!-- Alerts & Notifications -->
+            <div class="card shadow-sm mb-4">
+                <div class="card-body">
+                    <h5 class="card-title">Alerts & Notifications</h5>
+                    @if (Model.Alerts.Any())
+                    {
+                        <ul class="list-group list-group-flush">
+                            @foreach (var alert in Model.Alerts)
+                            {
+                                var badgeClass = alert.Severity switch
+                                {
+                                    "danger" => "bg-danger",
+                                    "warning" => "bg-warning text-dark",
+                                    _ => "bg-secondary"
+                                };
+                                <li class="list-group-item d-flex justify-content-between align-items-center">
+                                    <span><strong>@alert.Type:</strong> @alert.Message</span>
+                                    <span class="badge @badgeClass">@alert.Severity.ToUpper()</span>
+                                </li>
+                            }
+                        </ul>
+                    }
+                    else
+                    {
+                        <p class="text-muted">No alerts at this time.</p>
+                    }
+                </div>
+            </div>
+
         </main>
     </div>
 </div>
@@ -116,10 +171,9 @@
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Safely handle empty datasets
+        // Rent Trends Chart
         const rentData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RentTrends.Select(r => r.Amount)));
         const rentLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RentTrends.Select(r => r.Month)));
-
 
         new Chart(document.getElementById('rentTrendsChart').getContext('2d'), {
             type: 'line',
@@ -141,8 +195,9 @@
             }
         });
 
+        // Lease Expiration Chart
         const leaseData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LeaseExpirations.Select(l => l.Count)));
-        const leaseLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LeaseExpirations.Select(l => l.Month ?? "")));
+        const leaseLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.LeaseExpirations.Select(l => l.Month)));
 
         new Chart(document.getElementById('leaseExpirationChart').getContext('2d'), {
             type: 'bar',
@@ -153,6 +208,29 @@
                     data: leaseData,
                     backgroundColor: 'rgba(255, 193, 7, 0.7)',
                     borderColor: 'rgba(255, 193, 7, 1)',
+                    borderWidth: 1
+                }]
+            },
+            options: {
+                responsive: true,
+                plugins: { legend: { display: true, position: 'top' } },
+                scales: { y: { beginAtZero: true, precision: 0 } }
+            }
+        });
+
+               // Maintenance Aging Chart
+        const agingLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MaintenanceAgingBuckets.Select(b => $"Week {b.WeeksOpen}")));
+        const agingData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MaintenanceAgingBuckets.Select(b => b.Count)));
+
+        new Chart(document.getElementById('maintenanceAgingChart').getContext('2d'), {
+            type: 'bar',
+            data: {
+                labels: agingLabels,
+                datasets: [{
+                    label: 'Open Requests',
+                    data: agingData,
+                    backgroundColor: 'rgba(220, 53, 69, 0.7)',
+                    borderColor: 'rgba(220, 53, 69, 1)',
                     borderWidth: 1
                 }]
             },
