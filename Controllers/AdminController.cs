@@ -20,13 +20,171 @@ namespace EliteRentals.Controllers
             _clientFactory = clientFactory;
             _configuration = configuration;
         }
-        public IActionResult AdminDashboard() => View();
         public IActionResult AdminChatbot() => View();
         public IActionResult AdminMessages() => View();
        
         public IActionResult AdminProperties() => View();
         public IActionResult AdminReports() => View();
         public IActionResult AdminSettings() => View();
+
+        public async Task<IActionResult> AdminDashboard()
+        {
+            var client = _clientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://eliterentalsapi-czckh7fadmgbgtgf.southafricanorth-01.azurewebsites.net/");
+
+            // 🔐 Attach JWT
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // --- Fetch leases ---
+            List<LeaseDto> leases = new();
+            try
+            {
+                var leaseResponse = await client.GetAsync("api/lease");
+                if (leaseResponse.IsSuccessStatusCode)
+                    leases = await leaseResponse.Content.ReadFromJsonAsync<List<LeaseDto>>() ?? new();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching leases: {ex.Message}");
+            }
+
+            // --- Fetch properties ---
+            List<PropertyDto> properties = new();
+            try
+            {
+                var propertyResponse = await client.GetAsync("api/property");
+                if (propertyResponse.IsSuccessStatusCode)
+                    properties = await propertyResponse.Content.ReadFromJsonAsync<List<PropertyDto>>() ?? new();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching properties: {ex.Message}");
+            }
+
+            // --- Fetch payments ---
+            List<PaymentDto> payments = new();
+            try
+            {
+                var paymentResponse = await client.GetAsync("api/payment");
+                if (paymentResponse.IsSuccessStatusCode)
+                    payments = await paymentResponse.Content.ReadFromJsonAsync<List<PaymentDto>>() ?? new();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching payments: {ex.Message}");
+            }
+
+            // --- Fetch maintenance ---
+            List<MaintenanceDto> maintenance = new();
+            try
+            {
+                var maintenanceResponse = await client.GetAsync("api/maintenance");
+                if (maintenanceResponse.IsSuccessStatusCode)
+                    maintenance = await maintenanceResponse.Content.ReadFromJsonAsync<List<MaintenanceDto>>() ?? new();
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error fetching maintenance: {ex.Message}");
+            }
+
+            // --- Occupancy Rate ---
+            var leasedPropertyIds = leases
+                .Where(l => l.Status?.Equals("Active", StringComparison.OrdinalIgnoreCase) == true)
+                .Select(l => l.PropertyId)
+                .Distinct()
+                .ToHashSet();
+
+            var totalProperties = properties.Count;
+            var occupiedProperties = leasedPropertyIds.Count;
+
+            var occupancyRate = totalProperties > 0
+                ? (int)((occupiedProperties / (double)totalProperties) * 100)
+                : 0;
+
+            // --- Overdue Payments ---
+            var overduePayments = payments
+                .Where(p => !p.Status?.Equals("Paid", StringComparison.OrdinalIgnoreCase) == true)
+                .Sum(p => p.Amount);
+
+            // --- Maintenance KPIs ---
+            var activeMaintenance = maintenance.Count(m =>
+                m.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true ||
+                m.Status?.Equals("In Progress", StringComparison.OrdinalIgnoreCase) == true);
+
+            var pendingRequests = maintenance.Count(m =>
+                m.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true);
+
+            // --- Recent Activities ---
+            var recentActivities = payments.Select(p =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == p.TenantId);
+
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Payment",
+                    Date = p.Date,
+                    Status = p.Status ?? "Unknown"
+                };
+            })
+            .Concat(maintenance.Select(m =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == m.TenantId);
+
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Maintenance",
+                    Date = m.CreatedAt,
+                    Status = m.Status ?? "Pending"
+                };
+            }))
+            .OrderByDescending(a => a.Date)
+            .Take(6)
+            .ToList();
+
+            // --- Rent Trends (Month + Year) ---
+            var rentTrends = payments
+                .Where(p => p.Date != default)
+                .GroupBy(p => new { p.Date.Year, p.Date.Month })
+                .Select(g => new RentTrendDto
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM yyyy"),
+                    Amount = g.Sum(p => p.Amount)
+                })
+                .OrderBy(r => DateTime.ParseExact(r.Month, "MMM yyyy", null))
+                .ToList();
+
+            // --- Lease Expirations ---
+            var leaseExpirations = leases
+                .Where(l => l.EndDate != default)
+                .GroupBy(l => new { l.EndDate.Year, l.EndDate.Month })
+                .Select(g => new LeaseExpirationDto
+                {
+                    Month = new DateTime(g.Key.Year, g.Key.Month, 1).ToString("MMM yyyy"),
+                    Count = g.Count()
+                })
+                .OrderBy(l => DateTime.ParseExact(l.Month, "MMM yyyy", null))
+                .ToList();
+
+            // --- ViewModel ---
+            var model = new AdminDashboardViewModel
+            {
+                OccupancyRate = occupancyRate,
+                OverduePayments = overduePayments,
+                ActiveMaintenance = activeMaintenance,
+                PendingRequests = pendingRequests,
+                RecentActivities = recentActivities,
+                RentTrends = rentTrends,
+                LeaseExpirations = leaseExpirations
+            };
+
+            return View(model);
+        }
 
 
         public async Task<IActionResult> AdminSystemUser()
