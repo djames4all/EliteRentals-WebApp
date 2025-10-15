@@ -1,0 +1,52 @@
+﻿@model EliteRentals.Models.DTOs.LeaseDto
+@{
+    ViewData["Title"] = "View Lease";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_ManagerSidebar")
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Lease Details</h2>
+                <a asp-action="ManagerLeases" class="btn btn-secondary">Back to Leases</a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <dl class="row">
+                        <dt class="col-sm-3 text-secondary">Tenant</dt>
+                        <dd class="col-sm-9">@Model.TenantName</dd>
+
+                        <dt class="col-sm-3 text-secondary">Property</dt>
+                        <dd class="col-sm-9">@Model.PropertyTitle</dd>
+
+                        <dt class="col-sm-3 text-secondary">Start Date</dt>
+                        <dd class="col-sm-9">@Model.StartDate.ToString("yyyy-MM-dd")</dd>
+
+                        <dt class="col-sm-3 text-secondary">End Date</dt>
+                        <dd class="col-sm-9">@Model.EndDate.ToString("yyyy-MM-dd")</dd>
+
+                        <dt class="col-sm-3 text-secondary">Deposit</dt>
+                        <dd class="col-sm-9">@Model.Deposit.ToString("C")"</dd>
+
+                        <dt class="col-sm-3 text-secondary">Status</dt>
+                        <dd class="col-sm-9">@Model.Status</dd>
+
+                        @if (Model.DocumentData?.Length > 0)
+                        {
+                            <dt class="col-sm-3 text-secondary">Document</dt>
+                            <dd class="col-sm-9">
+                                <a asp-action="DownloadLeaseDocument" asp-route-id="@Model.LeaseId" class="btn btn-sm btn-outline-primary">
+                                    Download
+                                </a>
+                            </dd>
+                        }
+                    </dl>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

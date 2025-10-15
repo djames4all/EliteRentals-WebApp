@@ -631,6 +631,9 @@ namespace EliteRentals.Controllers
             return View(lease);
         }
 
+
+        //=================MAINTENANCE==============================================
+
         [HttpGet]
         public async Task<IActionResult> AdminMaintenance()
         {
