@@ -422,6 +422,215 @@ namespace EliteRentals.Controllers
             return View(dto);
         }
 
+        //================PAYMENTS===============================
+
+        [HttpGet]
+        public async Task<IActionResult> ManagerPayments()
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync("api/payment");
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Failed to load payments.";
+                return View(new List<PaymentDto>());
+            }
+
+            var json = await resp.Content.ReadAsStringAsync();
+            var payments = JsonSerializer.Deserialize<List<PaymentDto>>(json, _jsonOptions) ?? new List<PaymentDto>();
+
+            // Optionally fetch tenants to display names
+            var tenants = await FetchTenants();
+
+            // Combine tenant name into each payment
+            foreach (var p in payments)
+            {
+                var tenant = tenants.FirstOrDefault(t => t.UserId == p.TenantId);
+                if (tenant != null)
+                {
+                    p.TenantName = $"{tenant.FirstName} {tenant.LastName}";
+                }
+            }
+
+            return View(payments);
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> ViewPayment(int id)
+        {
+            var client = await CreateApiClient();
+            var response = await client.GetAsync($"api/payment/{id}");
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Unable to fetch payment details.";
+                return RedirectToAction("ManagerPayments");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var payment = JsonSerializer.Deserialize<PaymentDto>(json, _jsonOptions);
+
+            return View(payment);
+        }
+
+
+        [HttpPost]
+        public async Task<IActionResult> UpdatePaymentStatus(int id, string status)
+        {
+            var client = await CreateApiClient();
+
+            var dto = new { Status = status };
+            var json = JsonSerializer.Serialize(dto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var resp = await client.PutAsync($"api/payment/{id}/status", content);
+
+            if (!resp.IsSuccessStatusCode)
+                TempData["Error"] = "Failed to update payment status.";
+
+            return RedirectToAction("ManagerPayments");
+        }
+
+        //======================SYSTEM USERS===============================================
+
+        public async Task<IActionResult> ManagerTenants()
+        {
+            var token = HttpContext.Session.GetString("JWT");
+            if (string.IsNullOrEmpty(token))
+                return RedirectToAction("Login", "Account");
+
+            var client = _clientFactory.CreateClient("EliteRentalsAPI");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync("api/users");
+            if (!response.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Failed to load tenants.";
+                return View(new List<EliteRentals.Models.DTOs.UserDto>());
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var users = JsonSerializer.Deserialize<List<EliteRentals.Models.DTOs.UserDto>>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            // Filter only tenants
+            var tenants = users?.Where(u => u.Role == "Tenant").ToList() ?? new List<EliteRentals.Models.DTOs.UserDto>();
+
+            return View(tenants);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> ToggleUserStatus(int id)
+        {
+            var token = HttpContext.Session.GetString("JWT");
+            var client = _clientFactory.CreateClient("EliteRentalsAPI");
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.PatchAsync($"api/users/{id}/status", null);
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to update tenant status.";
+            }
+
+            return RedirectToAction("ManagerTenants");
+        }
+
+        [HttpGet]
+        public async Task<IActionResult> EditUser(int id)
+        {
+            var token = HttpContext.Session.GetString("JWT");
+            var client = _clientFactory.CreateClient("EliteRentalsAPI");
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var response = await client.GetAsync($"api/users/{id}");
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to load tenant.";
+                return RedirectToAction("ManagerTenants");
+            }
+
+            var json = await response.Content.ReadAsStringAsync();
+            var user = JsonSerializer.Deserialize<EliteRentals.Models.DTOs.UserDto>(json, new JsonSerializerOptions
+            {
+                PropertyNameCaseInsensitive = true
+            });
+
+            // Only allow editing if user is a tenant
+            if (user.Role != "Tenant")
+                return RedirectToAction("ManagerTenants");
+
+            return View("EditUser", user);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> EditUser(EliteRentals.Models.DTOs.UserDto user)
+        {
+            if (user.Role != "Tenant")
+                return RedirectToAction("ManagerTenants");
+
+            var token = HttpContext.Session.GetString("JWT");
+            var client = _clientFactory.CreateClient("EliteRentalsAPI");
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var json = JsonSerializer.Serialize(user);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PutAsync($"api/users/{user.UserId}", content);
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to update tenant.";
+                return View("EditUser", user);
+            }
+
+            return RedirectToAction("ManagerTenants");
+        }
+
+        [HttpGet]
+        public IActionResult AddUser()
+        {
+            var tenant = new EliteRentals.Models.DTOs.UserDto
+            {
+                Role = "Tenant"
+            };
+            return View(tenant);
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> AddUser(EliteRentals.Models.DTOs.UserDto user)
+        {
+            user.Role = "Tenant"; // force role as Tenant
+
+            var token = HttpContext.Session.GetString("JWT");
+            var client = _clientFactory.CreateClient("EliteRentalsAPI");
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // Generate a temporary password
+            user.Password = $"{user.FirstName}@{Guid.NewGuid():N}".Substring(0, 12);
+
+            var json = JsonSerializer.Serialize(user);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PostAsync("api/users/signup", content);
+
+            if (!response.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to create tenant.";
+                return View(user);
+            }
+
+            ViewBag.Success = "Tenant created successfully!";
+            ViewBag.GeneratedPassword = user.Password;
+
+            return View(new EliteRentals.Models.DTOs.UserDto { Role = "Tenant" });
+        }
+
+
 
         // ---------- helpers ----------
         private void NormalizeStatus(PropertyUploadDto form)

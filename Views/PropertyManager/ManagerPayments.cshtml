@@ -1,0 +1,80 @@
+﻿@model List<EliteRentals.Models.DTOs.PaymentDto>
+
+@{
+    ViewData["Title"] = "Admin Payments - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_ManagerSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <h2 class="h3 pb-2 mb-3 border-bottom">Payments</h2>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle" id="paymentsTable">
+                        <thead>
+                            <tr>
+                                <th>Tenant</th>
+                                <th>Amount</th>
+                                <th>Status</th>
+                                <th>Date</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var p in Model)
+                                {
+                                    var statusClass = p.Status switch
+                                    {
+                                        "Paid" => "bg-success",
+                                        "Pending" => "bg-warning text-dark",
+                                        "Revoked" or "Rejected" => "bg-danger",
+                                        _ => "bg-secondary"
+                                    };
+
+                                    <tr>
+                                        <td>@(p.TenantName ?? $"Tenant #{p.TenantId}")</td>
+                                        <td>@($"R{p.Amount}")</td>
+
+                                        <td>
+                                            <button class="btn btn-sm status-btn @statusClass">@p.Status</button>
+                                        </td>
+                                        <td>@p.Date.ToString("dd/MM/yyyy")</td>
+                                        <td>
+                                            <a href="@Url.Action("ViewPayment", "PropertyManager", new { id = p.PaymentId })"
+                                               class="btn btn-sm btn-info">View</a>
+                                            <form asp-action="UpdatePaymentStatus" method="post" style="display:inline;">
+                                                <input type="hidden" name="id" value="@p.PaymentId" />
+                                                <input type="hidden" name="status" value="Paid" />
+                                                <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                                            </form>
+                                            <form asp-action="UpdatePaymentStatus" method="post" style="display:inline;">
+                                                <input type="hidden" name="id" value="@p.PaymentId" />
+                                                <input type="hidden" name="status" value="Revoked" />
+                                                <button type="submit" class="btn btn-sm btn-danger">Revoke</button>
+                                            </form>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr><td colspan="5" class="text-center">No payments found.</td></tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

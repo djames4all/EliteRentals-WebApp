@@ -66,6 +66,14 @@
                    href="@Url.Action("ManagerMaintenance", "PropertyManager")">Maintenance</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Payments") ? "active" : "")"
+                   href="@Url.Action("ManagerPayments", "PropertyManager")">Payments</a>
+            </li>
+            <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Tenants") ? "active" : "")"
+                   href="@Url.Action("ManagerTenants", "PropertyManager")">Tenants</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link @(currentTitle.Contains("Escalations") ? "active" : "")"
                    href="@Url.Action("ManagerEscalations", "PropertyManager")">Escalations</a>
             </li>

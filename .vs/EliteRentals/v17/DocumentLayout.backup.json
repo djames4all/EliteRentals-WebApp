@@ -3,12 +3,8 @@
   "WorkspaceRootPath": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\propertymanager\\managermaintenance.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\propertymanager\\managermaintenance.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\propertymanager\\viewmaintenance.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\propertymanager\\viewmaintenance.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\propertymanager\\edituser.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\propertymanager\\edituser.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
       "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\controllers\\propertymanagercontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
@@ -17,6 +13,10 @@
     {
       "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
       "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:controllers\\admincontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\dasha\\onedrive - advtech ltd\\insy7315\\eliterentals web app\\eliterentals-webapp\\views\\propertymanager\\managertenants.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\propertymanager\\managertenants.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     }
   ],
   "DocumentGroupContainers": [
@@ -26,7 +26,7 @@
       "DocumentGroups": [
         {
           "DockedWidth": 200,
-          "SelectedChildIndex": 5,
+          "SelectedChildIndex": 4,
           "Children": [
             {
               "$type": "Bookmark",
@@ -46,52 +46,52 @@
             },
             {
               "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "ViewMaintenance.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\ViewMaintenance.cshtml",
-              "RelativeDocumentMoniker": "Views\\PropertyManager\\ViewMaintenance.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\ViewMaintenance.cshtml",
-              "RelativeToolTip": "Views\\PropertyManager\\ViewMaintenance.cshtml",
-              "ViewState": "AgIAAFQAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T15:33:50.423Z",
-              "EditorCaption": ""
-            },
-            {
-              "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "ManagerMaintenance.cshtml",
-              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\ManagerMaintenance.cshtml",
-              "RelativeDocumentMoniker": "Views\\PropertyManager\\ManagerMaintenance.cshtml",
-              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\ManagerMaintenance.cshtml",
-              "RelativeToolTip": "Views\\PropertyManager\\ManagerMaintenance.cshtml",
-              "ViewState": "AgIAACoAAAAAAAAAAAAAAE0AAABmAAAAAAAAAA==",
+              "Title": "EditUser.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\EditUser.cshtml",
+              "RelativeDocumentMoniker": "Views\\PropertyManager\\EditUser.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\EditUser.cshtml",
+              "RelativeToolTip": "Views\\PropertyManager\\EditUser.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAB4AAAA2AAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-10-15T15:31:56.777Z",
+              "WhenOpened": "2025-10-15T18:15:29.555Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 3,
+              "Title": "ManagerTenants.cshtml",
+              "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\ManagerTenants.cshtml",
+              "RelativeDocumentMoniker": "Views\\PropertyManager\\ManagerTenants.cshtml",
+              "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Views\\PropertyManager\\ManagerTenants.cshtml",
+              "RelativeToolTip": "Views\\PropertyManager\\ManagerTenants.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAADkAAAAAAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
+              "WhenOpened": "2025-10-15T18:15:04.449Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
               "Title": "AdminController.cs",
               "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\AdminController.cs",
               "RelativeDocumentMoniker": "Controllers\\AdminController.cs",
               "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\AdminController.cs",
               "RelativeToolTip": "Controllers\\AdminController.cs",
-              "ViewState": "AgIAANQCAAAAAAAAAAAkwHACAAAxAAAAAAAAAA==",
+              "ViewState": "AgIAAEYBAAAAAAAAAAAUwFoBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-09-24T12:04:52.892Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
-              "DocumentIndex": 2,
+              "DocumentIndex": 1,
               "Title": "PropertyManagerController.cs",
               "DocumentMoniker": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\PropertyManagerController.cs",
               "RelativeDocumentMoniker": "Controllers\\PropertyManagerController.cs",
               "ToolTip": "C:\\Users\\dasha\\OneDrive - ADvTECH Ltd\\INSY7315\\EliteRentals Web App\\EliteRentals-WebApp\\Controllers\\PropertyManagerController.cs",
               "RelativeToolTip": "Controllers\\PropertyManagerController.cs",
-              "ViewState": "AgIAAHoBAAAAAAAAAAAYwIQBAAAPAAAAAAAAAA==",
+              "ViewState": "AgIAAOEBAAAAAAAAAAD4v/QBAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
               "WhenOpened": "2025-10-14T17:26:04.341Z",
               "EditorCaption": ""

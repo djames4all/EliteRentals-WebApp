@@ -336,7 +336,7 @@ namespace EliteRentals.Controllers
             return File(bytes, "text/csv", "MaintenanceRequests.csv");
         }
 
-
+//======================SYSTEM USERS===============================================
 
         public async Task<IActionResult> AdminSystemUser()
         {
@@ -763,6 +763,8 @@ namespace EliteRentals.Controllers
 
             return View(dto);
         }
+
+        //================PAYMENTS===============================
 
         [HttpGet]
         public async Task<IActionResult> AdminPayments()

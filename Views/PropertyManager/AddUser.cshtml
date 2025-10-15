@@ -1,0 +1,67 @@
+﻿@model EliteRentals.Models.DTOs.UserDto
+@{
+    ViewData["Title"] = "Add New User";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container mt-4">
+    <h2 class="mb-3">Add New User</h2>
+
+    @* Display error message *@
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @* Display success message with generated password *@
+    @if (ViewBag.Success != null)
+    {
+        <div class="alert alert-success">
+            @ViewBag.Success
+            @if (ViewBag.GeneratedPassword != null)
+            {
+                <text><br />Temporary password: <strong>@ViewBag.GeneratedPassword</strong></text>
+            }
+        </div>
+    }
+
+
+
+    <form asp-action="AddUser" method="post">
+        <div class="mb-3">
+            <label asp-for="FirstName" class="form-label">First Name</label>
+            <input asp-for="FirstName" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="LastName" class="form-label">Last Name</label>
+            <input asp-for="LastName" class="form-control" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Email" class="form-label">Email</label>
+            <input asp-for="Email" class="form-control" type="email" />
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="Role" class="form-label">Role</label>
+            <select asp-for="Role" class="form-select">
+                <option value="Tenant">Tenant</option>
+
+            </select>
+        </div>
+
+        <div class="mb-3">
+            <label asp-for="TenantApproval" class="form-label">Tenant Approval</label>
+            <select asp-for="TenantApproval" class="form-select">
+                <option value="">-- Select --</option>
+                <option value="Pending">Pending</option>
+                <option value="Approved">Approved</option>
+                <option value="Rejected">Rejected</option>
+            </select>
+        </div>
+
+        <button type="submit" class="btn btn-primary">Create User</button>
+        <a asp-action="ManagerTenants" class="btn btn-secondary ms-2">Cancel</a>
+    </form>
+</div>

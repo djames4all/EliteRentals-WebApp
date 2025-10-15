@@ -1,0 +1,57 @@
+﻿@model List<EliteRentals.Models.DTOs.UserDto>
+@{
+    ViewData["Title"] = "Manage Tenants - EliteRentals";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_ManagerSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <h2 class="h3 pb-2 mb-3 border-bottom">Tenant Management</h2>
+
+            <div class="d-flex justify-content-between align-items-center mb-3">
+                <a asp-action="AddUser" class="btn btn-primary">Add New Tenant</a>
+            </div>
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead>
+                            <tr>
+                                <th>Name</th>
+                                <th>Email</th>
+                                <th>Status</th>
+                                <th>Tenant Approval</th>
+                                <th>Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @foreach (var tenant in Model)
+                            {
+                                <tr>
+                                    <td>@tenant.FirstName @tenant.LastName</td>
+                                    <td>@tenant.Email</td>
+                                    <td>@(tenant.IsActive ? "Active" : "Disabled")</td>
+                                    <td>@(tenant.TenantApproval ?? "Pending")</td>
+                                    <td>
+                                        <form asp-action="EditUser" method="get" asp-route-id="@tenant.UserId" style="display:inline;">
+                                            <button class="btn btn-sm btn-info">Edit</button>
+                                        </form>
+
+                                        <form asp-action="ToggleUserStatus" method="post" asp-route-id="@tenant.UserId" style="display:inline;">
+                                            <button class="btn btn-sm @(tenant.IsActive ? "btn-warning" : "btn-success")">
+                                                @(tenant.IsActive ? "Disable" : "Enable")
+                                            </button>
+                                        </form>
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
