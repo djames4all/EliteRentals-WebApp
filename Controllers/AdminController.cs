@@ -1,5 +1,6 @@
 ﻿using EliteRentals.Models;
 using EliteRentals.Models.DTOs;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
@@ -9,6 +10,7 @@ using System.Text.Json;
 
 namespace EliteRentals.Controllers
 {
+    [Authorize(Roles = "Admin")]
     public class AdminController : Controller
     {
 
@@ -27,6 +29,7 @@ namespace EliteRentals.Controllers
         public IActionResult AdminProperties() => View();
         public IActionResult AdminReports() => View();
         public IActionResult AdminSettings() => View();
+
 
         public async Task<IActionResult> AdminDashboard()
         {
@@ -428,20 +431,32 @@ namespace EliteRentals.Controllers
         {
             var token = HttpContext.Session.GetString("JWT");
             var client = _clientFactory.CreateClient("EliteRentalsAPI");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            // Generate a temporary password
+            user.Password = $"{user.FirstName}@{Guid.NewGuid():N}".Substring(0, 12);
 
             var json = JsonSerializer.Serialize(user);
-            var content = new StringContent(json, System.Text.Encoding.UTF8, "application/json");
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
 
             var response = await client.PostAsync("api/users/signup", content);
+
             if (!response.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Failed to create user.";
                 return View(user);
             }
 
-            return RedirectToAction("AdminSystemUser");
+            // Show success message with generated password
+            ViewBag.Success = "User created successfully!";
+            ViewBag.GeneratedPassword = user.Password;
+
+            // Clear form for new user
+            return View(new EliteRentals.Models.DTOs.UserDto());
         }
+
+
         // -------------------- LEASES --------------------
         [HttpGet]
         public async Task<IActionResult> AdminLeases()
@@ -536,11 +551,15 @@ namespace EliteRentals.Controllers
             // Only send allowed fields
             var updatePayload = new
             {
+                LeaseId = dto.LeaseId,
+                PropertyId = dto.PropertyId,
+                TenantId = dto.TenantId,
                 StartDate = dto.StartDate,
                 EndDate = dto.EndDate,
                 Deposit = dto.Deposit,
                 Status = dto.Status
             };
+
 
             var json = JsonSerializer.Serialize(updatePayload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
@@ -565,11 +584,6 @@ namespace EliteRentals.Controllers
             Console.WriteLine("✅ Lease updated successfully!");
             return RedirectToAction("AdminLeases");
         }
-
-
-
-
-
 
 
 

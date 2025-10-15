@@ -5,7 +5,7 @@ using EliteRentals.Models.DTOs;
 
 namespace EliteRentals.Controllers
 {
-    [Authorize(Roles = "Admin,PropertyManager")]
+    [Authorize(Roles = "PropertyManager")]
     public class PropertyManagerController : Controller
     {
         private readonly IEliteApi _api;

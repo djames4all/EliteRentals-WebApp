@@ -7,6 +7,26 @@
 <div class="container mt-4">
     <h2 class="mb-3">Add New User</h2>
 
+    @* Display error message *@
+    @if (TempData["Error"] != null)
+    {
+        <div class="alert alert-danger">@TempData["Error"]</div>
+    }
+
+    @* Display success message with generated password *@
+    @if (ViewBag.Success != null)
+    {
+        <div class="alert alert-success">
+            @ViewBag.Success
+            @if (ViewBag.GeneratedPassword != null)
+            {
+                <text><br />Temporary password: <strong>@ViewBag.GeneratedPassword</strong></text>
+            }
+        </div>
+    }
+
+
+
     <form asp-action="AddUser" method="post">
         <div class="mb-3">
             <label asp-for="FirstName" class="form-label">First Name</label>
