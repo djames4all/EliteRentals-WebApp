@@ -702,7 +702,89 @@ namespace EliteRentals.Controllers
         // NAV / SHELL PAGES
         // ===========================
 
-        [HttpGet] public IActionResult ManagerDashboard() => View();
+        [HttpGet]
+        public async Task<IActionResult> ManagerDashboard(CancellationToken ct)
+        {
+            var vm = new EliteRentals.Models.ViewModels.ManagerDashboardViewModel();
+
+            // 1) Properties via IEliteApi
+            var properties = await _api.GetPropertiesAsync(ct) ?? new List<PropertyReadDto>();
+            vm.TotalProperties      = properties.Count;
+            vm.PropertiesAvailable  = properties.Count(p => string.Equals(p.Status, "Available", System.StringComparison.OrdinalIgnoreCase));
+            vm.PropertiesOccupied   = properties.Count(p => string.Equals(p.Status, "Occupied",  System.StringComparison.OrdinalIgnoreCase));
+            vm.RecentProperties     = properties.OrderByDescending(p => p.PropertyId).Take(5).ToList();
+
+            // 2) Leases
+            var client = await CreateApiClient();
+            try
+            {
+                var leasesResp = await client.GetAsync("api/lease", ct);
+                if (leasesResp.IsSuccessStatusCode)
+                {
+                    var leasesJson = await leasesResp.Content.ReadAsStringAsync(ct);
+                    var leases = System.Text.Json.JsonSerializer.Deserialize<List<LeaseDto>>(leasesJson, _jsonOptions) ?? new();
+                    vm.TotalLeases  = leases.Count;
+                    vm.ActiveLeases = leases.Count(l => string.Equals(l.Status, "Active", System.StringComparison.OrdinalIgnoreCase));
+                }
+            }
+            catch { /* ignore, leave defaults */ }
+
+            // 3) Maintenance
+            try
+            {
+                var mResp = await client.GetAsync("api/maintenance", ct);
+                if (mResp.IsSuccessStatusCode)
+                {
+                    var mJson = await mResp.Content.ReadAsStringAsync(ct);
+                    var maint = System.Text.Json.JsonSerializer.Deserialize<List<EliteRentals.Models.Maintenance>>(mJson, _jsonOptions) ?? new();
+
+                    vm.OpenMaintenance = maint.Count(m =>
+                        string.Equals(m.Status ?? "Pending", "Pending",     System.StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(m.Status ?? "",           "In Progress", System.StringComparison.OrdinalIgnoreCase));
+
+                    vm.RecentMaintenance = maint
+                        .OrderByDescending(m => m.CreatedAt)
+                        .Take(5)
+                        .ToList();
+                }
+            }
+            catch { /* ignore */ }
+
+            // 4) Applications
+            try
+            {
+                var aResp = await client.GetAsync("api/rentalapplications", ct);
+                if (aResp.IsSuccessStatusCode)
+                {
+                    var aJson = await aResp.Content.ReadAsStringAsync(ct);
+                    var apps = System.Text.Json.JsonSerializer.Deserialize<List<EliteRentals.Models.DTOs.RentalApplicationDto>>(aJson, _jsonOptions) ?? new();
+
+                    vm.PendingApplications = apps.Count(a => string.Equals(a.Status, "Pending", System.StringComparison.OrdinalIgnoreCase));
+                    vm.RecentApplications  = apps.OrderByDescending(a => a.ApplicationId).Take(5).ToList();
+                }
+            }
+            catch { /* ignore */ }
+
+            // 5) Optional payments (last 30d)
+            try
+            {
+                var pResp = await client.GetAsync("api/payment", ct);
+                if (pResp.IsSuccessStatusCode)
+                {
+                    var pJson = await pResp.Content.ReadAsStringAsync(ct);
+                    var pays = System.Text.Json.JsonSerializer.Deserialize<List<PaymentDto>>(pJson, _jsonOptions) ?? new();
+                    var cutoff = DateTime.UtcNow.AddDays(-30);
+                    var last30 = pays.Where(p => p.Date >= cutoff).ToList();
+
+                    vm.PaymentsCount30d = last30.Count;
+                    vm.PaymentsTotal30d = last30.Sum(p => p.Amount);
+                }
+            }
+            catch { /* ignore */ }
+
+            return View(vm);
+        }
+
         [HttpGet] public IActionResult ManagerEscalations() => View();
         [HttpGet] public IActionResult ManagerSettings() => View();
 

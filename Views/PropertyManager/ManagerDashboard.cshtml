@@ -1,130 +1,270 @@
-﻿@{
-    ViewData["Title"] = "Manager Dashboard - EliteRentals";
-    Layout = "~/Views/Shared/_Layout.cshtml";
+﻿@model EliteRentals.Models.ViewModels.ManagerDashboardViewModel
+@{
+    ViewData["Title"] = "Manager • Dashboard";
+    Layout = "_Layout";
 }
+
+<style>
+  /* ----- Layout spacing to account for fixed manager sidebar ----- */
+  @@media (min-width: 768px){
+    .manager-main { margin-left: 240px; padding: 1.25rem 1.5rem; }
+  }
+
+  /* ----- KPI BAR: force 5 across on desktop, still responsive below ----- */
+  :root{
+    --kpi-gap: .5rem;   /* tight gap so 5 fit */
+  }
+
+  .kpi-row{
+    display: grid;
+    gap: var(--kpi-gap);
+    align-items: stretch;
+    grid-template-columns: repeat(2, 1fr); /* phones */
+  }
+  @@media (min-width: 576px){ .kpi-row{ grid-template-columns: repeat(3, 1fr); } }
+  @@media (min-width: 768px){ .kpi-row{ grid-template-columns: repeat(4, 1fr); } }
+  /* desktops and up: force 5 cards */
+  @@media (min-width: 992px){ .kpi-row{ grid-template-columns: repeat(5, minmax(0, 1fr)); } }
+
+  /* compact, equal-height KPI cards with soft brand accents */
+  .kpi-card{
+    border: 1px solid rgba(0,0,0,.06);
+    box-shadow: 0 1px 2px rgba(0,0,0,.05);
+    display: flex;
+  }
+  .kpi-card .card-body{
+    display: flex; flex-direction: column; gap: .35rem; width: 100%;
+  }
+  .kpi-title{ font-size: .82rem; color: #6c757d; }
+  .kpi-value{ font-size: 2rem; line-height: 1; }
+  .kpi-card .badge{ transform: translateY(-1px); }
+
+  .accent-primary  { background: linear-gradient(180deg, rgba(13,110,253,.10), transparent);  border-top: 3px solid #0d6efd; }
+  .accent-success  { background: linear-gradient(180deg, rgba(25,135,84,.10), transparent);   border-top: 3px solid #198754; }
+  .accent-warning  { background: linear-gradient(180deg, rgba(255,193,7,.15), transparent);    border-top: 3px solid #ffc107; }
+  .accent-secondary{ background: linear-gradient(180deg, rgba(108,117,125,.10), transparent);  border-top: 3px solid #6c757d; }
+
+  /* tables */
+  .table thead th { position: sticky; top: 0; z-index: 1; background: #f8f9fa; }
+  .card-header { background: #fff; }
+  .status-badge { font-weight: 500; letter-spacing: .2px; }
+</style>
 
 <div class="container-fluid">
-    <div class="row">
+  <div class="row">
+    @await Html.PartialAsync("_ManagerSidebar")
 
-        @await Html.PartialAsync("_ManagerSidebar")
+    <main class="manager-main col px-0">
 
-        <!-- Main Content -->
-        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
-            <!-- Header -->
-            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
-                <h2 class="h3">Property Manager Dashboard</h2>
-                <div class="d-flex align-items-center">
-                    <span class="me-2">Jane Smith</span>
-                    <img src="https://via.placeholder.com/40" class="rounded-circle" alt="Manager Avatar" />
-                </div>
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 m-0">Manager Dashboard</h2>
+      </div>
+
+      <!-- KPI BAR -->
+      <div class="kpi-row mb-3">
+        <div class="card kpi-card accent-primary">
+          <div class="card-body">
+            <div class="kpi-title">Properties (Avail / Occupied)</div>
+            <div class="d-flex align-items-end justify-content-between">
+              <div class="kpi-value fw-semibold">@Model.TotalProperties</div>
+              <div>
+                <span class="badge bg-success me-1">@Model.PropertiesAvailable</span>
+                <span class="badge bg-secondary">@Model.PropertiesOccupied</span>
+              </div>
             </div>
+            <a asp-action="ManagerProperties" class="stretched-link text-decoration-none small">Open Properties →</a>
+          </div>
+        </div>
 
-            <!-- KPI Cards -->
-            <div class="row mb-4">
-                <div class="col-md-4">
-                    <div class="card text-center shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Managed Properties</h5>
-                            <p class="display-6 fw-bold text-primary" id="kpiProperties">12</p>
+        <div class="card kpi-card accent-success">
+          <div class="card-body">
+            <div class="kpi-title">Leases (Active)</div>
+            <div class="kpi-value fw-semibold">@Model.TotalLeases</div>
+            <div class="small text-muted">Active: <span class="fw-semibold">@Model.ActiveLeases</span></div>
+            <a asp-action="ManagerLeases" class="stretched-link text-decoration-none small">Open Leases →</a>
+          </div>
+        </div>
+
+        <div class="card kpi-card accent-warning">
+          <div class="card-body">
+            <div class="kpi-title">Maintenance (Open)</div>
+            <div class="kpi-value fw-semibold">@Model.OpenMaintenance</div>
+            <a asp-action="ManagerMaintenance" class="stretched-link text-decoration-none small">Open Maintenance →</a>
+          </div>
+        </div>
+
+        <div class="card kpi-card accent-secondary">
+          <div class="card-body">
+            <div class="kpi-title">Applications (Pending)</div>
+            <div class="kpi-value fw-semibold">@Model.PendingApplications</div>
+            <a asp-action="ManagerApplications" class="stretched-link text-decoration-none small">Open Applications →</a>
+          </div>
+        </div>
+
+        <div class="card kpi-card accent-primary">
+          <div class="card-body">
+            <div class="kpi-title">Payments (Last 30 days)</div>
+            <div class="kpi-value fw-semibold">@Model.PaymentsCount30d</div>
+            <div class="small text-muted">Total: <span class="fw-semibold">R @Model.PaymentsTotal30d.ToString("N2")</span></div>
+            <a asp-action="ManagerPayments" class="stretched-link text-decoration-none small">Open Payments →</a>
+          </div>
+        </div>
+      </div>
+
+      <!-- RECENTS ROW -->
+      <div class="row g-3">
+        <!-- Recent Applications -->
+        <div class="col-12 col-xl-6">
+          <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Recent Applications</span>
+              <a asp-action="ManagerApplications" class="small text-decoration-none">View all →</a>
+            </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width:80px">ID</th>
+                    <th>Applicant</th>
+                    <th style="width:100px">Property</th>
+                    <th style="width:120px">Status</th>
+                    <th style="width:160px" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                @if (Model.RecentApplications?.Any() == true)
+                {
+                  foreach (var a in Model.RecentApplications)
+                  {
+                    var approved = string.Equals(a.Status, "Approved", System.StringComparison.OrdinalIgnoreCase);
+                    var rejected = string.Equals(a.Status, "Rejected", System.StringComparison.OrdinalIgnoreCase);
+                    var badge = approved ? "bg-success" : (rejected ? "bg-danger" : "bg-warning text-dark");
+                    <tr>
+                      <td class="text-muted">#@a.ApplicationId</td>
+                      <td class="fw-semibold">@a.ApplicantName</td>
+                      <td>#@a.PropertyId</td>
+                      <td><span class="badge @badge status-badge">@a.Status</span></td>
+                      <td class="text-end">
+                        <div class="btn-group btn-group-sm">
+                          <a class="btn btn-outline-secondary"
+                             asp-action="ViewApplication" asp-route-id="@a.ApplicationId">View</a>
+                          <a class="btn btn-outline-primary"
+                             asp-action="AddLease" asp-route-propertyId="@a.PropertyId">Create Lease</a>
                         </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Active Leases</h5>
-                            <p class="display-6 fw-bold text-success" id="kpiLeases">28</p>
-                        </div>
-                    </div>
-                </div>
-                <div class="col-md-4">
-                    <div class="card text-center shadow-sm">
-                        <div class="card-body">
-                            <h5 class="card-title">Open Maintenance</h5>
-                            <p class="display-6 fw-bold text-warning" id="kpiMaintenance">5</p>
-                        </div>
-                    </div>
-                </div>
+                      </td>
+                    </tr>
+                  }
+                }
+                else
+                {
+                  <tr><td colspan="5" class="text-center text-muted py-4">No recent applications.</td></tr>
+                }
+                </tbody>
+              </table>
             </div>
+          </div>
+        </div>
 
-            <!-- Property Listings Table -->
-            <div class="card shadow-sm mb-4">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Property Listings</h5>
-                    <table class="table table-striped align-middle">
-                        <thead>
-                            <tr>
-                                <th>Thumbnail</th>
-                                <th>Address</th>
-                                <th>Rent</th>
-                                <th>Availability</th>
-                            </tr>
-                        </thead>
-                        <tbody id="propertiesBody"></tbody>
-                    </table>
-                </div>
+        <!-- Recent Maintenance -->
+        <div class="col-12 col-xl-6">
+          <div class="card shadow-sm">
+            <div class="card-header d-flex justify-content-between align-items-center">
+              <span class="fw-semibold">Recent Maintenance</span>
+              <a asp-action="ManagerMaintenance" class="small text-decoration-none">View all →</a>
             </div>
+            <div class="table-responsive">
+              <table class="table table-sm table-hover align-middle mb-0">
+                <thead class="table-light">
+                  <tr>
+                    <th style="width:80px">ID</th>
+                    <th>Issue</th>
+                    <th style="width:120px">Status</th>
+                    <th style="width:180px">Created</th>
+                    <th style="width:120px" class="text-end">Actions</th>
+                  </tr>
+                </thead>
+                <tbody>
+                @if (Model.RecentMaintenance?.Any() == true)
+                {
+                  foreach (var m in Model.RecentMaintenance)
+                  {
+                    var pending  = string.Equals(m.Status ?? "Pending", "Pending", System.StringComparison.OrdinalIgnoreCase);
+                    var prog     = string.Equals(m.Status ?? "", "In Progress", System.StringComparison.OrdinalIgnoreCase);
+                    var badge    = pending ? "bg-warning text-dark" : (prog ? "bg-info text-dark" : "bg-success");
+                    <tr>
+                      <td class="text-muted">#@m.MaintenanceId</td>
+                      <td class="text-truncate" style="max-width:300px;">@(m.Description ?? "N/A")</td>
+                      <td><span class="badge @badge status-badge">@m.Status</span></td>
+                      <td>@m.CreatedAt.ToLocalTime().ToString("yyyy-MM-dd HH:mm")</td>
+                      <td class="text-end">
+                        <a class="btn btn-sm btn-outline-secondary"
+                           asp-action="ViewMaintenance" asp-route-id="@m.MaintenanceId">View</a>
+                      </td>
+                    </tr>
+                  }
+                }
+                else
+                {
+                  <tr><td colspan="5" class="text-center text-muted py-4">No recent maintenance.</td></tr>
+                }
+                </tbody>
+              </table>
+            </div>
+          </div>
+        </div>
+      </div>
 
-            <!-- Escalations -->
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <h5 class="card-title mb-3">Escalated Issues</h5>
-                    <ul class="list-group" id="escalationsList"></ul>
-                </div>
-            </div>
-        </main>
-    </div>
+      <!-- Recent Properties -->
+      <div class="card shadow-sm mt-3">
+        <div class="card-header d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Recent Properties</span>
+          <a asp-action="ManagerProperties" class="small text-decoration-none">View all →</a>
+        </div>
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:90px">ID</th>
+                <th style="min-width:220px">Title</th>
+                <th>Address</th>
+                <th style="width:140px">City</th>
+                <th style="width:140px">Status</th>
+                <th style="width:160px" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            @if (Model.RecentProperties?.Any() == true)
+            {
+              foreach (var p in Model.RecentProperties)
+              {
+                var avail = string.Equals(p.Status, "Available", System.StringComparison.OrdinalIgnoreCase);
+                var badge = avail ? "bg-success" : "bg-secondary";
+                <tr>
+                  <td class="text-muted">#@p.PropertyId</td>
+                  <td class="fw-semibold">@p.Title</td>
+                  <td class="text-truncate" style="max-width:420px;">@p.Address</td>
+                  <td>@p.City</td>
+                  <td><span class="badge @badge status-badge">@p.Status</span></td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm">
+                      <a class="btn btn-outline-secondary"
+                         asp-action="ManagerPropertyEdit" asp-route-id="@p.PropertyId">Edit</a>
+                      <a class="btn btn-outline-primary"
+                         asp-action="ManagerProperties">Open Table</a>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+            else
+            {
+              <tr><td colspan="6" class="text-center text-muted py-4">No recent properties.</td></tr>
+            }
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+    </main>
+  </div>
 </div>
-
-@section Scripts {
-    <script>
-        // Mock Data
-        let properties = [
-            { thumbnail: "https://via.placeholder.com/60", address: "123 Main St", rent: "R8,500", status: "Available" },
-            { thumbnail: "https://via.placeholder.com/60", address: "456 Elm St", rent: "R9,200", status: "Occupied" },
-            { thumbnail: "https://via.placeholder.com/60", address: "789 Oak St", rent: "R7,800", status: "Available" }
-        ];
-
-        let escalations = [
-            { issue: "Broken Elevator - 101 Pine St", severity: "Urgent" },
-            { issue: "Water Leakage - 789 Oak St", severity: "Pending" }
-        ];
-
-        // Render Properties Table
-        const propertiesBody = document.getElementById('propertiesBody');
-        function renderProperties() {
-            propertiesBody.innerHTML = '';
-            properties.forEach(prop => {
-                const availabilityBadge = prop.status === "Available"
-                    ? `<span class="badge bg-success">${prop.status}</span>`
-                    : `<span class="badge bg-warning text-dark">${prop.status}</span>`;
-                const row = `<tr>
-                                <td><img src="${prop.thumbnail}" class="rounded" /></td>
-                                <td>${prop.address}</td>
-                                <td>${prop.rent}</td>
-                                <td>${availabilityBadge}</td>
-                             </tr>`;
-                propertiesBody.insertAdjacentHTML('beforeend', row);
-            });
-            document.getElementById('kpiProperties').textContent = properties.length;
-        }
-
-        // Render Escalations List
-        const escalationsList = document.getElementById('escalationsList');
-        function renderEscalations() {
-            escalationsList.innerHTML = '';
-            escalations.forEach(e => {
-                const badgeClass = e.severity === "Urgent" ? "bg-danger" : "bg-warning text-dark";
-                const item = `<li class="list-group-item d-flex justify-content-between align-items-center">
-                                ${e.issue}
-                                <span class="badge ${badgeClass}">${e.severity}</span>
-                              </li>`;
-                escalationsList.insertAdjacentHTML('beforeend', item);
-            });
-        }
-
-        // Render initial dashboard
-        renderProperties();
-        renderEscalations();
-    </script>
-}
