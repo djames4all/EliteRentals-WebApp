@@ -1,228 +1,113 @@
 ﻿@model IEnumerable<EliteRentals.Models.DTOs.PropertyReadDto>
 @{
     ViewData["Title"] = "Manager • Properties";
-    Layout = "~/Views/Shared/_Layout.cshtml";
-    var msg = TempData["ManagerPropertyMsg"] as string;
-    string RentFmt(decimal v) => $"R {v:N0}";
+    Layout = "_Layout";
 }
 
 <style>
-    :root{
-        /* adjust if your top navbar is taller/shorter */
-        --mgr-navbar-h: 56px;
-        /* width of your left nav; keep in sync with your partial */
-        --mgr-sidebar-w: 240px;
-    }
-
-    /* Make YOUR existing .sidebar fixed and scrollable on desktop */
-    @@media (min-width: 768px){
-        .sidebar{
-            position: fixed;
-            top: var(--mgr-navbar-h);
-            left: 0;
-            bottom: 0;
-            width: var(--mgr-sidebar-w);
-            overflow-y: auto;
-            z-index: 1020;
-            box-shadow: inset -1px 0 0 rgba(0,0,0,.08);
-        }
-        .manager-main{
-            margin-left: var(--mgr-sidebar-w);
-            padding: 1.25rem 1.25rem;
-        }
-    }
-    @@media (max-width: 767.98px){
-        .manager-main{ padding: 1rem; }
-    }
-
-    /* Header + filters */
-    .mgr-head h2{ margin-bottom: .25rem; }
-    .mgr-head .sub{ color:#6c757d; }
-    .filters .form-control, .filters .form-select{ height: 40px; }
-
-    /* Table: use the extra horizontal space for Address, prevent wrapping on key cols */
-    .props-table.table-sm > :not(caption) > * > *{ padding: .46rem .56rem; }
-    .props-table th, .props-table td{ vertical-align: middle; }
-    .props-table thead th{ position: sticky; top: 0; z-index: 2; background: #f8f9fa; }
-
-    .props-table .col-id   { width:72px; color:#6c757d; white-space:nowrap; }
-    .props-table .col-title{ min-width:180px; max-width:260px; }
-    .props-table .col-addr { min-width:300px; max-width:600px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .props-table .col-city { width:140px; white-space:nowrap; }
-    .props-table .col-rent { width:120px; text-align:right; white-space:nowrap; font-weight:600; }
-    .props-table .col-num  { width:60px;  text-align:right; white-space:nowrap; }
-    .props-table .col-park { min-width:160px; max-width:230px; white-space:nowrap; overflow:hidden; text-overflow:ellipsis; }
-    .props-table .col-badge{ width:90px;  white-space:nowrap; }
-    .props-table .col-stat { width:110px; white-space:nowrap; }
-    .props-table .col-act  { width:240px; }
-
-    .badge-pill{ border-radius:50rem; padding:.35rem .6rem; font-weight:500; }
-
-    /* Hide low-priority columns earlier so the table stays neat at smaller widths */
-    @@media (max-width: 1199.98px){ /* xl- */
-        .props-table .col-park, .props-table .hdr-park{ display:none; }
-    }
-    @@media (max-width: 991.98px){ /* lg- */
-        .props-table .col-city,  .props-table .hdr-city{ display:none; }
-        .props-table .col-badge, .props-table .hdr-pets{ display:none; }
-    }
-    @@media (max-width: 767.98px){ /* md- */
-        .props-table .col-stat,  .props-table .hdr-stat{ display:none; }
-        .props-table .col-act{ width:180px; }
-    }
+  :root { --mgr-sidebar-w: 240px; }
+  @@media (min-width: 768px) {
+    .manager-main { margin-left: var(--mgr-sidebar-w); padding: 1.25rem 1.5rem; }
+    .manager-sidebar { width: var(--mgr-sidebar-w); position: fixed; top: 0; bottom: 0; overflow-y: auto; }
+  }
+  /* table polish to match leases page vibe */
+  .table thead th { position: sticky; top: 0; z-index: 1; background: #f8f9fa; }
+  .status-badge { font-weight: 500; }
 </style>
 
-@* keep your sidebar partial exactly as-is *@
-@await Html.PartialAsync("_ManagerSidebar")
+<div class="container-fluid">
+  <div class="row">
+    @await Html.PartialAsync("_ManagerSidebar")  @* ensure <nav> has class="manager-sidebar" in the partial *@
 
-<div class="manager-main">
-    <div class="d-flex align-items-center justify-content-between mb-3 mgr-head">
-        <div>
-            <h2 class="fw-semibold mb-0">All Properties</h2>
-            <div class="sub">Manage properties across your portfolio</div>
+    <main class="manager-main col px-0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 m-0">Properties</h2>
+        <a asp-action="ManagerPropertyCreate" class="btn btn-primary">Add Property</a>
+      </div>
+
+      @if (TempData["Toast"] is string ok && !string.IsNullOrWhiteSpace(ok))
+      {
+        <div class="alert alert-success py-2 mb-3">@ok</div>
+      }
+      @if (TempData["ToastError"] is string err && !string.IsNullOrWhiteSpace(err))
+      {
+        <div class="alert alert-danger py-2 mb-3">@err</div>
+      }
+      @if (ViewBag.Error != null)
+      {
+        <div class="alert alert-danger py-2 mb-3">@ViewBag.Error</div>
+      }
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Property List</span>
+          <small class="text-muted">Total: @(Model?.Count() ?? 0)</small>
         </div>
-        <a asp-action="ManagerPropertyCreate" class="btn btn-primary">
-            <i class="bi bi-plus-lg me-1"></i> Add Property
-        </a>
-    </div>
 
-    @if (!string.IsNullOrWhiteSpace(msg))
-    {
-        <div class="alert alert-success shadow-sm rounded-3">@msg</div>
-    }
-
-    <div class="card border-0 shadow-sm mb-3">
-        <div class="card-body py-3 filters">
-            <form class="row g-2 align-items-center" onsubmit="return false;">
-                <div class="col-sm-7 col-lg-6">
-                    <div class="input-group">
-                        <span class="input-group-text"><i class="bi bi-search"></i></span>
-                        <input id="q" type="search" class="form-control" placeholder="Search title, address, or city" oninput="filterRows()" />
-                    </div>
-                </div>
-                <div class="col-6 col-sm-3 col-lg-2">
-                    <select id="status" class="form-select" onchange="filterRows()">
-                        <option value="">All statuses</option>
-                        <option value="Available">Available</option>
-                        <option value="Occupied">Occupied</option>
-                    </select>
-                </div>
-                <div class="col-6 col-sm-2 col-lg-2">
-                    <select id="pets" class="form-select" onchange="filterRows()">
-                        <option value="">Pets (any)</option>
-                        <option value="Yes">Pet friendly</option>
-                        <option value="No">No pets</option>
-                    </select>
-                </div>
-            </form>
-        </div>
-    </div>
-
-    @if (!Model.Any())
-    {
-        <div class="alert alert-info mb-0">No properties in the database yet.</div>
-    }
-    else
-    {
         <div class="table-responsive">
-            <table id="props" class="table table-sm table-striped align-middle props-table">
-                <thead class="table-light">
-                    <tr>
-                        <th class="col-id">ID</th>
-                        <th class="col-title">Title</th>
-                        <th class="col-addr">Address</th>
-                        <th class="col-city hdr-city">City</th>
-                        <th class="col-rent">Rent</th>
-                        <th class="col-num">Bd</th>
-                        <th class="col-num">Ba</th>
-                        <th class="col-park hdr-park">Parking</th>
-                        <th class="col-badge hdr-pets">Pets</th>
-                        <th class="col-stat hdr-stat">Status</th>
-                        <th class="col-act">Actions</th>
-                    </tr>
-                </thead>
-                <tbody>
-                    @foreach (var p in Model)
-                    {
-                        var pets = p.PetFriendly ? "Yes" : "No";
-                        var status = string.Equals(p.Status, "Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available";
-                        <tr data-filter="@($"{p.Title} {p.Address} {p.City}".ToLower())"
-                            data-status="@status"
-                            data-pets="@pets">
-                            <td class="col-id">#@p.PropertyId</td>
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:90px">ID</th>
+                <th style="min-width:220px">Title</th>
+                <th>Address</th>
+                <th style="width:180px">City</th>
+                <th style="width:140px">Status</th>
+                <th style="width:220px" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+              @if (Model != null && Model.Any())
+              {
+                  foreach (var p in Model)
+                  {
+                      <tr>
+                        <td class="text-muted">#@p.PropertyId</td>
+                        <td class="fw-semibold">@p.Title</td>
+                        <td class="text-truncate" style="max-width: 420px;">@p.Address</td>
+                        <td>@p.City</td>
+                        <td>
+                          @{
+                              var isAvail = string.Equals(p.Status, "Available", System.StringComparison.OrdinalIgnoreCase);
+                              var badgeCls = isAvail ? "bg-success" : "bg-warning text-dark";
+                          }
+                          <span class="badge @badgeCls status-badge">@p.Status</span>
+                        </td>
+                        <td class="text-end">
+                          <a class="btn btn-sm btn-outline-primary me-1"
+                             asp-action="ManagerPropertyEdit" asp-route-id="@p.PropertyId">
+                            Edit
+                          </a>
 
-                            <td class="col-title">
-                                <div class="fw-semibold">@(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "Untitled")</div>
-                                <div class="text-muted small">@p.NumOfBedrooms bd · @p.NumOfBathrooms ba</div>
-                            </td>
+                          <!-- View public listing (same tab) -->
+                          <a class="btn btn-sm btn-outline-secondary me-1"
+                             asp-controller="ProspectiveTenant"
+                             asp-action="TenantListingDetails"
+                             asp-route-id="@p.PropertyId">
+                            View
+                          </a>
 
-                            <td class="col-addr" title="@p.Address">@p.Address</td>
-                            <td class="col-city">@p.City</td>
-
-                            <td class="col-rent">@RentFmt(p.RentAmount)</td>
-                            <td class="col-num">@p.NumOfBedrooms</td>
-                            <td class="col-num">@p.NumOfBathrooms</td>
-
-                            <td class="col-park" title="@($"{p.ParkingType} ({p.NumOfParkingSpots})")">
-                                @p.ParkingType (@p.NumOfParkingSpots)
-                            </td>
-
-                            <td class="col-badge">
-                                <span class="badge badge-pill bg-@(pets=="Yes"?"success":"secondary")">@pets</span>
-                            </td>
-
-                            <td class="col-stat">
-                                <span class="badge badge-pill bg-@(status=="Available"?"success":"secondary")">@status</span>
-                            </td>
-
-                            <td class="col-act">
-                                <div class="d-flex flex-wrap gap-2">
-                                    <a class="btn btn-outline-primary btn-sm"
-                                       asp-controller="ProspectiveTenant"
-                                       asp-action="TenantListingDetails"
-                                       asp-route-id="@p.PropertyId">
-                                        View
-                                    </a>
-                                    <a class="btn btn-warning btn-sm text-white"
-                                       asp-action="ManagerPropertyEdit"
-                                       asp-route-id="@p.PropertyId">
-                                        Edit
-                                    </a>
-                                    <form asp-action="ManagerPropertyDelete"
-                                          asp-route-id="@p.PropertyId"
-                                          method="post" class="d-inline">
-                                        @Html.AntiForgeryToken()
-                                        <button type="submit" class="btn btn-danger btn-sm"
-                                                onclick="return confirm('Delete property #@p.PropertyId?');">
-                                            Delete
-                                        </button>
-                                    </form>
-                                </div>
-                            </td>
-                        </tr>
-                    }
-                </tbody>
-            </table>
+                          <form asp-action="DeleteProperty" asp-route-id="@p.PropertyId" method="post" class="d-inline">
+                            @Html.AntiForgeryToken()
+                            <button class="btn btn-sm btn-outline-danger"
+                                    onclick="return confirm('Delete property #@p.PropertyId (@p.Title)?')">
+                              Delete
+                            </button>
+                          </form>
+                        </td>
+                      </tr>
+                  }
+              }
+              else
+              {
+                  <tr>
+                    <td colspan="6" class="text-center text-muted py-4">No properties found.</td>
+                  </tr>
+              }
+            </tbody>
+          </table>
         </div>
-    }
+      </div>
+    </main>
+  </div>
 </div>
-
-<script>
-    function filterRows() {
-        const q = (document.getElementById('q').value || '').toLowerCase();
-        const status = document.getElementById('status').value;
-        const pets = document.getElementById('pets').value;
-
-        document.querySelectorAll('#props tbody tr').forEach(tr => {
-            const txt = tr.getAttribute('data-filter') || '';
-            const st  = tr.getAttribute('data-status') || '';
-            const pt  = tr.getAttribute('data-pets') || '';
-
-            const okQ = !q || txt.includes(q);
-            const okS = !status || st === status;
-            const okP = !pets || pt === pets;
-
-            tr.style.display = (okQ && okS && okP) ? '' : 'none';
-        });
-    }
-</script>

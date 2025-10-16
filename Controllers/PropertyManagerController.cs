@@ -2,10 +2,10 @@
 using EliteRentals.Models.DTOs;
 using EliteRentals.Services;
 using Microsoft.AspNetCore.Authorization;
-using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Text;
 using System.Text.Json;
+using System.Linq; // for LINQ
 
 namespace EliteRentals.Controllers
 {
@@ -13,10 +13,8 @@ namespace EliteRentals.Controllers
     public class PropertyManagerController : Controller
     {
         private readonly IEliteApi _api;
-
         private readonly IHttpClientFactory _clientFactory;
-
-        private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
+        private readonly JsonSerializerOptions _jsonOptions = new() { PropertyNameCaseInsensitive = true };
 
         public PropertyManagerController(IEliteApi api, IHttpClientFactory clientFactory)
         {
@@ -24,9 +22,11 @@ namespace EliteRentals.Controllers
             _clientFactory = clientFactory;
         }
 
-        // ====== PROPERTIES ======
+        // ===========================
+        // PROPERTIES
+        // ===========================
 
-        // List ALL properties in the DB (as requested)
+        // List ALL properties
         public async Task<IActionResult> ManagerProperties(CancellationToken ct)
         {
             var all = await _api.GetPropertiesAsync(ct);
@@ -79,7 +79,7 @@ namespace EliteRentals.Controllers
                 ParkingType = p.ParkingType ?? "",
                 NumOfParkingSpots = p.NumOfParkingSpots,
                 PetFriendly = p.PetFriendly,
-                Status = (p.Status ?? "Available").Equals("Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available"
+                Status = (p.Status ?? "Available").Equals("Occupied", System.StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available"
             };
             ViewData["PropertyId"] = p.PropertyId;
             return View(vm);
@@ -114,8 +114,107 @@ namespace EliteRentals.Controllers
             return RedirectToAction(nameof(ManagerProperties));
         }
 
+        // ===========================
+        // APPLICATIONS
+        // ===========================
 
-        //---------------------LEASES------------------------------------------------------------
+        // DTO the site will bind to for app list/details
+        public class RentalApplicationDto
+        {
+            public int ApplicationId { get; set; }
+            public int PropertyId { get; set; }
+            public string ApplicantName { get; set; } = "";
+            public string Email { get; set; } = "";
+            public string Phone { get; set; } = "";
+            public string Status { get; set; } = "Pending";
+            public DateTime CreatedAt { get; set; }
+        }
+
+        // List Applications
+        [HttpGet]
+        public async Task<IActionResult> ManagerApplications()
+        {
+            var client = await CreateApiClient();
+            try
+            {
+                var resp = await client.GetAsync("api/rentalapplications");
+                if (!resp.IsSuccessStatusCode)
+                {
+                    ViewBag.Error = "Failed to load applications.";
+                    return View(Enumerable.Empty<RentalApplicationDto>());
+                }
+
+                var json = await resp.Content.ReadAsStringAsync();
+                var apps = JsonSerializer.Deserialize<List<RentalApplicationDto>>(json, _jsonOptions) ?? new();
+                apps = apps.OrderByDescending(a => a.ApplicationId).ToList();
+                return View(apps);
+            }
+            catch (Exception)
+            {
+                ViewBag.Error = "Unexpected error loading applications.";
+                return View(Enumerable.Empty<RentalApplicationDto>());
+            }
+        }
+        [HttpGet]
+        public async Task<IActionResult> ViewApplication(int id)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync($"api/rentalapplications/{id}");
+            if (!resp.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to load application.";
+                return RedirectToAction(nameof(ManagerApplications));
+            }
+
+            var json = await resp.Content.ReadAsStringAsync();
+            var app = System.Text.Json.JsonSerializer.Deserialize<EliteRentals.Models.DTOs.RentalApplicationDto>(json, _jsonOptions);
+            return View(app);
+        }
+
+        // View one Application (optional details view)
+        /*[HttpGet]
+        public async Task<IActionResult> ViewApplication(int id)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync($"api/rentalapplications/{id}");
+            if (!resp.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to load application.";
+                return RedirectToAction(nameof(ManagerApplications));
+            }
+
+            var json = await resp.Content.ReadAsStringAsync();
+            var app = JsonSerializer.Deserialize<RentalApplicationDto>(json, _jsonOptions);
+            return View(app);
+        }
+*/
+        // Approve / Reject
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> UpdateApplicationStatus(int id, string status)
+        {
+            if (string.IsNullOrWhiteSpace(status))
+            {
+                TempData["Error"] = "Invalid status.";
+                return RedirectToAction(nameof(ManagerApplications));
+            }
+
+            var client = await CreateApiClient();
+            var payload = new { Status = status };
+            var content = new StringContent(JsonSerializer.Serialize(payload), Encoding.UTF8, "application/json");
+
+            var resp = await client.PutAsync($"api/rentalapplications/{id}/status", content);
+            if (!resp.IsSuccessStatusCode)
+            {
+                TempData["Error"] = "Failed to update application status.";
+            }
+
+            return RedirectToAction(nameof(ManagerApplications));
+        }
+
+        // ===========================
+        // LEASES
+        // ===========================
 
         [HttpGet]
         public async Task<IActionResult> ManagerLeases()
@@ -131,22 +230,25 @@ namespace EliteRentals.Controllers
             var json = await resp.Content.ReadAsStringAsync();
             var leases = JsonSerializer.Deserialize<List<LeaseDto>>(json, _jsonOptions) ?? new List<LeaseDto>();
             return View(leases);
-
         }
 
         [HttpGet]
-        public async Task<IActionResult> AddLease()
+        public async Task<IActionResult> AddLease(int? propertyId)
         {
             ViewBag.Tenants = await FetchTenants();
             ViewBag.Properties = await FetchProperties();
+
             return View(new LeaseCreateUpdateDto
             {
+                PropertyId = propertyId ?? 0,
                 StartDate = DateTime.UtcNow.Date,
-                EndDate = DateTime.UtcNow.Date.AddMonths(12)
+                EndDate = DateTime.UtcNow.Date.AddMonths(12),
+                Status = "Active"
             });
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddLease(LeaseCreateUpdateDto dto)
         {
             var client = await CreateApiClient();
@@ -161,22 +263,23 @@ namespace EliteRentals.Controllers
                 return View(dto);
             }
 
-            return RedirectToAction("ManagerLeases");
+            return RedirectToAction(nameof(ManagerLeases));
         }
+
         // GET: Edit Lease
         [HttpGet]
         public async Task<IActionResult> EditLease(int id)
         {
             var client = await CreateApiClient();
             var resp = await client.GetAsync($"api/lease/{id}");
-            if (!resp.IsSuccessStatusCode) return RedirectToAction("ManagerLeases");
+            if (!resp.IsSuccessStatusCode) return RedirectToAction(nameof(ManagerLeases));
 
             var json = await resp.Content.ReadAsStringAsync();
             var lease = JsonSerializer.Deserialize<LeaseDto>(json, _jsonOptions);
             if (lease == null)
             {
                 TempData["Error"] = "Lease not found.";
-                return RedirectToAction("ManagerLeases");
+                return RedirectToAction(nameof(ManagerLeases));
             }
 
             ViewBag.Tenants = await FetchTenants();
@@ -198,17 +301,11 @@ namespace EliteRentals.Controllers
 
         // POST: Edit Lease
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> EditLease(LeaseCreateUpdateDto dto)
         {
             var client = await CreateApiClient();
 
-            // attach JWT
-            var token = HttpContext.Session.GetString("JWT");
-            if (!string.IsNullOrEmpty(token))
-                client.DefaultRequestHeaders.Authorization =
-                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
-
-            // Only send allowed fields
             var updatePayload = new
             {
                 LeaseId = dto.LeaseId,
@@ -220,39 +317,28 @@ namespace EliteRentals.Controllers
                 Status = dto.Status
             };
 
-
             var json = JsonSerializer.Serialize(updatePayload);
             var content = new StringContent(json, Encoding.UTF8, "application/json");
 
-            Console.WriteLine($"➡️ PUT api/lease/{dto.LeaseId} payload: {json}");
-
             var resp = await client.PutAsync($"api/lease/{dto.LeaseId}", content);
-
-            Console.WriteLine($"⬅️ Response Status: {resp.StatusCode}");
 
             if (!resp.IsSuccessStatusCode)
             {
-                var respBody = await resp.Content.ReadAsStringAsync();
-                Console.WriteLine($"❌ Response Body: {respBody}");
                 TempData["Error"] = $"Failed to update lease. ({resp.StatusCode})";
-
                 ViewBag.Tenants = await FetchTenants();
                 ViewBag.Properties = await FetchProperties();
                 return View(dto);
             }
 
-            Console.WriteLine("✅ Lease updated successfully!");
-            return RedirectToAction("ManagerLeases");
+            return RedirectToAction(nameof(ManagerLeases));
         }
-
-
 
         [HttpGet]
         public async Task<IActionResult> DeleteLease(int id)
         {
             var client = await CreateApiClient();
             var resp = await client.GetAsync($"api/lease/{id}");
-            if (!resp.IsSuccessStatusCode) return RedirectToAction("ManagerLeases");
+            if (!resp.IsSuccessStatusCode) return RedirectToAction(nameof(ManagerLeases));
 
             var json = await resp.Content.ReadAsStringAsync();
             var lease = JsonSerializer.Deserialize<LeaseDto>(json, _jsonOptions);
@@ -260,23 +346,22 @@ namespace EliteRentals.Controllers
             if (lease == null)
             {
                 TempData["Error"] = "Lease not found.";
-                return RedirectToAction("ManagerLeases");
+                return RedirectToAction(nameof(ManagerLeases));
             }
 
-            // Fetch tenants and properties to display their names
             ViewBag.Tenants = await FetchTenants();
             ViewBag.Properties = await FetchProperties();
 
             return View(lease);
         }
 
-
         [HttpPost, ActionName("DeleteLease")]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> DeleteLeaseConfirmed(int id)
         {
             var client = await CreateApiClient();
             await client.DeleteAsync($"api/lease/{id}");
-            return RedirectToAction("ManagerLeases");
+            return RedirectToAction(nameof(ManagerLeases));
         }
 
         [HttpGet]
@@ -284,14 +369,17 @@ namespace EliteRentals.Controllers
         {
             var client = await CreateApiClient();
             var resp = await client.GetAsync($"api/lease/{id}");
-            if (!resp.IsSuccessStatusCode) return RedirectToAction("ManagerLeases");
+            if (!resp.IsSuccessStatusCode) return RedirectToAction(nameof(ManagerLeases));
 
             var json = await resp.Content.ReadAsStringAsync();
             var lease = JsonSerializer.Deserialize<LeaseDto>(json, _jsonOptions);
             return View(lease);
         }
 
-        //=================MAINTENANCE=============================
+        // ===========================
+        // MAINTENANCE
+        // ===========================
+
         [HttpGet]
         public async Task<IActionResult> ManagerMaintenance()
         {
@@ -301,12 +389,12 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode)
             {
                 ViewBag.Error = "Failed to load maintenance requests.";
-                ViewBag.Caretakers = new List<Models.UserDto>();
+                ViewBag.Caretakers = new List<Models.DTOs.UserDto>();
                 return View(new List<MaintenanceDto>());
             }
 
             var json = await resp.Content.ReadAsStringAsync();
-            var raw = JsonSerializer.Deserialize<List<Maintenance>>(json, _jsonOptions) ?? new List<Maintenance>();
+            var raw = JsonSerializer.Deserialize<List<Maintenance>>(json, _jsonOptions) ?? new();
 
             var maintenance = raw.Select(m => new MaintenanceDto
             {
@@ -326,47 +414,41 @@ namespace EliteRentals.Controllers
                 ProofType = m.ProofType
             }).ToList();
 
-            // ✅ Correct assignment (no extra semicolon / new list)
             ViewBag.Caretakers = await FetchCaretakers();
 
             return View(maintenance);
         }
 
-
-
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AssignCaretaker(int maintenanceId, int caretakerId)
         {
             var client = await CreateApiClient();
 
             var dto = new { AssignedCaretakerId = caretakerId };
-            var json = JsonSerializer.Serialize(dto);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
 
             var resp = await client.PutAsync($"api/maintenance/{maintenanceId}/assign-caretaker", content);
-
             if (!resp.IsSuccessStatusCode)
                 TempData["Error"] = "Failed to assign caretaker.";
 
-            return RedirectToAction("ManagerMaintenance");
+            return RedirectToAction(nameof(ManagerMaintenance));
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdateMaintenanceStatus(int maintenanceId, string status)
         {
             var client = await CreateApiClient();
 
             var dto = new { Status = status };
-            var json = JsonSerializer.Serialize(dto);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
 
             var resp = await client.PutAsync($"api/maintenance/{maintenanceId}/status", content);
-
             if (!resp.IsSuccessStatusCode)
                 TempData["Error"] = "Failed to update status.";
 
-            return RedirectToAction("ManagerMaintenance");
+            return RedirectToAction(nameof(ManagerMaintenance));
         }
 
         [HttpGet]
@@ -378,15 +460,14 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Failed to load maintenance details.";
-                return RedirectToAction("ManagerMaintenance");
+                return RedirectToAction(nameof(ManagerMaintenance));
             }
 
             var json = await resp.Content.ReadAsStringAsync();
-            var m = JsonSerializer.Deserialize<EliteRentals.Models.Maintenance>(json, _jsonOptions);
+            var m = JsonSerializer.Deserialize<Maintenance>(json, _jsonOptions);
 
             string? caretakerName = null;
 
-            // If caretaker ID exists but caretaker object is null, fetch it
             if (m?.AssignedCaretakerId != null && m.AssignedCaretaker == null)
             {
                 var caretakerResp = await client.GetAsync($"api/users/{m.AssignedCaretakerId}");
@@ -401,9 +482,9 @@ namespace EliteRentals.Controllers
                 }
             }
 
-            var dto = new EliteRentals.Models.DTOs.MaintenanceDto
+            var dto = new MaintenanceDto
             {
-                MaintenanceId = m.MaintenanceId,
+                MaintenanceId = m!.MaintenanceId,
                 Issue = m.Description ?? "N/A",
                 PropertyName = m.Property?.Title ?? $"Property #{m.PropertyId}",
                 ReportedBy = m.Tenant != null ? $"{m.Tenant.FirstName} {m.Tenant.LastName}" : $"Tenant #{m.TenantId}",
@@ -422,7 +503,9 @@ namespace EliteRentals.Controllers
             return View(dto);
         }
 
-        //================PAYMENTS===============================
+        // ===========================
+        // PAYMENTS
+        // ===========================
 
         [HttpGet]
         public async Task<IActionResult> ManagerPayments()
@@ -437,19 +520,13 @@ namespace EliteRentals.Controllers
             }
 
             var json = await resp.Content.ReadAsStringAsync();
-            var payments = JsonSerializer.Deserialize<List<PaymentDto>>(json, _jsonOptions) ?? new List<PaymentDto>();
+            var payments = JsonSerializer.Deserialize<List<PaymentDto>>(json, _jsonOptions) ?? new();
 
-            // Optionally fetch tenants to display names
             var tenants = await FetchTenants();
-
-            // Combine tenant name into each payment
             foreach (var p in payments)
             {
                 var tenant = tenants.FirstOrDefault(t => t.UserId == p.TenantId);
-                if (tenant != null)
-                {
-                    p.TenantName = $"{tenant.FirstName} {tenant.LastName}";
-                }
+                if (tenant != null) p.TenantName = $"{tenant.FirstName} {tenant.LastName}";
             }
 
             return View(payments);
@@ -464,7 +541,7 @@ namespace EliteRentals.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Unable to fetch payment details.";
-                return RedirectToAction("ManagerPayments");
+                return RedirectToAction(nameof(ManagerPayments));
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -473,26 +550,28 @@ namespace EliteRentals.Controllers
             return View(payment);
         }
 
-
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> UpdatePaymentStatus(int id, string status)
         {
             var client = await CreateApiClient();
 
             var dto = new { Status = status };
-            var json = JsonSerializer.Serialize(dto);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
 
             var resp = await client.PutAsync($"api/payment/{id}/status", content);
 
             if (!resp.IsSuccessStatusCode)
                 TempData["Error"] = "Failed to update payment status.";
 
-            return RedirectToAction("ManagerPayments");
+            return RedirectToAction(nameof(ManagerPayments));
         }
 
-        //======================SYSTEM USERS===============================================
+        // ===========================
+        // SYSTEM USERS (Tenants)
+        // ===========================
 
+        [HttpGet]
         public async Task<IActionResult> ManagerTenants()
         {
             var token = HttpContext.Session.GetString("JWT");
@@ -500,28 +579,25 @@ namespace EliteRentals.Controllers
                 return RedirectToAction("Login", "Account");
 
             var client = _clientFactory.CreateClient("EliteRentalsAPI");
-            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            client.DefaultRequestHeaders.Authorization =
+                new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
             var response = await client.GetAsync("api/users");
             if (!response.IsSuccessStatusCode)
             {
                 ViewBag.Error = "Failed to load tenants.";
-                return View(new List<EliteRentals.Models.DTOs.UserDto>());
+                return View(new List<Models.DTOs.UserDto>());
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            var users = JsonSerializer.Deserialize<List<EliteRentals.Models.DTOs.UserDto>>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var users = JsonSerializer.Deserialize<List<Models.DTOs.UserDto>>(json, _jsonOptions) ?? new();
 
-            // Filter only tenants
-            var tenants = users?.Where(u => u.Role == "Tenant").ToList() ?? new List<EliteRentals.Models.DTOs.UserDto>();
-
+            var tenants = users.Where(u => u.Role == "Tenant").ToList();
             return View(tenants);
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> ToggleUserStatus(int id)
         {
             var token = HttpContext.Session.GetString("JWT");
@@ -535,7 +611,7 @@ namespace EliteRentals.Controllers
                 TempData["Error"] = "Failed to update tenant status.";
             }
 
-            return RedirectToAction("ManagerTenants");
+            return RedirectToAction(nameof(ManagerTenants));
         }
 
         [HttpGet]
@@ -550,35 +626,31 @@ namespace EliteRentals.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Failed to load tenant.";
-                return RedirectToAction("ManagerTenants");
+                return RedirectToAction(nameof(ManagerTenants));
             }
 
             var json = await response.Content.ReadAsStringAsync();
-            var user = JsonSerializer.Deserialize<EliteRentals.Models.DTOs.UserDto>(json, new JsonSerializerOptions
-            {
-                PropertyNameCaseInsensitive = true
-            });
+            var user = JsonSerializer.Deserialize<Models.DTOs.UserDto>(json, _jsonOptions);
 
-            // Only allow editing if user is a tenant
-            if (user.Role != "Tenant")
-                return RedirectToAction("ManagerTenants");
+            if (user == null || user.Role != "Tenant")
+                return RedirectToAction(nameof(ManagerTenants));
 
             return View("EditUser", user);
         }
 
         [HttpPost]
-        public async Task<IActionResult> EditUser(EliteRentals.Models.DTOs.UserDto user)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> EditUser(Models.DTOs.UserDto user)
         {
             if (user.Role != "Tenant")
-                return RedirectToAction("ManagerTenants");
+                return RedirectToAction(nameof(ManagerTenants));
 
             var token = HttpContext.Session.GetString("JWT");
             var client = _clientFactory.CreateClient("EliteRentalsAPI");
             client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            var json = JsonSerializer.Serialize(user);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
+            var content = new StringContent(JsonSerializer.Serialize(user), Encoding.UTF8, "application/json");
 
             var response = await client.PutAsync($"api/users/{user.UserId}", content);
             if (!response.IsSuccessStatusCode)
@@ -587,21 +659,19 @@ namespace EliteRentals.Controllers
                 return View("EditUser", user);
             }
 
-            return RedirectToAction("ManagerTenants");
+            return RedirectToAction(nameof(ManagerTenants));
         }
 
         [HttpGet]
         public IActionResult AddUser()
         {
-            var tenant = new EliteRentals.Models.DTOs.UserDto
-            {
-                Role = "Tenant"
-            };
+            var tenant = new Models.DTOs.UserDto { Role = "Tenant" };
             return View(tenant);
         }
 
         [HttpPost]
-        public async Task<IActionResult> AddUser(EliteRentals.Models.DTOs.UserDto user)
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AddUser(Models.DTOs.UserDto user)
         {
             user.Role = "Tenant"; // force role as Tenant
 
@@ -613,9 +683,7 @@ namespace EliteRentals.Controllers
             // Generate a temporary password
             user.Password = $"{user.FirstName}@{Guid.NewGuid():N}".Substring(0, 12);
 
-            var json = JsonSerializer.Serialize(user);
-            var content = new StringContent(json, Encoding.UTF8, "application/json");
-
+            var content = new StringContent(JsonSerializer.Serialize(user), Encoding.UTF8, "application/json");
             var response = await client.PostAsync("api/users/signup", content);
 
             if (!response.IsSuccessStatusCode)
@@ -627,19 +695,26 @@ namespace EliteRentals.Controllers
             ViewBag.Success = "Tenant created successfully!";
             ViewBag.GeneratedPassword = user.Password;
 
-            return View(new EliteRentals.Models.DTOs.UserDto { Role = "Tenant" });
+            return View(new Models.DTOs.UserDto { Role = "Tenant" });
         }
 
+        // ===========================
+        // NAV / SHELL PAGES
+        // ===========================
 
+        [HttpGet] public IActionResult ManagerDashboard() => View();
+        [HttpGet] public IActionResult ManagerEscalations() => View();
+        [HttpGet] public IActionResult ManagerSettings() => View();
 
-        // ---------- helpers ----------
+        // ===========================
+        // Helpers
+        // ===========================
         private void NormalizeStatus(PropertyUploadDto form)
         {
             // restrict to Available or Occupied only
-            if (string.Equals(form.Status, "Occupied", StringComparison.OrdinalIgnoreCase))
-                form.Status = "Occupied";
-            else
-                form.Status = "Available";
+            form.Status = string.Equals(form.Status, "Occupied", System.StringComparison.OrdinalIgnoreCase)
+                ? "Occupied"
+                : "Available";
         }
 
         private async Task<HttpClient> CreateApiClient()
@@ -659,7 +734,7 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode) return new List<TenantDto>();
 
             var json = await resp.Content.ReadAsStringAsync();
-            var users = JsonSerializer.Deserialize<List<TenantDto>>(json, _jsonOptions) ?? new List<TenantDto>();
+            var users = JsonSerializer.Deserialize<List<TenantDto>>(json, _jsonOptions) ?? new();
             return users.Where(u => string.IsNullOrEmpty(u.Role) || u.Role == "Tenant").ToList();
         }
 
@@ -670,7 +745,7 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode) return new List<PropertyDto>();
 
             var json = await resp.Content.ReadAsStringAsync();
-            return JsonSerializer.Deserialize<List<PropertyDto>>(json, _jsonOptions) ?? new List<PropertyDto>();
+            return JsonSerializer.Deserialize<List<PropertyDto>>(json, _jsonOptions) ?? new();
         }
 
         private async Task<List<Models.DTOs.UserDto>> FetchCaretakers()
@@ -679,38 +754,20 @@ namespace EliteRentals.Controllers
             {
                 var client = await CreateApiClient();
                 var response = await client.GetAsync("api/users");
-
-                if (!response.IsSuccessStatusCode)
-                {
-                    Console.WriteLine($"[FetchCaretakers] Failed API call: {response.StatusCode}");
-                    return new List<Models.DTOs.UserDto>();
-                }
+                if (!response.IsSuccessStatusCode) return new List<Models.DTOs.UserDto>();
 
                 var json = await response.Content.ReadAsStringAsync();
-                var users = JsonSerializer.Deserialize<List<Models.DTOs.UserDto>>(json, _jsonOptions) ?? new List<Models.DTOs.UserDto>();
+                var users = JsonSerializer.Deserialize<List<Models.DTOs.UserDto>>(json, _jsonOptions) ?? new();
 
-                Console.WriteLine($"[FetchCaretakers] Found {users.Count} users.");
-
-                var caretakers = users
+                return users
                     .Where(u => !string.IsNullOrEmpty(u.Role) &&
-                                u.Role.Equals("Caretaker", StringComparison.OrdinalIgnoreCase))
+                                u.Role.Equals("Caretaker", System.StringComparison.OrdinalIgnoreCase))
                     .ToList();
-
-                Console.WriteLine($"[FetchCaretakers] Filtered {caretakers.Count} caretakers.");
-                return caretakers;
             }
-            catch (Exception ex)
+            catch
             {
-                Console.WriteLine($"[FetchCaretakers] Error: {ex.Message}");
                 return new List<Models.DTOs.UserDto>();
             }
         }
-
-
-        // other dashboard pages remain as you had them
-        public IActionResult ManagerDashboard() => View();
-        public IActionResult ManagerEscalations() => View();
-        public IActionResult ManagerSettings() => View();
-
     }
 }

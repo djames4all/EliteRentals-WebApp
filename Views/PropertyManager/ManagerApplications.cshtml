@@ -1,0 +1,110 @@
+@model IEnumerable<EliteRentals.Controllers.PropertyManagerController.RentalApplicationDto>
+@{
+    ViewData["Title"] = "Manager • Applications";
+    Layout = "_Layout";
+}
+
+<style>
+  :root { --mgr-sidebar-w: 240px; }
+  @@media (min-width: 768px) {
+    .manager-main { margin-left: var(--mgr-sidebar-w); padding: 1.25rem 1.5rem; }
+  }
+  .table thead th { position: sticky; top: 0; z-index: 1; background: #f8f9fa; }
+  .status-badge { font-weight: 500; letter-spacing: .2px; }
+  .btn-group .btn { min-width: 92px; } /* keeps widths consistent */
+</style>
+
+<div class="container-fluid">
+  <div class="row">
+    @await Html.PartialAsync("_ManagerSidebar")
+
+    <main class="manager-main col px-0">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h2 class="h4 m-0">Applications</h2>
+      </div>
+
+      @if (TempData["Error"] is string err && !string.IsNullOrWhiteSpace(err))
+      {
+        <div class="alert alert-danger py-2 mb-3">@err</div>
+      }
+
+      <div class="card shadow-sm">
+        <div class="card-header bg-white d-flex justify-content-between align-items-center">
+          <span class="fw-semibold">Incoming Applications</span>
+          <small class="text-muted">Total: @(Model?.Count() ?? 0)</small>
+        </div>
+
+        <div class="table-responsive">
+          <table class="table table-sm table-hover align-middle mb-0">
+            <thead class="table-light">
+              <tr>
+                <th style="width:90px">ID</th>
+                <th style="min-width:220px">Applicant</th>
+                <th>Email</th>
+                <th>Phone</th>
+                <th style="width:120px">Property</th>
+                <th style="width:140px">Status</th>
+                <th style="width:220px" class="text-end">Actions</th>
+              </tr>
+            </thead>
+            <tbody>
+            @if (Model != null && Model.Any())
+            {
+              foreach (var a in Model)
+              {
+                var isApproved = string.Equals(a.Status, "Approved", System.StringComparison.OrdinalIgnoreCase);
+                var isRejected = string.Equals(a.Status, "Rejected", System.StringComparison.OrdinalIgnoreCase);
+                var badge = isApproved ? "bg-success" : (isRejected ? "bg-danger" : "bg-warning text-dark");
+
+                <tr>
+                  <td class="text-muted">#@a.ApplicationId</td>
+                  <td class="fw-semibold">@a.ApplicantName</td>
+                  <td class="text-truncate" style="max-width: 260px;">@a.Email</td>
+                  <td>@a.Phone</td>
+                  <td>#@a.PropertyId</td>
+                  <td><span class="badge @badge status-badge">@a.Status</span></td>
+                  <td class="text-end">
+                    <div class="btn-group btn-group-sm flex-wrap justify-content-end" role="group" aria-label="Application actions">
+                      <form asp-action="UpdateApplicationStatus" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@a.ApplicationId" />
+                        <input type="hidden" name="status" value="Approved" />
+                        <button class="btn btn-outline-success" @(isApproved ? "disabled" : "")>Approve</button>
+                      </form>
+
+                      <form asp-action="UpdateApplicationStatus" method="post" class="d-inline">
+                        @Html.AntiForgeryToken()
+                        <input type="hidden" name="id" value="@a.ApplicationId" />
+                        <input type="hidden" name="status" value="Rejected" />
+                        <button class="btn btn-outline-danger" @(isRejected ? "disabled" : "")>Reject</button>
+                      </form>
+
+                      <a class="btn btn-outline-secondary"
+                         asp-action="ViewApplication"
+                         asp-route-id="@a.ApplicationId">
+                        View
+                      </a>
+
+                      <a class="btn btn-outline-primary"
+                         asp-action="AddLease"
+                         asp-route-propertyId="@a.PropertyId">
+                        Create Lease
+                      </a>
+                    </div>
+                  </td>
+                </tr>
+              }
+            }
+            else
+            {
+              <tr>
+                <td colspan="7" class="text-center text-muted py-4">No applications yet.</td>
+              </tr>
+            }
+            </tbody>
+          </table>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

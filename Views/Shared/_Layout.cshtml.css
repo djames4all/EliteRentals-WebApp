@@ -46,3 +46,47 @@ button.accept-policy {
   white-space: nowrap;
   line-height: 60px;
 }
+
+:root { --mgr-sidebar-w: 240px; }
+
+/* paints a persistent left strip so the dark bg looks continuous while scrolling */
+body::before{
+  content:"";
+  position: fixed;
+  top: 0; bottom: 0; left: 0;
+  width: var(--mgr-sidebar-w);
+  background: #212529;           /* same as .bg-dark */
+  z-index: 0;                     /* sits behind real content */
+}
+
+/* real sidebar: fixed and scrollable on its own */
+.manager-sidebar{
+  position: fixed;
+  top: 0; left: 0; bottom: 0;
+  width: var(--mgr-sidebar-w);
+  overflow-y: auto;
+  background-color: #212529;      /* match bg-dark */
+  color: #fff;
+  z-index: 2;                      /* above the body::before strip */
+  padding-top: 1rem;
+}
+
+/* main content is offset to the right of the fixed sidebar */
+.manager-main{
+  margin-left: var(--mgr-sidebar-w);
+  padding: 1.25rem 1.5rem;
+  position: relative;
+  z-index: 1;
+}
+
+/* mobile: sidebar becomes normal flow so it doesn’t cover content */
+@media (max-width: 991.98px){
+  body::before{ display: none; }
+  .manager-sidebar{
+    position: static;
+    width: auto;
+    height: auto;
+    overflow: visible;
+  }
+  .manager-main{ margin-left: 0; padding: 1rem; }
+}
