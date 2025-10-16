@@ -102,6 +102,7 @@ namespace EliteRentals.Controllers
             await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
 
             // Session storage
+            HttpContext.Session.SetString("UserId", loginResponse.User.UserId.ToString());
             HttpContext.Session.SetString("JWT", loginResponse.Token);
             HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
             HttpContext.Session.SetString("UserName", loginResponse.User.FirstName);
@@ -143,7 +144,26 @@ namespace EliteRentals.Controllers
                 responseBody,
                 new JsonSerializerOptions { PropertyNameCaseInsensitive = true });
 
-            await SignInWithCookie(loginResponse);
+            // Store UserId in session for Google login too
+            HttpContext.Session.SetString("UserId", loginResponse.User.UserId.ToString());
+            HttpContext.Session.SetString("JWT", loginResponse.Token);
+            HttpContext.Session.SetString("UserRole", loginResponse.User.Role);
+            HttpContext.Session.SetString("UserName", loginResponse.User.FirstName);
+
+            var claims = new List<Claim>
+    {
+        new Claim(ClaimTypes.NameIdentifier, loginResponse.User.UserId.ToString()),
+        new Claim(ClaimTypes.Name, loginResponse.User.FirstName),
+        new Claim(ClaimTypes.Email, loginResponse.User.Email),
+        new Claim(ClaimTypes.Role, loginResponse.User.Role),
+        new Claim("JWT", loginResponse.Token)
+    };
+
+            var identity = new ClaimsIdentity(claims, CookieAuthenticationDefaults.AuthenticationScheme);
+            var principal = new ClaimsPrincipal(identity);
+
+            await HttpContext.SignInAsync(CookieAuthenticationDefaults.AuthenticationScheme, principal);
+
             return RedirectToDashboard(loginResponse.User.Role);
         }
 

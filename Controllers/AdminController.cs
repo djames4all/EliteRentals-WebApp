@@ -1,9 +1,11 @@
 ﻿using EliteRentals.Models;
 using EliteRentals.Models.DTOs;
+using EliteRentals.Models.ViewModels;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 
@@ -24,7 +26,6 @@ namespace EliteRentals.Controllers
             _configuration = configuration;
         }
         public IActionResult AdminChatbot() => View();
-        public IActionResult AdminMessages() => View();
        
         public IActionResult AdminProperties() => View();
         public IActionResult AdminReports() => View();
@@ -1021,6 +1022,242 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
             form.Status = string.Equals(form.Status, "Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available";
         }
 
+        // GET: Admin Messages page - Server-side implementation
+        public async Task<IActionResult> AdminMessages()
+        {
+            try
+            {
+                var adminId = GetCurrentUserId();
+                var client = await CreateApiClient();
+
+                var model = new AdminMessagesViewModel
+                {
+                    CurrentUserId = adminId,
+                    CurrentUserName = HttpContext.Session.GetString("UserName") ?? "Admin"
+                };
+
+                var usersResponse = await client.GetAsync("api/users");
+                if (usersResponse.IsSuccessStatusCode)
+                {
+                    var usersJson = await usersResponse.Content.ReadAsStringAsync();
+                    var users = JsonSerializer.Deserialize<List<Models.UserDto>>(usersJson, _jsonOptions) ?? new();
+                    model.Users = users.Where(u => u.UserId != adminId).ToList();
+                }
+
+                var inbox = new List<MessageDto>();
+                var sent = new List<MessageDto>();
+
+                var inboxResponse = await client.GetAsync($"api/Message/inbox/{adminId}");
+                if (inboxResponse.IsSuccessStatusCode)
+                {
+                    var inboxJson = await inboxResponse.Content.ReadAsStringAsync();
+                    inbox = JsonSerializer.Deserialize<List<MessageDto>>(inboxJson, _jsonOptions) ?? new();
+                }
+
+                var sentResponse = await client.GetAsync($"api/Message/sent/{adminId}");
+                if (sentResponse.IsSuccessStatusCode)
+                {
+                    var sentJson = await sentResponse.Content.ReadAsStringAsync();
+                    sent = JsonSerializer.Deserialize<List<MessageDto>>(sentJson, _jsonOptions) ?? new();
+                }
+
+                model.InboxMessages = inbox;
+                model.SentMessages = sent;
+                model.Conversations = await BuildConversations(inbox.Concat(sent).ToList(), adminId, client);
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading messages: {ex.Message}";
+                return View(new AdminMessagesViewModel());
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendMessage(Models.ViewModels.SendMessageRequest request)
+        {
+            try
+            {
+                var adminId = GetCurrentUserId();
+                var client = await CreateApiClient();
+
+                var message = new MessageDto
+                {
+                    SenderId = adminId,
+                    ReceiverId = request.ReceiverId,
+                    MessageText = request.MessageText,
+                    Timestamp = DateTime.UtcNow,
+                    IsChatbot = false
+                };
+
+                var json = JsonSerializer.Serialize(message, _jsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync("api/Message", content);
+
+                TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
+                    response.IsSuccessStatusCode ? "Message sent successfully!" : "Failed to send message.";
+
+                return RedirectToAction("AdminMessages");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error sending message: {ex.Message}";
+                return RedirectToAction("AdminMessages");
+            }
+        }
+
+        [HttpPost]
+        public async Task<IActionResult> SendBroadcast(string MessageText, string TargetRole)
+        {
+            try
+            {
+                var adminId = GetCurrentUserId();
+                var client = await CreateApiClient();
+
+                var message = new MessageDto
+                {
+                    SenderId = adminId,
+                    ReceiverId = null,
+                    MessageText = MessageText,
+                    Timestamp = DateTime.UtcNow,
+                    IsChatbot = false,
+                    IsBroadcast = true,
+                    TargetRole = string.IsNullOrWhiteSpace(TargetRole) ? null : TargetRole
+                };
+
+                var json = JsonSerializer.Serialize(message, _jsonOptions);
+                var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+                var response = await client.PostAsync("api/Message/broadcast", content);
+
+                TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
+                    response.IsSuccessStatusCode ? "Announcement sent!" : "Failed to send announcement.";
+
+                return RedirectToAction("AdminMessages");
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error sending broadcast: {ex.Message}";
+                return RedirectToAction("AdminMessages");
+            }
+        }
+
+
+
+        // GET: View conversation with a specific user
+        public async Task<IActionResult> ViewConversation(int userId)
+        {
+            try
+            {
+                var adminId = GetCurrentUserId();
+                var client = await CreateApiClient();
+
+                // Get the conversation
+                var conversationResponse = await client.GetAsync($"api/Message/conversation/{adminId}/{userId}");
+                if (!conversationResponse.IsSuccessStatusCode)
+                {
+                    TempData["Error"] = "Failed to load conversation.";
+                    return RedirectToAction("AdminMessages");
+                }
+
+                var conversationJson = await conversationResponse.Content.ReadAsStringAsync();
+                var messages = JsonSerializer.Deserialize<List<MessageDto>>(conversationJson, _jsonOptions) ?? new List<MessageDto>();
+
+                // Get user info for the other user
+                var otherUserName = await GetUserName(userId, client);
+
+                var model = new ConversationDetailViewModel
+                {
+                    OtherUserId = userId,
+                    OtherUserName = otherUserName,
+                    Messages = messages,
+                    CurrentUserId = adminId
+                };
+
+                return View(model);
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Error loading conversation: {ex.Message}";
+                return RedirectToAction("AdminMessages");
+            }
+        }
+
+        private async Task<List<ConversationDto>> BuildConversations(List<MessageDto> messages, int currentUserId, HttpClient client)
+        {
+            var conversations = new Dictionary<int, ConversationDto>();
+
+            foreach (var message in messages)
+            {
+                // ✅ Skip broadcasts (no ReceiverId or IsBroadcast flag)
+                if (!message.ReceiverId.HasValue || message.IsBroadcast)
+                    continue;
+
+                var otherUserId = message.SenderId == currentUserId
+                    ? message.ReceiverId.Value
+                    : message.SenderId;
+
+                var otherUserName = await GetUserName(otherUserId, client);
+
+                if (!conversations.ContainsKey(otherUserId))
+                {
+                    conversations[otherUserId] = new ConversationDto
+                    {
+                        OtherUserId = otherUserId,
+                        OtherUserName = otherUserName,
+                        LastMessage = message.MessageText,
+                        LastMessageTimestamp = message.Timestamp,
+                        IsChatbot = message.IsChatbot,
+                        UnreadCount = 0
+                    };
+                }
+                else
+                {
+                    var existing = conversations[otherUserId];
+                    if (message.Timestamp > existing.LastMessageTimestamp)
+                    {
+                        existing.LastMessage = message.MessageText;
+                        existing.LastMessageTimestamp = message.Timestamp;
+                        existing.IsChatbot = message.IsChatbot;
+                    }
+                }
+            }
+
+            return conversations.Values
+                .OrderByDescending(c => c.LastMessageTimestamp)
+                .ToList();
+        }
+
+
+        // Helper method to get user name by ID
+        private async Task<string> GetUserName(int userId, HttpClient client)
+        {
+            try
+            {
+                var response = await client.GetAsync($"api/users/{userId}");
+                if (response.IsSuccessStatusCode)
+                {
+                    var userJson = await response.Content.ReadAsStringAsync();
+                    var user = JsonSerializer.Deserialize<Models.UserDto>(userJson, _jsonOptions);
+                    if (user != null)
+                    {
+                        return $"{user.FirstName} {user.LastName}";
+                    }
+                }
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine($"Error getting user name for {userId}: {ex.Message}");
+            }
+
+            return $"User {userId}";
+        }
+
+        // -------------------- HELPERS --------------------
+
+
         // -------------------- HELPERS --------------------
         private async Task<HttpClient> CreateApiClient()
         {
@@ -1090,6 +1327,110 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
         {
             if (string.IsNullOrEmpty(value)) return "";
             return value.Replace("\"", "\"\"");
+        }
+
+        private int GetCurrentUserId()
+        {
+            try
+            {
+                // Method 1: Get from User Claims (most reliable)
+                var userIdClaim = User.FindFirst(ClaimTypes.NameIdentifier)?.Value;
+                if (!string.IsNullOrEmpty(userIdClaim) && int.TryParse(userIdClaim, out int userIdFromClaim))
+                {
+                    return userIdFromClaim;
+                }
+
+                // Method 2: Get from Session (fallback)
+                var userIdFromSession = HttpContext.Session.GetString("UserId");
+                if (!string.IsNullOrEmpty(userIdFromSession) && int.TryParse(userIdFromSession, out int sessionUserId))
+                {
+                    return sessionUserId;
+                }
+
+                // Method 3: Get from JWT token (if stored)
+                var token = HttpContext.Session.GetString("JWT");
+                if (!string.IsNullOrEmpty(token))
+                {
+                    var userIdFromToken = ExtractUserIdFromToken(token);
+                    if (userIdFromToken.HasValue)
+                    {
+                        // Store in session for future use
+                        HttpContext.Session.SetString("UserId", userIdFromToken.Value.ToString());
+                        return userIdFromToken.Value;
+                    }
+                }
+
+                throw new Exception("Unable to determine current user ID");
+            }
+            catch (Exception ex)
+            {
+                // Log the error
+                Console.WriteLine($"Error getting current user ID: {ex.Message}");
+                throw;
+            }
+        }
+
+        private int? ExtractUserIdFromToken(string token)
+        {
+            try
+            {
+                // Simple JWT parsing - you might want to use a proper JWT library
+                var parts = token.Split('.');
+                if (parts.Length != 3) return null;
+
+                var payload = parts[1];
+                // Add padding if needed
+                while (payload.Length % 4 != 0)
+                    payload += '=';
+
+                var payloadBytes = Convert.FromBase64String(payload);
+                var payloadJson = Encoding.UTF8.GetString(payloadBytes);
+
+                using var document = JsonDocument.Parse(payloadJson);
+                if (document.RootElement.TryGetProperty("nameid", out var nameIdElement) &&
+                    nameIdElement.ValueKind == JsonValueKind.String &&
+                    int.TryParse(nameIdElement.GetString(), out int userId))
+                {
+                    return userId;
+                }
+
+                // Try alternative claim names
+                if (document.RootElement.TryGetProperty("sub", out var subElement) &&
+                    subElement.ValueKind == JsonValueKind.String &&
+                    int.TryParse(subElement.GetString(), out int subUserId))
+                {
+                    return subUserId;
+                }
+
+                if (document.RootElement.TryGetProperty("userId", out var userIdElement) &&
+                    userIdElement.ValueKind == JsonValueKind.Number)
+                {
+                    return userIdElement.GetInt32();
+                }
+
+                return null;
+            }
+            catch
+            {
+                return null;
+            }
+        }
+
+        private string GenerateChatbotResponse(string userMessage)
+        {
+            // Simple chatbot logic - you can enhance this
+            userMessage = userMessage.ToLower();
+
+            if (userMessage.Contains("hello") || userMessage.Contains("hi"))
+                return "Hello! How can I help you today?";
+            else if (userMessage.Contains("rent") || userMessage.Contains("property"))
+                return "I can help you with property rentals. Please contact our admin for more details.";
+            else if (userMessage.Contains("maintenance"))
+                return "For maintenance requests, please submit a maintenance ticket through your tenant portal.";
+            else if (userMessage.Contains("payment"))
+                return "Payment issues? Please check your tenant portal or contact our billing department.";
+            else
+                return "Thank you for your message. Our team will get back to you shortly.";
         }
 
 
