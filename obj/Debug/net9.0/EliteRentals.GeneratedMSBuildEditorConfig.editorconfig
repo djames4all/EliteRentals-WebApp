@@ -80,6 +80,18 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5Qcm9wZXJ0aWVzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 
 
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminPropertyCreate.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5Qcm9wZXJ0eUNyZWF0ZS5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminPropertyEdit.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5Qcm9wZXJ0eUVkaXQuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
+[/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminPropertyView.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5Qcm9wZXJ0eVZpZXcuY3NodG1s
+build_metadata.AdditionalFiles.CssScope = 
+
 [/Users/ayush/C\#_Projects/EliteRentals-WebApp/Untitled/Views/Admin/AdminReports.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3MvQWRtaW4vQWRtaW5SZXBvcnRzLmNzaHRtbA==
 build_metadata.AdditionalFiles.CssScope = 

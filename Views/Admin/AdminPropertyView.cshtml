@@ -1,0 +1,75 @@
+@using EliteRentals.Models.DTOs
+@model PropertyDto
+@{
+    Layout = "_Layout";
+
+    string ImageOf()
+    {
+        var url  = Model?.GetType().GetProperty("ImageUrl")?.GetValue(Model)?.ToString();
+        var path = Model?.GetType().GetProperty("ImagePath")?.GetValue(Model)?.ToString();
+        var b64  = Model?.GetType().GetProperty("ImageBase64")?.GetValue(Model)?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(url))  return Url.Content(url);
+        if (!string.IsNullOrWhiteSpace(path)) return Url.Content(path);
+        if (!string.IsNullOrWhiteSpace(b64))  return $"data:image/jpeg;base64,{b64}";
+        return Url.Content("~/images/placeholders/property-wide.jpg");
+    }
+}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Left sidebar -->
+    <aside class="col-12 col-lg-3 col-xl-2 py-3">
+      @{ try { await Html.RenderPartialAsync("_ManagerSidebar"); } catch { } }
+    </aside>
+
+    <!-- Main content -->
+    <main class="col-12 col-lg-9 col-xl-10 py-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0">@Model.Title</h3>
+        <div class="btn-group">
+          <a asp-action="AdminProperties" class="btn btn-outline-secondary">Back</a>
+          <a asp-action="AdminPropertyEdit" asp-route-id="@Model.PropertyId" class="btn btn-primary">Edit</a>
+          <form asp-action="AdminPropertyDelete" asp-route-id="@Model.PropertyId" method="post" class="d-inline">
+            @Html.AntiForgeryToken()
+            <button class="btn btn-outline-danger" onclick="return confirm('Delete this property?');">Delete</button>
+          </form>
+        </div>
+      </div>
+
+      <div class="row g-3">
+        <div class="col-12 col-lg-8">
+          <div class="card shadow-sm overflow-hidden">
+            <img src="@ImageOf()" alt="Property" style="width:100%;height:320px;object-fit:cover;" />
+            <div class="card-body">
+              <h5 class="card-title mb-3">Overview</h5>
+              <p class="mb-0">@Model.Description</p>
+            </div>
+          </div>
+        </div>
+
+        <div class="col-12 col-lg-4">
+          <div class="card shadow-sm">
+            <div class="card-body">
+              <h6 class="text-muted">Monthly Rent</h6>
+              <div class="fs-4 fw-bold">R @Model.RentAmount.ToString("N0")</div>
+              <hr />
+              <div class="small text-muted">
+                @* Optional meta if present on your DTO *@
+                @{
+                  void Row(string k, string v) { if (!string.IsNullOrWhiteSpace(v)) { <div class="d-flex justify-content-between"><span>@k</span><span class="fw-semibold">@v</span></div>; } }
+                  Row("Status", Model?.GetType().GetProperty("Status")?.GetValue(Model)?.ToString() ?? "");
+                  Row("City", Model?.GetType().GetProperty("City")?.GetValue(Model)?.ToString() ?? "");
+                  Row("Bedrooms", Model?.GetType().GetProperty("NumOfBedrooms")?.GetValue(Model)?.ToString() ?? "");
+                  Row("Bathrooms", Model?.GetType().GetProperty("NumOfBathrooms")?.GetValue(Model)?.ToString() ?? "");
+                  Row("Parking", Model?.GetType().GetProperty("ParkingType")?.GetValue(Model)?.ToString() ?? "");
+                  Row("Pet-friendly", (Model?.GetType().GetProperty("PetFriendly")?.GetValue(Model)?.ToString() ?? "") == "True" ? "Yes" : "");
+                }
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </main>
+  </div>
+</div>

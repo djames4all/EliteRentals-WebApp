@@ -1,0 +1,104 @@
+@using EliteRentals.Models.DTOs
+@model PropertyDto
+@{
+    Layout = "_Layout";
+    var isCreate = Model == null || Model.PropertyId == 0;
+    ViewData["Title"] = isCreate ? "Create Property" : "Edit Property";
+
+    string CurrentImage()
+    {
+        var url  = Model?.GetType().GetProperty("ImageUrl")?.GetValue(Model)?.ToString();
+        var path = Model?.GetType().GetProperty("ImagePath")?.GetValue(Model)?.ToString();
+        var b64  = Model?.GetType().GetProperty("ImageBase64")?.GetValue(Model)?.ToString();
+
+        if (!string.IsNullOrWhiteSpace(url))  return Url.Content(url);
+        if (!string.IsNullOrWhiteSpace(path)) return Url.Content(path);
+        if (!string.IsNullOrWhiteSpace(b64))  return $"data:image/jpeg;base64,{b64}";
+        return Url.Content("~/images/placeholders/property.jpg");
+    }
+}
+
+<div class="container-fluid">
+  <div class="row">
+    <!-- Left sidebar -->
+    <aside class="col-12 col-lg-3 col-xl-2 py-3">
+      @{ try { await Html.RenderPartialAsync("_ManagerSidebar"); } catch { } }
+    </aside>
+
+    <!-- Main content -->
+    <main class="col-12 col-lg-9 col-xl-10 py-3">
+      <div class="d-flex justify-content-between align-items-center mb-3">
+        <h3 class="m-0">@ViewData["Title"]</h3>
+        <a asp-action="AdminProperties" class="btn btn-outline-secondary">Back</a>
+      </div>
+
+      <div class="card shadow-sm">
+        <div class="card-body">
+          <form asp-action="@(isCreate ? "AdminPropertyCreate" : "AdminPropertyEdit")"
+                asp-route-id="@(isCreate ? null : Model.PropertyId)"
+                method="post" enctype="multipart/form-data">
+            @Html.AntiForgeryToken()
+
+            <div class="row g-4">
+              <div class="col-12 col-lg-8">
+                <div class="row g-3">
+                  <div class="col-12 col-md-7">
+                    <label asp-for="Title" class="form-label"></label>
+                    <input asp-for="Title" class="form-control" />
+                    <span asp-validation-for="Title" class="text-danger"></span>
+                  </div>
+
+                  <div class="col-12 col-md-5">
+                    <label asp-for="RentAmount" class="form-label"></label>
+                    <input asp-for="RentAmount" type="number" step="0.01" class="form-control" />
+                    <span asp-validation-for="RentAmount" class="text-danger"></span>
+                  </div>
+
+                  <div class="col-12">
+                    <label asp-for="Description" class="form-label"></label>
+                    <textarea asp-for="Description" rows="5" class="form-control"></textarea>
+                    <span asp-validation-for="Description" class="text-danger"></span>
+                  </div>
+                </div>
+              </div>
+
+              <div class="col-12 col-lg-4">
+                <div class="border rounded p-2">
+                  <div class="ratio ratio-4x3 mb-2" style="background:#f8f9fa;border:1px solid #eee;">
+                    <img id="propPreview"
+                         src="@CurrentImage()"
+                         alt="Preview"
+                         style="width:100%;height:100%;object-fit:cover;"/>
+                  </div>
+                  <label class="form-label">Image</label>
+                  <input name="image" type="file" class="form-control" accept="image/*" onchange="previewImage(this)" />
+                  <div class="form-text">Optional. Upload to add/replace the image.</div>
+                </div>
+              </div>
+            </div>
+
+            <div class="d-flex justify-content-end gap-2 mt-4">
+              <a asp-action="AdminProperties" class="btn btn-outline-secondary">Cancel</a>
+              <button type="submit" class="btn btn-primary">@((isCreate) ? "Create" : "Save changes")</button>
+            </div>
+          </form>
+        </div>
+      </div>
+
+      @if (TempData["AdminPropertyErr"] != null)
+      { <div class="alert alert-danger mt-3">@TempData["AdminPropertyErr"]</div> }
+    </main>
+  </div>
+</div>
+
+@section Scripts {
+  <partial name="_ValidationScriptsPartial" />
+  <script>
+    function previewImage(input) {
+      if (!input.files || !input.files[0]) return;
+      const reader = new FileReader();
+      reader.onload = e => document.getElementById('propPreview').src = e.target.result;
+      reader.readAsDataURL(input.files[0]);
+    }
+  </script>
+}

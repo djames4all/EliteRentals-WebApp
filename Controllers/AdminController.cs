@@ -833,10 +833,193 @@ namespace EliteRentals.Controllers
             return RedirectToAction("AdminPayments");
         }
 
+       // ===================== ADMIN • PROPERTIES =====================
 
+// LIST
+[HttpGet]
+public async Task<IActionResult> AdminProperties(CancellationToken ct)
+{
+    var client = await CreateApiClient();
+    var resp = await client.GetAsync("api/property", ct);
+    if (!resp.IsSuccessStatusCode)
+    {
+        ViewBag.Error = "Failed to load properties.";
+        return View(new List<PropertyReadDto>()); // Views/Admin/AdminProperties.cshtml
+    }
 
+    var json = await resp.Content.ReadAsStringAsync(ct);
+    var items = JsonSerializer.Deserialize<List<PropertyReadDto>>(json, _jsonOptions) ?? new List<PropertyReadDto>();
+    return View(items); // Views/Admin/AdminProperties.cshtml
+}
 
+// VIEW DETAILS
+[HttpGet]
+public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
+{
+    var client = await CreateApiClient();
+    var resp = await client.GetAsync($"api/property/{id}", ct);
+    if (!resp.IsSuccessStatusCode)
+    {
+        TempData["AdminPropertyErr"] = "Unable to load property.";
+        return RedirectToAction(nameof(AdminProperties));
+    }
 
+    var json = await resp.Content.ReadAsStringAsync(ct);
+    var p = JsonSerializer.Deserialize<PropertyReadDto>(json, _jsonOptions);
+    return View(p); // Views/Admin/AdminPropertyView.cshtml
+}
+
+        // CREATE (GET)
+        [HttpGet]
+        public IActionResult AdminPropertyCreate()
+        {
+            return View(new PropertyUploadDto { Status = "Available" }); // Views/Admin/AdminPropertyCreate.cshtml
+        }
+
+        // CREATE (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminPropertyCreate(PropertyUploadDto form, IFormFile? image, CancellationToken ct)
+        {
+            NormalizeStatus(form);
+
+            if (!ModelState.IsValid)
+                return View(form); // Views/Admin/AdminPropertyCreate.cshtml
+
+            var client = await CreateApiClient();
+            using var content = new MultipartFormDataContent();
+            content.Add(new StringContent(form.Title ?? ""), "Title");
+            content.Add(new StringContent(form.Description ?? ""), "Description");
+            content.Add(new StringContent(form.Address ?? ""), "Address");
+            content.Add(new StringContent(form.City ?? ""), "City");
+            content.Add(new StringContent(form.Province ?? ""), "Province");
+            content.Add(new StringContent(form.Country ?? ""), "Country");
+            content.Add(new StringContent(form.RentAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)), "RentAmount");
+            content.Add(new StringContent(form.NumOfBedrooms.ToString()), "NumOfBedrooms");
+            content.Add(new StringContent(form.NumOfBathrooms.ToString()), "NumOfBathrooms");
+            content.Add(new StringContent(form.ParkingType ?? ""), "ParkingType");
+            content.Add(new StringContent(form.NumOfParkingSpots.ToString()), "NumOfParkingSpots");
+            content.Add(new StringContent(form.PetFriendly ? "true" : "false"), "PetFriendly");
+            content.Add(new StringContent(form.Status ?? "Available"), "Status");
+
+            if (image != null && image.Length > 0)
+            {
+                var stream = image.OpenReadStream();
+                var file = new StreamContent(stream);
+                file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(image.ContentType);
+                content.Add(file, "Image", image.FileName);
+            }
+
+            var resp = await client.PostAsync("api/property", content, ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                TempData["AdminPropertyErr"] = "Could not create property.";
+                return View(form); // Views/Admin/AdminPropertyCreate.cshtml
+            }
+
+            TempData["AdminPropertyMsg"] = "Property created successfully.";
+            return RedirectToAction(nameof(AdminProperties));
+        }
+
+        // EDIT (GET)
+        [HttpGet]
+        public async Task<IActionResult> AdminPropertyEdit(int id, CancellationToken ct)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync($"api/property/{id}", ct);
+            if (!resp.IsSuccessStatusCode) return RedirectToAction(nameof(AdminProperties));
+
+            var json = await resp.Content.ReadAsStringAsync(ct);
+            var p = JsonSerializer.Deserialize<PropertyReadDto>(json, _jsonOptions);
+            if (p == null) return RedirectToAction(nameof(AdminProperties));
+
+            var vm = new PropertyUploadDto
+            {
+                Title = p.Title ?? "",
+                Description = p.Description ?? "",
+                Address = p.Address ?? "",
+                City = p.City ?? "",
+                Province = p.Province ?? "",
+                Country = p.Country ?? "",
+                RentAmount = p.RentAmount,
+                NumOfBedrooms = p.NumOfBedrooms,
+                NumOfBathrooms = p.NumOfBathrooms,
+                ParkingType = p.ParkingType ?? "",
+                NumOfParkingSpots = p.NumOfParkingSpots,
+                PetFriendly = p.PetFriendly,
+                Status = (p.Status ?? "Available").Equals("Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available"
+            };
+            ViewData["PropertyId"] = p.PropertyId;
+
+            return View(vm); // Views/Admin/AdminPropertyEdit.cshtml
+        }
+
+        // EDIT (POST)
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminPropertyEdit(int id, PropertyUploadDto form, IFormFile? image, CancellationToken ct)
+        {
+            NormalizeStatus(form);
+
+            if (!ModelState.IsValid)
+            {
+                ViewData["PropertyId"] = id;
+                return View(form); // Views/Admin/AdminPropertyEdit.cshtml
+            }
+
+            var client = await CreateApiClient();
+            using var content = new MultipartFormDataContent();
+            content.Add(new StringContent(form.Title ?? ""), "Title");
+            content.Add(new StringContent(form.Description ?? ""), "Description");
+            content.Add(new StringContent(form.Address ?? ""), "Address");
+            content.Add(new StringContent(form.City ?? ""), "City");
+            content.Add(new StringContent(form.Province ?? ""), "Province");
+            content.Add(new StringContent(form.Country ?? ""), "Country");
+            content.Add(new StringContent(form.RentAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)), "RentAmount");
+            content.Add(new StringContent(form.NumOfBedrooms.ToString()), "NumOfBedrooms");
+            content.Add(new StringContent(form.NumOfBathrooms.ToString()), "NumOfBathrooms");
+            content.Add(new StringContent(form.ParkingType ?? ""), "ParkingType");
+            content.Add(new StringContent(form.NumOfParkingSpots.ToString()), "NumOfParkingSpots");
+            content.Add(new StringContent(form.PetFriendly ? "true" : "false"), "PetFriendly");
+            content.Add(new StringContent(form.Status ?? "Available"), "Status");
+
+            if (image != null && image.Length > 0)
+            {
+                var stream = image.OpenReadStream();
+                var file = new StreamContent(stream);
+                file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(image.ContentType);
+                content.Add(file, "Image", image.FileName);
+            }
+
+            var resp = await client.PutAsync($"api/property/{id}", content, ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                TempData["AdminPropertyErr"] = "Update failed. Please try again.";
+                ViewData["PropertyId"] = id;
+                return View(form); // Views/Admin/AdminPropertyEdit.cshtml
+            }
+
+            TempData["AdminPropertyMsg"] = "Property updated.";
+            return RedirectToAction(nameof(AdminProperties));
+        }
+
+        // DELETE
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> AdminPropertyDelete(int id, CancellationToken ct)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.DeleteAsync($"api/property/{id}", ct);
+
+            TempData["AdminPropertyMsg"] = resp.IsSuccessStatusCode ? "Property deleted." : "Delete failed.";
+            return RedirectToAction(nameof(AdminProperties));
+        }
+
+        // Ensure this helper exists in AdminController
+        private void NormalizeStatus(PropertyUploadDto form)
+        {
+            form.Status = string.Equals(form.Status, "Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available";
+        }
 
         // -------------------- HELPERS --------------------
         private async Task<HttpClient> CreateApiClient()
