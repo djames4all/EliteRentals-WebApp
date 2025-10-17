@@ -12,6 +12,8 @@ namespace EliteRentals.Models.ViewModels
         public List<MessageDto> SentMessages { get; set; } = new();
         public int CurrentUserId { get; set; }
         public string CurrentUserName { get; set; } = string.Empty;
+
+        public bool HasUnreadMessages { get; set; }
     }
 
     public class ConversationDto

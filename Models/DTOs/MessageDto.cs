@@ -14,5 +14,8 @@ namespace EliteRentals.Models.DTOs
         public bool IsChatbot { get; set; } = false;
         public bool IsBroadcast { get; set; }
         public string? TargetRole { get; set; }
+
+        public bool IsRead { get; set; }
+
     }
 }

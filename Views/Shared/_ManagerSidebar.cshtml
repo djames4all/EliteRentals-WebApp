@@ -80,6 +80,10 @@
                    href="@Url.Action("ManagerTenants", "PropertyManager")">Tenants</a>
             </li>
             <li class="nav-item">
+                <a class="nav-link @(currentTitle.Contains("Messages") ? "active" : "")"
+                   href="@Url.Action("ManagerMessages", "PropertyManager")">Messages</a>
+            </li>
+            <li class="nav-item">
                 <a class="nav-link @(currentTitle.Contains("Escalations") ? "active" : "")"
                    href="@Url.Action("ManagerEscalations", "PropertyManager")">Escalations</a>
             </li>

@@ -1,13 +1,13 @@
 ﻿@model EliteRentals.Models.ViewModels.AdminMessagesViewModel
 
 @{
-    ViewData["Title"] = "Admin Messages - EliteRentals";
+    ViewData["Title"] = "Manager Messages - EliteRentals";
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
 <div class="container-fluid">
     <div class="row">
-        @await Html.PartialAsync("_AdminSidebar")
+        @await Html.PartialAsync("_ManagerSidebar")
 
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
             <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
@@ -57,7 +57,7 @@
                         <div class="list-group">
                             @foreach (var convo in Model.Conversations)
                             {
-                                <a href="@Url.Action("ViewConversation", "Admin", new { userId = convo.OtherUserId })"
+                                <a href="@Url.Action("ViewConversation", "PropertyManager", new { userId = convo.OtherUserId })"
                                    class="list-group-item list-group-item-action d-flex justify-content-between">
                                     <div>
                                         <h6>@convo.OtherUserName</h6>
@@ -258,23 +258,3 @@
         </div>
     </div>
 </div>
-@section Scripts {
-    <script>
-        // Auto-refresh inbox light every 30 seconds
-        setInterval(async () => {
-            const res = await fetch('/Admin/CheckNewMessages');
-            const data = await res.json();
-            const inboxTab = document.querySelector('#messageTabs button[data-bs-target="#inbox"]');
-            if (data.hasNewMessages) {
-                if (!inboxTab.querySelector('.bg-danger')) {
-                    const dot = document.createElement('span');
-                    dot.className = 'position-absolute top-0 start-100 translate-middle p-1 bg-danger border border-light rounded-circle';
-                    inboxTab.appendChild(dot);
-                }
-            } else {
-                const dot = inboxTab.querySelector('.bg-danger');
-                if (dot) dot.remove();
-            }
-        }, 30000);
-    </script>
-}

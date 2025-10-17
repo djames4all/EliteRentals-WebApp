@@ -188,6 +188,10 @@ build_metadata.AdditionalFiles.CssScope =
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJNYWludGVuYW5jZS5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
 
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerMessages.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJNZXNzYWdlcy5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
 [C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ManagerPayments.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXE1hbmFnZXJQYXltZW50cy5jc2h0bWw=
 build_metadata.AdditionalFiles.CssScope = 
@@ -214,6 +218,10 @@ build_metadata.AdditionalFiles.CssScope =
 
 [C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ViewApplication.cshtml]
 build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXFZpZXdBcHBsaWNhdGlvbi5jc2h0bWw=
+build_metadata.AdditionalFiles.CssScope = 
+
+[C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ViewConversation.cshtml]
+build_metadata.AdditionalFiles.TargetPath = Vmlld3NcUHJvcGVydHlNYW5hZ2VyXFZpZXdDb252ZXJzYXRpb24uY3NodG1s
 build_metadata.AdditionalFiles.CssScope = 
 
 [C:/Users/dasha/OneDrive - ADvTECH Ltd/INSY7315/EliteRentals Web App/EliteRentals-WebApp/Views/PropertyManager/ViewLease.cshtml]

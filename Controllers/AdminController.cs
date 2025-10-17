@@ -1066,6 +1066,14 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
 
                 model.InboxMessages = inbox;
                 model.SentMessages = sent;
+                foreach (var msg in model.InboxMessages.Concat(model.SentMessages))
+                {
+                    msg.Timestamp = msg.Timestamp.ToLocalTime();
+                }
+
+                // ✅ Detect unread messages for notification light
+                model.HasUnreadMessages = model.InboxMessages.Any(m => !m.IsRead);
+
                 model.Conversations = await BuildConversations(inbox.Concat(sent).ToList(), adminId, client);
 
                 return View(model);
@@ -1232,6 +1240,24 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
                 .OrderByDescending(c => c.LastMessageTimestamp)
                 .ToList();
         }
+
+        [HttpGet]
+        public async Task<IActionResult> CheckNewMessages()
+        {
+            var adminId = GetCurrentUserId();
+            var client = await CreateApiClient();
+            var response = await client.GetAsync($"api/Message/inbox/{adminId}");
+
+            if (!response.IsSuccessStatusCode)
+                return Json(new { hasNewMessages = false });
+
+            var json = await response.Content.ReadAsStringAsync();
+            var inbox = JsonSerializer.Deserialize<List<MessageDto>>(json, _jsonOptions) ?? new();
+
+            bool hasNew = inbox.Any(m => !m.IsRead);
+            return Json(new { hasNewMessages = hasNew });
+        }
+
 
 
         // Helper method to get user name by ID
