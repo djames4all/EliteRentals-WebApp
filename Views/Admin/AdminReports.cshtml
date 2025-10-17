@@ -13,21 +13,106 @@
                 <button class="btn btn-primary" data-bs-toggle="modal" data-bs-target="#generateReportModal">Generate New Report</button>
             </div>
 
-            <!-- Charts Section -->
+            <!-- Report Statistics Cards -->
             <div class="row g-4 mb-4">
-                <div class="col-md-6">
-                    <div class="card shadow-sm">
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-primary">
                         <div class="card-body">
-                            <h5 class="card-title">Monthly Rent Collection</h5>
-                            <canvas id="monthlyRentChart"></canvas>
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted mb-2">Total Reports</h6>
+                                    <h3 class="mb-0" id="totalReportsCount">0</h3>
+                                </div>
+                                <div class="icon-shape bg-primary text-white rounded-circle p-3">
+                                    <i class="fas fa-file-alt fa-2x"></i>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">All generated reports</p>
                         </div>
                     </div>
                 </div>
-                <div class="col-md-6">
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-success">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted mb-2">Completed</h6>
+                                    <h3 class="mb-0" id="completedReportsCount">0</h3>
+                                </div>
+                                <div class="icon-shape bg-success text-white rounded-circle p-3">
+                                    <i class="fas fa-check-circle fa-2x"></i>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Ready for download</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-warning">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted mb-2">Pending</h6>
+                                    <h3 class="mb-0" id="pendingReportsCount">0</h3>
+                                </div>
+                                <div class="icon-shape bg-warning text-white rounded-circle p-3">
+                                    <i class="fas fa-clock fa-2x"></i>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Processing reports</p>
+                        </div>
+                    </div>
+                </div>
+                <div class="col-md-3">
+                    <div class="card shadow-sm border-info">
+                        <div class="card-body">
+                            <div class="d-flex justify-content-between align-items-center">
+                                <div>
+                                    <h6 class="card-title text-muted mb-2">This Month</h6>
+                                    <h3 class="mb-0" id="monthlyReportsCount">0</h3>
+                                </div>
+                                <div class="icon-shape bg-info text-white rounded-circle p-3">
+                                    <i class="fas fa-calendar-alt fa-2x"></i>
+                                </div>
+                            </div>
+                            <p class="text-muted mt-2 mb-0">Generated this month</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Quick Actions -->
+            <div class="row g-4 mb-4">
+                <div class="col-12">
                     <div class="card shadow-sm">
                         <div class="card-body">
-                            <h5 class="card-title">Lease Expiration Overview</h5>
-                            <canvas id="leaseReportChart"></canvas>
+                            <h5 class="card-title mb-4">Quick Report Generation</h5>
+                            <div class="row g-3">
+                                <div class="col-md-4">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-primary btn-lg quick-report-btn" data-type="activities">
+                                            <i class="fas fa-history me-2"></i>
+                                            Recent Activities
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-success btn-lg quick-report-btn" data-type="payments">
+                                            <i class="fas fa-money-bill-wave me-2"></i>
+                                            Rent Collection
+                                        </button>
+                                    </div>
+                                </div>
+                                <div class="col-md-4">
+                                    <div class="d-grid">
+                                        <button class="btn btn-outline-warning btn-lg quick-report-btn" data-type="maintenance">
+                                            <i class="fas fa-tools me-2"></i>
+                                            Maintenance
+                                        </button>
+                                    </div>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -36,21 +121,33 @@
             <!-- Reports Table -->
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <h5 class="card-title mb-3">Detailed Reports</h5>
-                    <table class="table table-hover align-middle" id="reportsTable">
-                        <thead>
-                            <tr>
-                                <th>Report Name</th>
-                                <th>Type</th>
-                                <th>Date Generated</th>
-                                <th>Status</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <!-- Populated dynamically -->
-                        </tbody>
-                    </table>
+                    <div class="d-flex justify-content-between align-items-center mb-3">
+                        <h5 class="card-title mb-0">Detailed Reports</h5>
+                        <div class="d-flex gap-2">
+                            <input type="text" class="form-control form-control-sm" id="searchReports" placeholder="Search reports...">
+                            <select class="form-select form-select-sm" id="filterStatus" style="width: auto;">
+                                <option value="">All Status</option>
+                                <option value="Completed">Completed</option>
+                                <option value="Pending">Pending</option>
+                            </select>
+                        </div>
+                    </div>
+                    <div class="table-responsive">
+                        <table class="table table-hover align-middle" id="reportsTable">
+                            <thead>
+                                <tr>
+                                    <th>Report Name</th>
+                                    <th>Type</th>
+                                    <th>Date Generated</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                <!-- Populated dynamically -->
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
             </div>
         </main>
@@ -59,7 +156,7 @@
 
 <!-- Generate Report Modal -->
 <div class="modal fade" id="generateReportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog">
+    <div class="modal-dialog modal-lg">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title">Generate New Report</h5>
@@ -67,20 +164,58 @@
             </div>
             <div class="modal-body">
                 <form id="generateReportForm">
-                    <div class="mb-3">
-                        <label class="form-label">Report Name</label>
-                        <input type="text" class="form-control" id="reportName" required>
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Report Type</label>
+                            <select class="form-select" id="reportType" required>
+                                <option value="">Select Report Type</option>
+                                <option value="activities">Recent Activities</option>
+                                <option value="maintenance">Maintenance Requests</option>
+                                <option value="payments">Payments</option>
+                            </select>
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Status</label>
+                            <select class="form-select" id="reportStatus">
+                                <option value="">All Statuses</option>
+                                <option value="Pending">Pending</option>
+                                <option value="Completed">Completed</option>
+                                <option value="In Progress">In Progress</option>
+                            </select>
+                        </div>
                     </div>
+
+                    <div class="row">
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">Start Date</label>
+                            <input type="date" class="form-control" id="startDate">
+                        </div>
+                        <div class="col-md-6 mb-3">
+                            <label class="form-label">End Date</label>
+                            <input type="date" class="form-control" id="endDate">
+                        </div>
+                    </div>
+
                     <div class="mb-3">
-                        <label class="form-label">Report Type</label>
-                        <select class="form-select" id="reportType">
-                            <option>Monthly Rent Collection</option>
-                            <option>Lease Expiration Overview</option>
-                            <option>Maintenance Summary</option>
-                            <option>Tenant Activity</option>
+                        <label class="form-label">Property</label>
+                        <select class="form-select" id="propertyId">
+                            <option value="">All Properties</option>
+                            <!-- Properties will be populated dynamically -->
                         </select>
                     </div>
-                    <button type="submit" class="btn btn-primary">Generate</button>
+
+                    <div class="mb-3">
+                        <label class="form-label">Report Name</label>
+                        <input type="text" class="form-control" id="reportName" placeholder="Enter report name" required>
+                    </div>
+
+                    <div class="d-flex justify-content-end gap-2">
+                        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Cancel</button>
+                        <button type="submit" class="btn btn-primary" id="generateReportBtn">
+                            <span class="spinner-border spinner-border-sm d-none" role="status"></span>
+                            Generate Report
+                        </button>
+                    </div>
                 </form>
             </div>
         </div>
@@ -89,7 +224,7 @@
 
 <!-- View Report Modal -->
 <div class="modal fade" id="viewReportModal" tabindex="-1" aria-hidden="true">
-    <div class="modal-dialog modal-lg">
+    <div class="modal-dialog modal-xl">
         <div class="modal-content">
             <div class="modal-header">
                 <h5 class="modal-title" id="viewReportTitle">Report Details</h5>
@@ -98,114 +233,356 @@
             <div class="modal-body" id="viewReportBody">
                 <!-- Report content will appear here -->
             </div>
+            <div class="modal-footer">
+                <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Close</button>
+                <button type="button" class="btn btn-primary" id="downloadFromViewBtn">Download PDF</button>
+            </div>
         </div>
     </div>
 </div>
 
 @section Scripts {
-    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
     <script>
-        // Mock report data
-        let reports = [
-            {id:1, name:"January Rent Collection", type:"Monthly Rent Collection", date:"2025-01-31", status:"Completed"},
-            {id:2, name:"Feb Lease Expirations", type:"Lease Expiration Overview", date:"2025-02-28", status:"Completed"},
-            {id:3, name:"Maintenance Summary March", type:"Maintenance Summary", date:"2025-03-15", status:"Pending"},
-            {id:4, name:"Tenant Activity April", type:"Tenant Activity", date:"2025-04-20", status:"Completed"}
-        ];
+        // Global variables
+        let reports = [];
+        let properties = [];
+        let currentViewingReport = null;
 
         const reportsTableBody = document.querySelector("#reportsTable tbody");
+        const generateReportModal = new bootstrap.Modal(document.getElementById('generateReportModal'));
         const viewReportModal = new bootstrap.Modal(document.getElementById('viewReportModal'));
+        const generateReportBtn = document.getElementById('generateReportBtn');
+        const generateReportForm = document.getElementById('generateReportForm');
 
-        function renderReports(){
+        // Initialize the page
+        document.addEventListener('DOMContentLoaded', function() {
+            loadProperties();
+            loadReports();
+            updateReportStatistics();
+            setupEventListeners();
+        });
+
+        // Load properties for filter
+        async function loadProperties() {
+            try {
+                const response = await fetch('/Admin/GetProperties');
+                if (response.ok) {
+                    properties = await response.json();
+                    const propertySelect = document.getElementById('propertyId');
+                    properties.forEach(prop => {
+                        const option = document.createElement('option');
+                        option.value = prop.propertyId;
+                        option.textContent = prop.propertyTitle;
+                        propertySelect.appendChild(option);
+                    });
+                }
+            } catch (error) {
+                console.error('Error loading properties:', error);
+            }
+        }
+
+        // Load initial reports
+        function loadReports() {
+            // In a real application, you would fetch this from an API
+            reports = [
+                {id:1, name:"January Rent Collection", type:"Monthly Rent Collection", date:"2025-01-31", status:"Completed", reportType: "payments"},
+                {id:2, name:"Feb Lease Expirations", type:"Lease Expiration Overview", date:"2025-02-28", status:"Completed", reportType: "activities"},
+                {id:3, name:"Maintenance Summary March", type:"Maintenance Summary", date:"2025-03-15", status:"Pending", reportType: "maintenance"},
+                {id:4, name:"Tenant Activity April", type:"Tenant Activity", date:"2025-04-20", status:"Completed", reportType: "activities"}
+            ];
+            renderReports();
+        }
+
+        // Update report statistics
+        function updateReportStatistics() {
+            const total = reports.length;
+            const completed = reports.filter(r => r.status === 'Completed').length;
+            const pending = reports.filter(r => r.status === 'Pending').length;
+
+            // Count reports from current month
+            const currentMonth = new Date().getMonth();
+            const currentYear = new Date().getFullYear();
+            const monthly = reports.filter(r => {
+                const reportDate = new Date(r.date);
+                return reportDate.getMonth() === currentMonth && reportDate.getFullYear() === currentYear;
+            }).length;
+
+            document.getElementById('totalReportsCount').textContent = total;
+            document.getElementById('completedReportsCount').textContent = completed;
+            document.getElementById('pendingReportsCount').textContent = pending;
+            document.getElementById('monthlyReportsCount').textContent = monthly;
+        }
+
+        // Setup additional event listeners
+        function setupEventListeners() {
+            // Quick report buttons
+            document.querySelectorAll('.quick-report-btn').forEach(btn => {
+                btn.addEventListener('click', function() {
+                    const reportType = this.getAttribute('data-type');
+                    document.getElementById('reportType').value = reportType;
+
+                    // Set default report name based on type
+                    const typeNames = {
+                        'activities': 'Recent Activities Report',
+                        'payments': 'Rent Collection Report',
+                        'maintenance': 'Maintenance Summary Report'
+                    };
+                    document.getElementById('reportName').value = `${typeNames[reportType]} - ${new Date().toLocaleDateString()}`;
+
+                    generateReportModal.show();
+                });
+            });
+
+            // Search functionality
+            document.getElementById('searchReports').addEventListener('input', function(e) {
+                const searchTerm = e.target.value.toLowerCase();
+                filterReports();
+            });
+
+            // Status filter
+            document.getElementById('filterStatus').addEventListener('change', filterReports);
+        }
+
+        // Filter reports based on search and status
+        function filterReports() {
+            const searchTerm = document.getElementById('searchReports').value.toLowerCase();
+            const statusFilter = document.getElementById('filterStatus').value;
+
+            const filteredReports = reports.filter(report => {
+                const matchesSearch = report.name.toLowerCase().includes(searchTerm) ||
+                                    report.type.toLowerCase().includes(searchTerm);
+                const matchesStatus = !statusFilter || report.status === statusFilter;
+                return matchesSearch && matchesStatus;
+            });
+
+            renderFilteredReports(filteredReports);
+        }
+
+        // Render filtered reports
+        function renderFilteredReports(filteredReports) {
             reportsTableBody.innerHTML = "";
-            reports.forEach(r=>{
+            filteredReports.forEach(r => {
                 const tr = document.createElement("tr");
+                const statusBadge = r.status === 'Completed' ? 'badge bg-success' :
+                                  r.status === 'Pending' ? 'badge bg-warning' : 'badge bg-secondary';
+
                 tr.innerHTML = `
                     <td>${r.name}</td>
                     <td>${r.type}</td>
                     <td>${r.date}</td>
-                    <td>${r.status}</td>
+                    <td><span class="${statusBadge}">${r.status}</span></td>
                     <td>
-                        <button class="btn btn-sm btn-info view-btn">View</button>
-                        <button class="btn btn-sm btn-success download-btn">Download</button>
-                        <button class="btn btn-sm btn-danger delete-btn">Delete</button>
+                        <button class="btn btn-sm btn-info view-btn" data-id="${r.id}">View</button>
+                        <button class="btn btn-sm btn-success download-btn" data-id="${r.id}">Download</button>
+                        <button class="btn btn-sm btn-danger delete-btn" data-id="${r.id}">Delete</button>
                     </td>
                 `;
-                // View button
-                tr.querySelector('.view-btn').addEventListener('click', ()=>{
-                    document.getElementById('viewReportTitle').textContent = r.name;
-                    document.getElementById('viewReportBody').innerHTML = `
-                        <p><strong>Type:</strong> ${r.type}</p>
-                        <p><strong>Date Generated:</strong> ${r.date}</p>
-                        <p><strong>Status:</strong> ${r.status}</p>
-                        <p>Lorem ipsum dolor sit amet, consectetur adipiscing elit. Report details would appear here.</p>
-                    `;
-                    viewReportModal.show();
-                });
-                // Download button
-                tr.querySelector('.download-btn').addEventListener('click', ()=>{
-                    alert(`Downloading report: ${r.name}`);
-                });
-                // Delete button
-                tr.querySelector('.delete-btn').addEventListener('click', ()=>{
-                    if(confirm(`Are you sure you want to delete "${r.name}"?`)){
-                        reports = reports.filter(rep=>rep.id!==r.id);
-                        renderReports();
-                    }
-                });
-
                 reportsTableBody.appendChild(tr);
+            });
+
+            // Add event listeners to the filtered rows
+            document.querySelectorAll('.view-btn').forEach(btn => {
+                btn.addEventListener('click', handleViewReport);
+            });
+            document.querySelectorAll('.download-btn').forEach(btn => {
+                btn.addEventListener('click', handleDownloadReport);
+            });
+            document.querySelectorAll('.delete-btn').forEach(btn => {
+                btn.addEventListener('click', handleDeleteReport);
             });
         }
 
-        renderReports();
+        // Render reports table
+        function renderReports(){
+            filterReports(); // This will render with current filters
+        }
 
-        // Generate report form
-        document.getElementById('generateReportForm').addEventListener('submit', e=>{
+        // Handle view report
+        function handleViewReport(e) {
+            const reportId = e.target.getAttribute('data-id');
+            currentViewingReport = reports.find(r => r.id == reportId);
+
+            if (currentViewingReport) {
+                document.getElementById('viewReportTitle').textContent = currentViewingReport.name;
+                document.getElementById('viewReportBody').innerHTML = `
+                    <div class="row">
+                        <div class="col-md-6">
+                            <p><strong>Type:</strong> ${currentViewingReport.type}</p>
+                            <p><strong>Date Generated:</strong> ${currentViewingReport.date}</p>
+                            <p><strong>Status:</strong> <span class="badge ${currentViewingReport.status === 'Completed' ? 'bg-success' : 'bg-warning'}">${currentViewingReport.status}</span></p>
+                        </div>
+                        <div class="col-md-6">
+                            <p><strong>Report ID:</strong> ${currentViewingReport.id}</p>
+                            <p><strong>Data Range:</strong> Last 30 days</p>
+                            <p><strong>Records Count:</strong> ${Math.floor(Math.random() * 100) + 50}</p>
+                        </div>
+                    </div>
+                    <div class="mt-3">
+                        <h6>Summary</h6>
+                        <p>This report contains detailed information about ${currentViewingReport.type.toLowerCase()}.
+                        The data has been processed and is ready for analysis. You can download the full report in PDF format for offline viewing.</p>
+                    </div>
+                `;
+                viewReportModal.show();
+            }
+        }
+
+        // Handle download report
+        async function handleDownloadReport(e) {
+            const reportId = e.target.getAttribute('data-id');
+            const report = reports.find(r => r.id == reportId);
+
+            if (!report) return;
+
+            try {
+                // Show loading state
+                e.target.innerHTML = '<span class="spinner-border spinner-border-sm" role="status"></span> Downloading...';
+                e.target.disabled = true;
+
+                const params = new URLSearchParams();
+
+                // Add date range (last 30 days as default)
+                const endDate = new Date();
+                const startDate = new Date();
+                startDate.setDate(startDate.getDate() - 30);
+
+                params.append('startDate', startDate.toISOString().split('T')[0]);
+                params.append('endDate', endDate.toISOString().split('T')[0]);
+
+                let url = '';
+                switch (report.reportType) {
+                    case 'activities':
+                        url = '/Admin/ExportActivitiesReportPdf';
+                        break;
+                    case 'maintenance':
+                        url = '/Admin/ExportMaintenanceReportPdf';
+                        break;
+                    case 'payments':
+                        url = '/Admin/ExportPaymentsReportPdf';
+                        break;
+                    default:
+                        throw new Error('Unknown report type');
+                }
+
+                // Trigger download
+                window.location.href = `${url}?${params.toString()}`;
+
+            } catch (error) {
+                alert('Error downloading report: ' + error.message);
+            } finally {
+                // Reset button state
+                setTimeout(() => {
+                    e.target.innerHTML = 'Download';
+                    e.target.disabled = false;
+                }, 2000);
+            }
+        }
+
+        // Handle delete report
+        function handleDeleteReport(e) {
+            const reportId = e.target.getAttribute('data-id');
+            const report = reports.find(r => r.id == reportId);
+
+            if (report && confirm(`Are you sure you want to delete "${report.name}"?`)) {
+                reports = reports.filter(r => r.id != reportId);
+                renderReports();
+                updateReportStatistics();
+                showToast('Report deleted successfully', 'success');
+            }
+        }
+
+        // Handle generate report form submission
+        generateReportForm.addEventListener('submit', async function(e) {
             e.preventDefault();
-            const name = document.getElementById('reportName').value;
-            const type = document.getElementById('reportType').value;
-            const date = new Date().toISOString().split('T')[0];
 
-            const newReport = {
-                id: reports.length + 1,
-                name,
-                type,
-                date,
-                status: "Pending"
-            };
+            const reportType = document.getElementById('reportType').value;
+            const reportName = document.getElementById('reportName').value;
+            const startDate = document.getElementById('startDate').value;
+            const endDate = document.getElementById('endDate').value;
+            const propertyId = document.getElementById('propertyId').value;
+            const status = document.getElementById('reportStatus').value;
 
-            reports.push(newReport);
-            renderReports();
-            bootstrap.Modal.getInstance(document.getElementById('generateReportModal')).hide();
-            e.target.reset();
-        });
+            if (!reportType || !reportName) {
+                alert('Please fill in all required fields');
+                return;
+            }
 
-        // Charts
-        const rentChart = new Chart(document.getElementById('monthlyRentChart').getContext('2d'), {
-            type: 'line',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-                datasets: [{
-                    label: 'Rent Collected',
-                    data: [2000,2500,3000,3500,3200,4000],
-                    borderColor: '#0d6efd',
-                    backgroundColor: 'rgba(13,110,253,0.2)',
-                    fill: true
-                }]
+            try {
+                // Show loading state
+                const spinner = generateReportBtn.querySelector('.spinner-border');
+                spinner.classList.remove('d-none');
+                generateReportBtn.disabled = true;
+
+                const params = new URLSearchParams();
+                if (startDate) params.append('startDate', startDate);
+                if (endDate) params.append('endDate', endDate);
+                if (propertyId) params.append('propertyId', propertyId);
+                if (status) params.append('status', status);
+
+                let url = '';
+                let typeName = '';
+
+                switch (reportType) {
+                    case 'activities':
+                        url = '/Admin/ExportActivitiesReportPdf';
+                        typeName = 'Recent Activities';
+                        break;
+                    case 'maintenance':
+                        url = '/Admin/ExportMaintenanceReportPdf';
+                        typeName = 'Maintenance Summary';
+                        break;
+                    case 'payments':
+                        url = '/Admin/ExportPaymentsReportPdf';
+                        typeName = 'Monthly Rent Collection';
+                        break;
+                }
+
+                // Generate the report
+                window.location.href = `${url}?${params.toString()}`;
+
+                // Add to reports list
+                const newReport = {
+                    id: reports.length + 1,
+                    name: reportName,
+                    type: typeName,
+                    date: new Date().toISOString().split('T')[0],
+                    status: "Completed",
+                    reportType: reportType
+                };
+
+                reports.unshift(newReport);
+                renderReports();
+                updateReportStatistics();
+
+                generateReportModal.hide();
+                generateReportForm.reset();
+                showToast('Report generated successfully', 'success');
+
+            } catch (error) {
+                alert('Error generating report: ' + error.message);
+            } finally {
+                // Reset button state
+                const spinner = generateReportBtn.querySelector('.spinner-border');
+                spinner.classList.add('d-none');
+                generateReportBtn.disabled = false;
             }
         });
 
-        const leaseChart = new Chart(document.getElementById('leaseReportChart').getContext('2d'), {
-            type: 'bar',
-            data: {
-                labels: ['Jan','Feb','Mar','Apr','May','Jun'],
-                datasets: [{
-                    label: 'Expiring Leases',
-                    data: [2,5,3,8,4,6],
-                    backgroundColor: '#ffc107'
-                }]
+        // Download from view modal
+        document.getElementById('downloadFromViewBtn').addEventListener('click', function() {
+            if (currentViewingReport) {
+                const downloadBtn = document.querySelector(`.download-btn[data-id="${currentViewingReport.id}"]`);
+                if (downloadBtn) {
+                    downloadBtn.click();
+                }
+                viewReportModal.hide();
             }
         });
+
+        // Utility function to show toast messages
+        function showToast(message, type = 'info') {
+            // You can implement a toast notification here
+            console.log(`${type.toUpperCase()}: ${message}`);
+        }
     </script>
 }

@@ -1,10 +1,13 @@
 ﻿using EliteRentals.Models;
 using EliteRentals.Models.DTOs;
 using EliteRentals.Models.ViewModels;
+using iTextSharp.text;
+using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Http.Json;
 using Microsoft.AspNetCore.Mvc;
 using System.Net.Http.Headers;
+using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
@@ -1432,6 +1435,179 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
             else
                 return "Thank you for your message. Our team will get back to you shortly.";
         }
+
+        // Helper method to generate PDF
+        private IActionResult GeneratePdf(List<RecentActivityDto> records, string title, string filePrefix)
+        {
+            using var ms = new MemoryStream();
+            var doc = new iTextSharp.text.Document(PageSize.A4, 25, 25, 30, 30);
+            iTextSharp.text.pdf.PdfWriter.GetInstance(doc, ms);
+            doc.Open();
+
+            var titleFont = FontFactory.GetFont("Arial", 16, iTextSharp.text.Font.BOLD);
+            var tableFont = FontFactory.GetFont("Arial", 12);
+
+            doc.Add(new Paragraph(title, titleFont));
+            doc.Add(new Paragraph($"Generated on {DateTime.Now:dd MMM yyyy}\n\n"));
+
+            var table = new PdfPTable(5) { WidthPercentage = 100 };
+            table.SetWidths(new float[] { 3, 3, 2, 2, 2 });
+
+            void AddHeader(string text) => table.AddCell(new PdfPCell(new Phrase(text, tableFont)) { BackgroundColor = BaseColor.LIGHT_GRAY });
+            AddHeader("Tenant"); AddHeader("Property"); AddHeader("Action"); AddHeader("Date"); AddHeader("Status");
+
+            foreach (var r in records)
+            {
+                table.AddCell(new PdfPCell(new Phrase(r.Tenant, tableFont)));
+                table.AddCell(new PdfPCell(new Phrase(r.Property, tableFont)));
+                table.AddCell(new PdfPCell(new Phrase(r.Action, tableFont)));
+                table.AddCell(new PdfPCell(new Phrase(r.Date.ToString("yyyy-MM-dd"), tableFont)));
+                table.AddCell(new PdfPCell(new Phrase(r.Status, tableFont)));
+            }
+
+            doc.Add(table);
+            doc.Close();
+
+            return File(ms.ToArray(), "application/pdf", $"{filePrefix}_{DateTime.Now:yyyyMMdd}.pdf");
+        }
+        // ================== EXPORT REPORTS ==================
+
+        private HttpClient GetApiClientWithJwt()
+        {
+            var client = _clientFactory.CreateClient();
+            client.BaseAddress = new Uri("https://eliterentalsapi-czckh7fadmgbgtgf.southafricanorth-01.azurewebsites.net/api/");
+
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+            {
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+            }
+
+            client.Timeout = TimeSpan.FromMinutes(5);
+            return client;
+        }
+
+        // Export Recent Activities as PDF
+        [HttpGet]
+        public async Task<IActionResult> ExportActivitiesReportPdf(DateTime? startDate, DateTime? endDate, int? propertyId, string status)
+        {
+            var client = GetApiClientWithJwt();
+
+            var leases = await client.GetFromJsonAsync<List<LeaseDto>>("lease");
+            var maintenance = await client.GetFromJsonAsync<List<MaintenanceDto>>("maintenance");
+            var payments = await client.GetFromJsonAsync<List<PaymentDto>>("payment");
+
+            var records = new List<RecentActivityDto>();
+
+            // Combine maintenance and payments
+            records.AddRange(maintenance.Select(m =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == m.TenantId);
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Maintenance",
+                    Date = m.CreatedAt,
+                    Status = m.Status ?? "Pending"
+                };
+            }));
+
+            records.AddRange(payments.Select(p =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == p.TenantId);
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Payment",
+                    Date = p.Date,
+                    Status = p.Status ?? "Unknown"
+                };
+            }));
+
+            // Apply filters
+            if (startDate.HasValue) records = records.Where(r => r.Date >= startDate.Value).ToList();
+            if (endDate.HasValue) records = records.Where(r => r.Date <= endDate.Value).ToList();
+            if (propertyId.HasValue)
+            {
+                var propTitle = leases.FirstOrDefault(l => l.PropertyId == propertyId)?.PropertyTitle ?? "";
+                records = records.Where(r => r.Property.Contains(propTitle)).ToList();
+            }
+            if (!string.IsNullOrEmpty(status)) records = records.Where(r => r.Status == status).ToList();
+
+            return GeneratePdf(records, "Recent Activities Report", "RecentActivities");
+        }
+
+        // Export Maintenance Requests as PDF
+        [HttpGet]
+        public async Task<IActionResult> ExportMaintenanceReportPdf(DateTime? startDate, DateTime? endDate, int? propertyId, string status)
+        {
+            var client = GetApiClientWithJwt();
+
+            var leases = await client.GetFromJsonAsync<List<LeaseDto>>("lease");
+            var maintenance = await client.GetFromJsonAsync<List<MaintenanceDto>>("maintenance");
+
+            var records = maintenance.Select(m =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == m.TenantId);
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Maintenance",
+                    Date = m.CreatedAt,
+                    Status = m.Status ?? "Pending"
+                };
+            }).ToList();
+
+            if (startDate.HasValue) records = records.Where(r => r.Date >= startDate.Value).ToList();
+            if (endDate.HasValue) records = records.Where(r => r.Date <= endDate.Value).ToList();
+            if (propertyId.HasValue)
+            {
+                var propTitle = leases.FirstOrDefault(l => l.PropertyId == propertyId)?.PropertyTitle ?? "";
+                records = records.Where(r => r.Property.Contains(propTitle)).ToList();
+            }
+            if (!string.IsNullOrEmpty(status)) records = records.Where(r => r.Status == status).ToList();
+
+            return GeneratePdf(records, "Maintenance Requests Report", "MaintenanceRequests");
+        }
+
+        // Export Payments as PDF
+        [HttpGet]
+        public async Task<IActionResult> ExportPaymentsReportPdf(DateTime? startDate, DateTime? endDate, int? propertyId, string status)
+        {
+            var client = GetApiClientWithJwt();
+
+            var leases = await client.GetFromJsonAsync<List<LeaseDto>>("lease");
+            var payments = await client.GetFromJsonAsync<List<PaymentDto>>("payment");
+
+            var records = payments.Select(p =>
+            {
+                var lease = leases.FirstOrDefault(l => l.TenantId == p.TenantId);
+                return new RecentActivityDto
+                {
+                    Tenant = lease?.TenantName ?? "Unknown Tenant",
+                    Property = lease?.PropertyTitle ?? "Unknown Property",
+                    Action = "Payment",
+                    Date = p.Date,
+                    Status = p.Status ?? "Unknown"
+                };
+            }).ToList();
+
+            if (startDate.HasValue) records = records.Where(r => r.Date >= startDate.Value).ToList();
+            if (endDate.HasValue) records = records.Where(r => r.Date <= endDate.Value).ToList();
+            if (propertyId.HasValue)
+            {
+                var propTitle = leases.FirstOrDefault(l => l.PropertyId == propertyId)?.PropertyTitle ?? "";
+                records = records.Where(r => r.Property.Contains(propTitle)).ToList();
+            }
+            if (!string.IsNullOrEmpty(status)) records = records.Where(r => r.Status == status).ToList();
+
+            return GeneratePdf(records, "Payments Report", "Payments");
+        }
+
 
 
 
