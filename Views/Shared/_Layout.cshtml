@@ -11,7 +11,8 @@
     <link rel="stylesheet" href="~/EliteRentals.styles.css" asp-append-version="true" />
 </head>
 <body>
-    <input type="hidden" id="currentUserId" value="@Context.Session.GetString("UserId")" />
+    <input type="hidden" id="currentUserId" value="@HttpContextAccessor.HttpContext?.Session.GetString("UserId")" />
+
     <header>
         <nav class="navbar navbar-expand-sm navbar-toggleable-sm navbar-light bg-white border-bottom box-shadow mb-3">
             <div class="container-fluid">
@@ -114,5 +115,66 @@
     <script src="~/lib/bootstrap/dist/js/bootstrap.bundle.min.js"></script>
     <script src="~/js/site.js" asp-append-version="true"></script>
     @await RenderSectionAsync("Scripts", required: false)
+
+    <script>
+        if ("serviceWorker" in navigator) {
+            navigator.serviceWorker.register("/firebase-messaging-sw.js")
+                .then((registration) => {
+                    console.log("✅ Service Worker registered:", registration);
+                }).catch((err) => {
+                    console.error("❌ Service Worker registration failed:", err);
+                });
+        }
+    </script>
+
+
+    @if (isLoggedIn)
+    {
+        <script type="module">
+            import { initializeApp } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-app.js";
+            import { getAnalytics } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-analytics.js";
+            import { getMessaging, getToken, onMessage } from "https://www.gstatic.com/firebasejs/12.4.0/firebase-messaging.js";
+
+            const firebaseConfig = {
+                apiKey: "AIzaSyAqBjYCCfBZo-pLFnY6oybdV5ru3ge17IE",
+                authDomain: "elite-rentals-42256.firebaseapp.com",
+                projectId: "elite-rentals-42256",
+                storageBucket: "elite-rentals-42256.firebasestorage.app",
+                messagingSenderId: "719647668815",
+                appId: "1:719647668815:web:4d5a410415c8df2198483a",
+                measurementId: "G-7XG2PLJLL1"
+            };
+
+            const app = initializeApp(firebaseConfig);
+            const analytics = getAnalytics(app);
+            const messaging = getMessaging(app);
+
+            const vapidKey = "BKpvPVmOcI28BWF5LGv88S0AlffPr3AsCpdudSgaoK_Q_9Vupag1q1W2Ap6Ns6UetoU1OKyUXtU3bHjBBQ8Zs1Q";
+
+            getToken(messaging, { vapidKey }).then((currentToken) => {
+                if (currentToken) {
+                    console.log("📲 FCM Token:", currentToken);
+
+                    fetch("/Account/UpdateFcmToken", {
+                        method: "POST",
+                        headers: {
+                            "Content-Type": "application/json"
+                        },
+                        body: JSON.stringify({ token: currentToken })
+                    });
+                } else {
+                    console.warn("⚠️ No registration token available.");
+                }
+            }).catch((err) => {
+                console.error("❌ Error retrieving token:", err);
+            });
+
+            onMessage(messaging, (payload) => {
+                console.log("🔔 Foreground message:", payload);
+                alert(`${payload.notification?.title}: ${payload.notification?.body}`);
+            });
+        </script>
+    }
+
 </body>
 </html>

@@ -1107,8 +1107,17 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
 
                 var response = await client.PostAsync("api/Message", content);
 
-                TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
-                    response.IsSuccessStatusCode ? "Message sent successfully!" : "Failed to send message.";
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Message sent successfully!";
+                    TempData.Remove("Error");
+                }
+                //else
+                //{
+                //    TempData["Error"] = "Failed to send message.";
+                //    TempData.Remove("Success");
+                //}
+
 
                 return RedirectToAction("AdminMessages");
             }
@@ -1143,8 +1152,17 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
 
                 var response = await client.PostAsync("api/Message/broadcast", content);
 
-                TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
-                    response.IsSuccessStatusCode ? "Announcement sent!" : "Failed to send announcement.";
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Message sent successfully!";
+                    TempData.Remove("Error");
+                }
+                //else
+                //{
+                //    TempData["Error"] = "Failed to send message.";
+                //    TempData.Remove("Success");
+                //}
+
 
                 return RedirectToAction("AdminMessages");
             }

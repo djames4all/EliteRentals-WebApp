@@ -8,6 +8,7 @@ using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
 using Microsoft.AspNetCore.Http;
+using EliteRentals.Models.DTOs;
 
 namespace EliteRentals.Controllers
 {
@@ -166,6 +167,26 @@ namespace EliteRentals.Controllers
 
             return RedirectToDashboard(loginResponse.User.Role);
         }
+
+        [HttpPost]
+        public async Task<IActionResult> UpdateFcmToken([FromBody] FcmTokenDto dto)
+        {
+            var userId = HttpContext.Session.GetString("UserId");
+            var jwt = HttpContext.Session.GetString("JWT");
+
+            if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(jwt))
+                return Unauthorized();
+
+            var client = _clientFactory.CreateClient("EliteRentalsAPI");
+            client.DefaultRequestHeaders.Authorization = new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", jwt);
+
+            var json = JsonSerializer.Serialize(dto);
+            var content = new StringContent(json, Encoding.UTF8, "application/json");
+
+            var response = await client.PatchAsync($"api/Users/{userId}/fcmtoken", content);
+            return response.IsSuccessStatusCode ? Ok() : StatusCode((int)response.StatusCode);
+        }
+
 
         private IActionResult RedirectToDashboard(string role) =>
             role switch

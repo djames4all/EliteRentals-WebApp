@@ -1,5 +1,6 @@
 ﻿using EliteRentals.Models;
 using EliteRentals.Models.DTOs;
+using EliteRentals.Models.ViewModels;
 using EliteRentals.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -797,7 +798,7 @@ namespace EliteRentals.Controllers
                 var propertymanagerId = GetCurrentUserId();
                 var client = await CreateApiClient();
 
-                var model = new Models.ViewModels.AdminMessagesViewModel
+                var model = new AdminMessagesViewModel
                 {
                     CurrentUserId = propertymanagerId,
                     CurrentUserName = HttpContext.Session.GetString("UserName") ?? "PropertyManager"
@@ -830,7 +831,6 @@ namespace EliteRentals.Controllers
 
                 model.InboxMessages = inbox;
                 model.SentMessages = sent;
-
                 foreach (var msg in model.InboxMessages.Concat(model.SentMessages))
                 {
                     msg.Timestamp = msg.Timestamp.ToLocalTime();
@@ -846,7 +846,7 @@ namespace EliteRentals.Controllers
             catch (Exception ex)
             {
                 TempData["Error"] = $"Error loading messages: {ex.Message}";
-                return View(new Models.ViewModels.AdminMessagesViewModel());
+                return View(new AdminMessagesViewModel());
             }
         }
 
@@ -872,8 +872,17 @@ namespace EliteRentals.Controllers
 
                 var response = await client.PostAsync("api/Message", content);
 
-                TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
-                    response.IsSuccessStatusCode ? "Message sent successfully!" : "Failed to send message.";
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Message sent successfully!";
+                    TempData.Remove("Error");
+                }
+                //else
+                //{
+                //    TempData["Error"] = "Failed to send message.";
+                //    TempData.Remove("Success");
+                //}
+
 
                 return RedirectToAction("ManagerMessages");
             }
@@ -908,8 +917,17 @@ namespace EliteRentals.Controllers
 
                 var response = await client.PostAsync("api/Message/broadcast", content);
 
-                TempData[response.IsSuccessStatusCode ? "Success" : "Error"] =
-                    response.IsSuccessStatusCode ? "Announcement sent!" : "Failed to send announcement.";
+                if (response.IsSuccessStatusCode)
+                {
+                    TempData["Success"] = "Message sent successfully!";
+                    TempData.Remove("Error");
+                }
+                //else
+                //{
+                //    TempData["Error"] = "Failed to send message.";
+                //    TempData.Remove("Success");
+                //}
+
 
                 return RedirectToAction("ManagerMessages");
             }

@@ -22,14 +22,15 @@
                 </div>
             </div>
 
-            @if (TempData["Error"] != null)
-            {
-                <div class="alert alert-danger">@TempData["Error"]</div>
-            }
             @if (TempData["Success"] != null)
             {
                 <div class="alert alert-success">@TempData["Success"]</div>
             }
+@*             else if (TempData["Error"] != null)
+            {
+                <div class="alert alert-danger">@TempData["Error"]</div>
+            } *@
+
 
             <ul class="nav nav-tabs mb-3" id="messageTabs" role="tablist">
                 <li class="nav-item"><button class="nav-link active" data-bs-toggle="tab" data-bs-target="#conversations">Conversations</button></li>
