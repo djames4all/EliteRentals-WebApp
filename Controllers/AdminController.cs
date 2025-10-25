@@ -1093,7 +1093,8 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
                 var adminId = GetCurrentUserId();
                 var client = await CreateApiClient();
 
-                var message = new MessageDto
+                // ✅ Map DTO to API Message entity
+                var message = new
                 {
                     SenderId = adminId,
                     ReceiverId = request.ReceiverId,
@@ -1110,14 +1111,12 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["Success"] = "Message sent successfully!";
-                    TempData.Remove("Error");
                 }
-                //else
-                //{
-                //    TempData["Error"] = "Failed to send message.";
-                //    TempData.Remove("Success");
-                //}
-
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Failed to send message: {error}";
+                }
 
                 return RedirectToAction("AdminMessages");
             }
@@ -1136,10 +1135,11 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
                 var adminId = GetCurrentUserId();
                 var client = await CreateApiClient();
 
-                var message = new MessageDto
+                // ✅ Map DTO to API Message entity
+                var message = new
                 {
                     SenderId = adminId,
-                    ReceiverId = null,
+                    ReceiverId = (int?)null,
                     MessageText = MessageText,
                     Timestamp = DateTime.UtcNow,
                     IsChatbot = false,
@@ -1154,15 +1154,13 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["Success"] = "Message sent successfully!";
-                    TempData.Remove("Error");
+                    TempData["Success"] = "Broadcast sent successfully!";
                 }
-                //else
-                //{
-                //    TempData["Error"] = "Failed to send message.";
-                //    TempData.Remove("Success");
-                //}
-
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Failed to send broadcast: {error}";
+                }
 
                 return RedirectToAction("AdminMessages");
             }
@@ -1172,6 +1170,7 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
                 return RedirectToAction("AdminMessages");
             }
         }
+
 
 
 

@@ -858,7 +858,7 @@ namespace EliteRentals.Controllers
                 var propertymanagerId = GetCurrentUserId();
                 var client = await CreateApiClient();
 
-                var message = new MessageDto
+                var message = new
                 {
                     SenderId = propertymanagerId,
                     ReceiverId = request.ReceiverId,
@@ -875,14 +875,12 @@ namespace EliteRentals.Controllers
                 if (response.IsSuccessStatusCode)
                 {
                     TempData["Success"] = "Message sent successfully!";
-                    TempData.Remove("Error");
                 }
-                //else
-                //{
-                //    TempData["Error"] = "Failed to send message.";
-                //    TempData.Remove("Success");
-                //}
-
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Failed to send message: {error}";
+                }
 
                 return RedirectToAction("ManagerMessages");
             }
@@ -901,10 +899,10 @@ namespace EliteRentals.Controllers
                 var propertymanagerId = GetCurrentUserId();
                 var client = await CreateApiClient();
 
-                var message = new MessageDto
+                var message = new
                 {
                     SenderId = propertymanagerId,
-                    ReceiverId = null,
+                    ReceiverId = (int?)null,
                     MessageText = MessageText,
                     Timestamp = DateTime.UtcNow,
                     IsChatbot = false,
@@ -919,15 +917,13 @@ namespace EliteRentals.Controllers
 
                 if (response.IsSuccessStatusCode)
                 {
-                    TempData["Success"] = "Message sent successfully!";
-                    TempData.Remove("Error");
+                    TempData["Success"] = "Broadcast sent successfully!";
                 }
-                //else
-                //{
-                //    TempData["Error"] = "Failed to send message.";
-                //    TempData.Remove("Success");
-                //}
-
+                else
+                {
+                    var error = await response.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Failed to send broadcast: {error}";
+                }
 
                 return RedirectToAction("ManagerMessages");
             }
