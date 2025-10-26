@@ -1,6 +1,7 @@
 ﻿using EliteRentals.Models;
 using EliteRentals.Models.DTOs;
 using EliteRentals.Models.ViewModels;
+using EliteRentals.Services;
 using iTextSharp.text;
 using iTextSharp.text.pdf;
 using Microsoft.AspNetCore.Authorization;
@@ -22,11 +23,13 @@ namespace EliteRentals.Controllers
         private readonly IHttpClientFactory _clientFactory;
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         private readonly IConfiguration _configuration;
+        private readonly EliteRentals.Services.EmailService _emailService;
 
-        public AdminController(IHttpClientFactory clientFactory, IConfiguration configuration)
+        public AdminController(IHttpClientFactory clientFactory, IConfiguration configuration, EmailService emailService)
         {
             _clientFactory = clientFactory;
             _configuration = configuration;
+            _emailService = emailService;
         }
         public IActionResult AdminChatbot() => View();
        
@@ -438,7 +441,7 @@ namespace EliteRentals.Controllers
             client.DefaultRequestHeaders.Authorization =
                 new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
 
-            // Generate a temporary password
+            // Generate temporary password
             user.Password = $"{user.FirstName}@{Guid.NewGuid():N}".Substring(0, 12);
 
             var json = JsonSerializer.Serialize(user);
@@ -452,13 +455,26 @@ namespace EliteRentals.Controllers
                 return View(user);
             }
 
-            // Show success message with generated password
-            ViewBag.Success = "User created successfully!";
-            ViewBag.GeneratedPassword = user.Password;
+            // Send email with temp password
+            try
+            {
+                await _emailService.SendEmailAsync(
+                    user.Email,
+                    "Your New Account",
+                    $"Hello {user.FirstName},\n\nYour temporary password is: {user.Password}\nPlease log in and change it immediately."
+                );
+
+                ViewBag.Success = "User created successfully! Temp password emailed to user.";
+            }
+            catch (Exception ex)
+            {
+                ViewBag.Warning = "User created, but failed to send email: " + ex.Message;
+            }
 
             // Clear form for new user
             return View(new EliteRentals.Models.DTOs.UserDto());
         }
+
 
 
         // -------------------- LEASES --------------------

@@ -1,5 +1,6 @@
 wwwroot\css\site.css
 wwwroot\favicon.ico
+wwwroot\firebase-messaging-sw.js
 wwwroot\js\site.js
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css
 wwwroot\lib\bootstrap\dist\css\bootstrap-grid.css.map
@@ -61,7 +62,6 @@ wwwroot\lib\jquery\dist\jquery.slim.js
 wwwroot\lib\jquery\dist\jquery.slim.min.js
 wwwroot\lib\jquery\dist\jquery.slim.min.map
 wwwroot\lib\jquery\LICENSE.txt
-wwwroot\firebase-messaging-sw.js
 C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\wwwroot\lib\jquery\LICENSE.txt
 C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\wwwroot\lib\jquery\dist\jquery.slim.min.map
 C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\wwwroot\lib\jquery\dist\jquery.slim.min.js

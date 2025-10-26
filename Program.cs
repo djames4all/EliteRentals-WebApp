@@ -88,6 +88,8 @@ namespace EliteRentals
             builder.Services.AddRazorPages();
             builder.Services.AddHttpClient();         // generic factory (ok to keep)
             builder.Services.AddHttpContextAccessor();
+            builder.Services.AddSingleton<EmailService>();
+
 
             var app = builder.Build();
 
