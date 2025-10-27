@@ -12,6 +12,7 @@ using System.Reflection.Metadata;
 using System.Security.Claims;
 using System.Text;
 using System.Text.Json;
+using System.Linq;
 
 
 namespace EliteRentals.Controllers
@@ -24,15 +25,17 @@ namespace EliteRentals.Controllers
         private readonly JsonSerializerOptions _jsonOptions = new JsonSerializerOptions { PropertyNameCaseInsensitive = true };
         private readonly IConfiguration _configuration;
         private readonly EliteRentals.Services.EmailService _emailService;
+        private readonly IEliteApi _api;
 
-        public AdminController(IHttpClientFactory clientFactory, IConfiguration configuration, EmailService emailService)
+        public AdminController(IHttpClientFactory clientFactory, IConfiguration configuration, EmailService emailService,IEliteApi api)
         {
+            _api = api;
             _clientFactory = clientFactory;
             _configuration = configuration;
             _emailService = emailService;
         }
-        public IActionResult AdminChatbot() => View();
-       
+        //public IActionResult AdminChatbot() => View();
+
         public IActionResult AdminProperties() => View();
         public IActionResult AdminReports() => View();
         public IActionResult AdminSettings() => View();
@@ -343,7 +346,7 @@ namespace EliteRentals.Controllers
             return File(bytes, "text/csv", "MaintenanceRequests.csv");
         }
 
-//======================SYSTEM USERS===============================================
+        //======================SYSTEM USERS===============================================
 
         public async Task<IActionResult> AdminSystemUser()
         {
@@ -774,7 +777,7 @@ namespace EliteRentals.Controllers
                 AssignedCaretakerId = m.AssignedCaretakerId,
                 AssignedCaretakerName = m.AssignedCaretaker != null
                     ? $"{m.AssignedCaretaker.FirstName} {m.AssignedCaretaker.LastName}"
-                    : caretakerName, 
+                    : caretakerName,
                 CreatedAt = m.CreatedAt,
                 UpdatedAt = m.UpdatedAt,
                 ProofData = m.ProofData,
@@ -826,7 +829,7 @@ namespace EliteRentals.Controllers
             if (!response.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Unable to fetch payment details.";
-                return RedirectToAction("AdminPayments"); 
+                return RedirectToAction("AdminPayments");
             }
 
             var json = await response.Content.ReadAsStringAsync();
@@ -853,41 +856,41 @@ namespace EliteRentals.Controllers
             return RedirectToAction("AdminPayments");
         }
 
-       // ===================== ADMIN • PROPERTIES =====================
+        // ===================== ADMIN • PROPERTIES =====================
 
-// LIST
-[HttpGet]
-public async Task<IActionResult> AdminProperties(CancellationToken ct)
-{
-    var client = await CreateApiClient();
-    var resp = await client.GetAsync("api/property", ct);
-    if (!resp.IsSuccessStatusCode)
-    {
-        ViewBag.Error = "Failed to load properties.";
-        return View(new List<PropertyReadDto>()); // Views/Admin/AdminProperties.cshtml
-    }
+        // LIST
+        [HttpGet]
+        public async Task<IActionResult> AdminProperties(CancellationToken ct)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync("api/property", ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Failed to load properties.";
+                return View(new List<PropertyReadDto>()); // Views/Admin/AdminProperties.cshtml
+            }
 
-    var json = await resp.Content.ReadAsStringAsync(ct);
-    var items = JsonSerializer.Deserialize<List<PropertyReadDto>>(json, _jsonOptions) ?? new List<PropertyReadDto>();
-    return View(items); // Views/Admin/AdminProperties.cshtml
-}
+            var json = await resp.Content.ReadAsStringAsync(ct);
+            var items = JsonSerializer.Deserialize<List<PropertyReadDto>>(json, _jsonOptions) ?? new List<PropertyReadDto>();
+            return View(items); // Views/Admin/AdminProperties.cshtml
+        }
 
-// VIEW DETAILS
-[HttpGet]
-public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
-{
-    var client = await CreateApiClient();
-    var resp = await client.GetAsync($"api/property/{id}", ct);
-    if (!resp.IsSuccessStatusCode)
-    {
-        TempData["AdminPropertyErr"] = "Unable to load property.";
-        return RedirectToAction(nameof(AdminProperties));
-    }
+        // VIEW DETAILS
+        [HttpGet]
+        public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync($"api/property/{id}", ct);
+            if (!resp.IsSuccessStatusCode)
+            {
+                TempData["AdminPropertyErr"] = "Unable to load property.";
+                return RedirectToAction(nameof(AdminProperties));
+            }
 
-    var json = await resp.Content.ReadAsStringAsync(ct);
-    var p = JsonSerializer.Deserialize<PropertyReadDto>(json, _jsonOptions);
-    return View(p); // Views/Admin/AdminPropertyView.cshtml
-}
+            var json = await resp.Content.ReadAsStringAsync(ct);
+            var p = JsonSerializer.Deserialize<PropertyReadDto>(json, _jsonOptions);
+            return View(p); // Views/Admin/AdminPropertyView.cshtml
+        }
 
         // CREATE (GET)
         [HttpGet]
@@ -1667,9 +1670,274 @@ public async Task<IActionResult> AdminPropertyView(int id, CancellationToken ct)
             return GeneratePdf(records, "Payments Report", "Payments");
         }
 
+// ⬇️ inside the AdminController class
+// (1) Small DTOs for request/response
+public class AdminChatAskRequest
+{
+    public string Text { get; set; } = "";
+}
+public class AdminChatAskResponse
+{
+    public string Reply { get; set; } = "";
+    public string Intent { get; set; } = "";
 
+    // NEW:
+    public bool IsHtml { get; set; } = false;  // if true, the view will render Html as-is
+    public string? Html { get; set; }          // optional rich content
+}
+
+
+// (2) Route to the Chatbot page (view already exists)
+[Authorize(Roles = "Admin")]
+[HttpGet]
+public IActionResult AdminChatbot()
+{
+    return View();
+}
+
+// (3) Main chat endpoint
+[Authorize(Roles = "Admin")]
+[HttpPost]
+[ValidateAntiForgeryToken]
+public async Task<IActionResult> AdminChatbotAsk([FromBody] AdminChatAskRequest req)
+{
+    if (string.IsNullOrWhiteSpace(req?.Text))
+        return BadRequest(new { error = "Empty message" });
+
+    var answer = await GenerateAdminBotReplyAsync(req.Text);
+
+    // optional: log both sides to API messages (skip if API down)
+    try
+    {
+        var api = await CreateApiClientAsync();
+        var me = await GetCurrentUserIdAsync(); // returns int?; may be null if not mapped
+        if (me.HasValue)
+        {
+            var now = DateTime.UtcNow;
+            await api.PostAsJsonAsync("api/Message", new {
+                SenderId = me.Value,
+                ReceiverId = 0, // system
+                MessageText = req.Text,
+                Timestamp = now,
+                IsChatbot = false
+            });
+            await api.PostAsJsonAsync("api/Message", new {
+                SenderId = me.Value,
+                ReceiverId = 0,
+                MessageText = answer.Reply,
+                Timestamp = now,
+                IsChatbot = true,
+                IsBroadcast = false
+            });
+        }
+    }
+    catch { /* non-blocking */ }
+
+    return Ok(answer);
+}
+
+// (4) The “brain”: intent routing + live KPIs from your API
+private async Task<AdminChatAskResponse> GenerateAdminBotReplyAsync(string text)
+{
+    var msg = (text ?? "").Trim().ToLowerInvariant();
+    var api = await CreateApiClientAsync();
+
+    // --- helpers that call your API ---
+    async Task<(int total, int available, int occupied, int vacant)> PropertyStats()
+    {
+        var props = await GetJsonAsync<List<PropertyRead>>(api, "api/Property");
+        int total = props?.Count ?? 0;
+        int occupied = props?.Count(p => string.Equals(p.Status, "Occupied", StringComparison.OrdinalIgnoreCase)) ?? 0;
+        int available = props?.Count(p => string.Equals(p.Status, "Available", StringComparison.OrdinalIgnoreCase)) ?? 0;
+        int vacant = total - occupied;
+        return (total, available, occupied, vacant);
+    }
+
+    async Task<(int pending, int inProgress, int open)> MaintenanceStats()
+    {
+        var items = await GetJsonAsync<List<MaintenanceRead>>(api, "api/Maintenance");
+        int pending = items?.Count(m => string.Equals(m.Status ?? "Pending","Pending", StringComparison.OrdinalIgnoreCase)) ?? 0;
+        int inProg  = items?.Count(m => string.Equals(m.Status ?? "","In Progress", StringComparison.OrdinalIgnoreCase)) ?? 0;
+        return (pending, inProg, (pending + inProg));
+    }
+
+    async Task<decimal> OverduePaymentsTotal()
+    {
+        var pays = await GetJsonAsync<List<PaymentRead>>(api, "api/Payment");
+        return pays?.Where(p => !string.Equals(p.Status, "Paid", StringComparison.OrdinalIgnoreCase))
+                    .Sum(p => p.Amount) ?? 0m;
+    }
+
+    async Task<(int in30, int in60, int in90)> LeaseExpiring()
+    {
+        var leases = await GetJsonAsync<List<LeaseRead>>(api, "api/Lease");
+        var now = DateTime.UtcNow;
+        int in30 = leases?.Count(l => l.EndDate > now && l.EndDate <= now.AddDays(30)) ?? 0;
+        int in60 = leases?.Count(l => l.EndDate > now.AddDays(30) && l.EndDate <= now.AddDays(60)) ?? 0;
+        int in90 = leases?.Count(l => l.EndDate > now.AddDays(60) && l.EndDate <= now.AddDays(90)) ?? 0;
+        return (in30, in60, in90);
+    }
+
+    // --- intents ---
+    if (msg.Contains("mainten") || msg.Contains("repair") || msg.Contains("fix"))
+{
+    try
+    {
+        var items = await _api.GetMaintenanceAsync() ?? new List<MaintenanceDto>();
+
+        static string S(string? s) => (s ?? "").Trim();
+
+        int pending = items.Count(m => string.Equals(S(m.Status), "Pending", StringComparison.OrdinalIgnoreCase));
+        int inProg  = items.Count(m => string.Equals(S(m.Status), "In Progress", StringComparison.OrdinalIgnoreCase)
+                                    || string.Equals(S(m.Status), "InProgress", StringComparison.OrdinalIgnoreCase));
+        int open    = pending + inProg;
+
+        var openRows = items
+            .Where(m => string.Equals(S(m.Status), "Pending", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(S(m.Status), "In Progress", StringComparison.OrdinalIgnoreCase)
+                     || string.Equals(S(m.Status), "InProgress", StringComparison.OrdinalIgnoreCase))
+            .OrderByDescending(m => m.CreatedAt)
+            .Take(6)
+            .Select(m => new {
+                m.MaintenanceId,
+                m.PropertyId,
+                Property   = m.PropertyName,
+                TenantId   = m.TenantId,
+                ReportedBy = m.ReportedBy,
+                Priority   = string.IsNullOrWhiteSpace(m.Priority) ? "—" : m.Priority,
+                Status     = m.Status,
+                Created    = m.CreatedAt.ToString("yyyy-MM-dd")
+            })
+            .ToList();
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append($@"
+<div class=""mb-2""><strong>Maintenance:</strong> {pending} pending, {inProg} in-progress • {open} open.</div>
+<table class=""table table-sm table-striped mb-2"">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Property</th>
+      <th>Reported By</th>
+      <th>Priority</th>
+      <th>Status</th>
+      <th>Created</th>
+    </tr>
+  </thead>
+  <tbody>");
+
+        foreach (var r in openRows)
+        {
+            sb.Append($@"
+    <tr>
+      <td>#{r.MaintenanceId}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Property ?? $"Property {r.PropertyId}")}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.ReportedBy ?? $"Tenant {r.TenantId}")}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Priority ?? "—")}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Status ?? "")}</td>
+      <td>{r.Created}</td>
+    </tr>");
+        }
+
+        sb.Append(@"
+  </tbody>
+</table>
+<a class=""btn btn-sm btn-primary"" href=""__MAINT_URL__"">Open Maintenance</a>");
+
+        return new AdminChatAskResponse {
+            Intent = "maintenance.summary",
+            IsHtml = true,
+            Html   = sb.ToString()
+        };
+    }
+    catch
+    {
+        return new AdminChatAskResponse {
+            Intent = "maintenance.summary",
+            Reply  = "Maintenance lookup failed unexpectedly."
+        };
+    }
+}
+
+
+    if (msg.Contains("lease") && msg.Contains("expir"))
+    {
+        var (in30, in60, in90) = await LeaseExpiring();
+        return new() {
+            Intent = "lease.expirations",
+            Reply = $"Leases expiring → 30d: {in30}, 60d: {in60}, 90d: {in90}."
+        };
+    }
+
+    if (msg.Contains("assign") && (msg.Contains("caretaker") || msg.Contains("tech")))
+    {
+        return new() {
+            Intent = "maintenance.assign",
+            Reply = "Go Admin → Maintenance, open a ticket, pick a caretaker in the dropdown, click Assign, then update status as work progresses."
+        };
+    }
+
+    if (msg.Contains("broadcast") || msg.Contains("announcement"))
+    {
+        return new() {
+            Intent = "messages.broadcast",
+            Reply = "Use Admin → Messages → Send Announcement. Choose ‘All’ or a role (Tenant/Caretaker), type message, Send."
+        };
+    }
+
+    // fallback
+    return new() { Intent = "fallback", Reply = "I didn’t catch that. Try “maintenance summary”, “overdue payments”, “property stats”, or “leases expiring”." };
+}
+
+// (5) Minimal typed readers for JSON mapping (shape matches your API outputs)
+private record PropertyRead(int PropertyId, string? Title, string? Status);
+private record MaintenanceRead(int MaintenanceId, string? Status);
+private record PaymentRead(int PaymentId, decimal Amount, string Status);
+private record LeaseRead(int LeaseId, DateTime EndDate);
+
+// (6) HTTP helpers — pulls JWT from session if available
+private async Task<HttpClient> CreateApiClientAsync()
+{
+    var factory = HttpContext.RequestServices.GetRequiredService<IHttpClientFactory>();
+    var client  = factory.CreateClient("EliteRentalsAPI");
+
+    // Try to get a stored JWT from session or auth ticket
+    var token = HttpContext.Session.GetString("JwtToken");
+    if (!string.IsNullOrWhiteSpace(token))
+    {
+        client.DefaultRequestHeaders.Authorization = new AuthenticationHeaderValue("Bearer", token);
+    }
+
+    // Accept JSON
+    client.DefaultRequestHeaders.Accept.Clear();
+    client.DefaultRequestHeaders.Accept.Add(new MediaTypeWithQualityHeaderValue("application/json"));
+    return await Task.FromResult(client);
+}
+
+private async Task<T?> GetJsonAsync<T>(HttpClient client, string path)
+{
+    try
+    {
+        using var res = await client.GetAsync(path);
+        if (!res.IsSuccessStatusCode) return default;
+        var stream = await res.Content.ReadAsStreamAsync();
+        return await JsonSerializer.DeserializeAsync<T>(stream, new JsonSerializerOptions {
+            PropertyNameCaseInsensitive = true
+        });
+    }
+    catch { return default; }
+}
+
+private async Task<int?> GetCurrentUserIdAsync()
+{
+    // common claim types: "userId", "nameid", "sub". Adjust if needed.
+    var idClaim = User?.Claims?.FirstOrDefault(c => c.Type is "userId" or "nameid" or "sub")?.Value;
+    return await Task.FromResult(int.TryParse(idClaim, out var id) ? id : (int?)null);
+}
 
 
     }
+    
+
 }
 

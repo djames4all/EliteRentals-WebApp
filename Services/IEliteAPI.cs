@@ -15,6 +15,8 @@ namespace EliteRentals.Services
         // Manager: Properties
         Task<int?> CreatePropertyAsync(PropertyUploadDto dto, IFormFile? image, CancellationToken ct = default);
         Task<bool>  UpdatePropertyAsync(int propertyId, PropertyUploadDto dto, IFormFile? image, CancellationToken ct = default);
-        Task<bool>  DeletePropertyAsync(int propertyId, CancellationToken ct = default);
+        Task<bool> DeletePropertyAsync(int propertyId, CancellationToken ct = default);
+        
+        Task<List<MaintenanceDto>> GetMaintenanceAsync(CancellationToken ct = default);
     }
 }
