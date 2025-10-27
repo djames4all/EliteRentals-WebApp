@@ -9,6 +9,7 @@ using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
 using Microsoft.Extensions.Hosting;
 using EliteRentals.Services;
+using System.Globalization;
 
 namespace EliteRentals
 {
@@ -122,6 +123,10 @@ namespace EliteRentals
                 pattern: "{controller=Home}/{action=Index}/{id?}");
 
             app.MapRazorPages();
+            
+            var culture = CultureInfo.GetCultureInfo("en-ZA");
+            CultureInfo.DefaultThreadCurrentCulture = culture;
+            CultureInfo.DefaultThreadCurrentUICulture = culture;
 
             app.Run();
         }
