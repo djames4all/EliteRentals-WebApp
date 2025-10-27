@@ -2,45 +2,45 @@
 /* Please see documentation at https://learn.microsoft.com/aspnet/core/client-side/bundling-and-minification
 for details on configuring this project to bundle and minify static web assets. */
 
-a.navbar-brand[b-qd0oonxy5a] {
+a.navbar-brand[b-252h1bq4aq] {
   white-space: normal;
   text-align: center;
   word-break: break-all;
 }
 
-a[b-qd0oonxy5a] {
+a[b-252h1bq4aq] {
   color: #0077cc;
 }
 
-.btn-primary[b-qd0oonxy5a] {
+.btn-primary[b-252h1bq4aq] {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
 
-.nav-pills .nav-link.active[b-qd0oonxy5a], .nav-pills .show > .nav-link[b-qd0oonxy5a] {
+.nav-pills .nav-link.active[b-252h1bq4aq], .nav-pills .show > .nav-link[b-252h1bq4aq] {
   color: #fff;
   background-color: #1b6ec2;
   border-color: #1861ac;
 }
 
-.border-top[b-qd0oonxy5a] {
+.border-top[b-252h1bq4aq] {
   border-top: 1px solid #e5e5e5;
 }
-.border-bottom[b-qd0oonxy5a] {
+.border-bottom[b-252h1bq4aq] {
   border-bottom: 1px solid #e5e5e5;
 }
 
-.box-shadow[b-qd0oonxy5a] {
+.box-shadow[b-252h1bq4aq] {
   box-shadow: 0 .25rem .75rem rgba(0, 0, 0, .05);
 }
 
-button.accept-policy[b-qd0oonxy5a] {
+button.accept-policy[b-252h1bq4aq] {
   font-size: 1rem;
   line-height: inherit;
 }
 
-.footer[b-qd0oonxy5a] {
+.footer[b-252h1bq4aq] {
   position: absolute;
   bottom: 0;
   width: 100%;
@@ -48,10 +48,10 @@ button.accept-policy[b-qd0oonxy5a] {
   line-height: 60px;
 }
 
-:root[b-qd0oonxy5a] { --mgr-sidebar-w: 240px; }
+:root[b-252h1bq4aq] { --mgr-sidebar-w: 240px; }
 
 /* paints a persistent left strip so the dark bg looks continuous while scrolling */
-body[b-qd0oonxy5a]::before{
+body[b-252h1bq4aq]::before{
   content:"";
   position: fixed;
   top: 0; bottom: 0; left: 0;
@@ -61,7 +61,7 @@ body[b-qd0oonxy5a]::before{
 }
 
 /* real sidebar: fixed and scrollable on its own */
-.manager-sidebar[b-qd0oonxy5a]{
+.manager-sidebar[b-252h1bq4aq]{
   position: fixed;
   top: 0; left: 0; bottom: 0;
   width: var(--mgr-sidebar-w);
@@ -73,7 +73,7 @@ body[b-qd0oonxy5a]::before{
 }
 
 /* main content is offset to the right of the fixed sidebar */
-.manager-main[b-qd0oonxy5a]{
+.manager-main[b-252h1bq4aq]{
   margin-left: var(--mgr-sidebar-w);
   padding: 1.25rem 1.5rem;
   position: relative;
@@ -82,12 +82,12 @@ body[b-qd0oonxy5a]::before{
 
 /* mobile: sidebar becomes normal flow so it doesn’t cover content */
 @media (max-width: 991.98px){
-  body[b-qd0oonxy5a]::before{ display: none; }
-  .manager-sidebar[b-qd0oonxy5a]{
+  body[b-252h1bq4aq]::before{ display: none; }
+  .manager-sidebar[b-252h1bq4aq]{
     position: static;
     width: auto;
     height: auto;
     overflow: visible;
   }
-  .manager-main[b-qd0oonxy5a]{ margin-left: 0; padding: 1rem; }
+  .manager-main[b-252h1bq4aq]{ margin-left: 0; padding: 1rem; }
 }

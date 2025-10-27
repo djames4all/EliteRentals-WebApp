@@ -654,6 +654,97 @@ namespace EliteRentals.Controllers
             return View(lease);
         }
 
+        // ARCHIVE Lease
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ArchiveLease(int id)
+        {
+            var client = await CreateApiClient();
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var resp = await client.PutAsync($"api/lease/archive/{id}", null);
+
+            if (!resp.IsSuccessStatusCode)
+                TempData["Error"] = "Failed to archive lease.";
+            else
+                TempData["Success"] = "Lease archived successfully.";
+
+            return RedirectToAction("AdminLeases");
+        }
+
+        // RESTORE Lease
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> RestoreLease(int id)
+        {
+            var client = await CreateApiClient();
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var resp = await client.PutAsync($"api/lease/restore/{id}", null);
+
+            if (!resp.IsSuccessStatusCode)
+                TempData["Error"] = "Failed to restore lease.";
+            else
+                TempData["Success"] = "Lease restored successfully.";
+
+            return RedirectToAction("ArchivedLeases");
+        }
+
+        // ARCHIVED Lease list
+        [HttpGet]
+        public async Task<IActionResult> ArchivedLeases()
+        {
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync("api/lease/archived");
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Failed to load archived leases.";
+                return View(new List<LeaseDto>());
+            }
+
+            var json = await resp.Content.ReadAsStringAsync();
+
+            var leases = JsonSerializer.Deserialize<List<LeaseDto>>(json,
+                new JsonSerializerOptions
+                {
+                    ReferenceHandler = System.Text.Json.Serialization.ReferenceHandler.IgnoreCycles,
+                    PropertyNameCaseInsensitive = true
+                }) ?? new List<LeaseDto>();
+
+            return View(leases);
+        }
+
+
+
+        // DELETE PERMANENT
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> DeleteLeasePermanent(int id)
+        {
+            var client = await CreateApiClient();
+            var token = HttpContext.Session.GetString("JWT");
+            if (!string.IsNullOrEmpty(token))
+                client.DefaultRequestHeaders.Authorization =
+                    new System.Net.Http.Headers.AuthenticationHeaderValue("Bearer", token);
+
+            var resp = await client.DeleteAsync($"api/lease/{id}");
+
+            if (!resp.IsSuccessStatusCode)
+                TempData["Error"] = "Failed to delete lease permanently.";
+            else
+                TempData["Success"] = "Lease permanently deleted.";
+
+            return RedirectToAction("ArchivedLeases");
+        }
+
+
 
         //=================MAINTENANCE==============================================
 
@@ -1058,6 +1149,7 @@ namespace EliteRentals.Controllers
                     CurrentUserName = HttpContext.Session.GetString("UserName") ?? "Admin"
                 };
 
+                // Load users
                 var usersResponse = await client.GetAsync("api/users");
                 if (usersResponse.IsSuccessStatusCode)
                 {
@@ -1066,33 +1158,40 @@ namespace EliteRentals.Controllers
                     model.Users = users.Where(u => u.UserId != adminId).ToList();
                 }
 
-                var inbox = new List<MessageDto>();
-                var sent = new List<MessageDto>();
-
+                // Load Inbox (only non-archived)
                 var inboxResponse = await client.GetAsync($"api/Message/inbox/{adminId}");
+                var inbox = new List<MessageDto>();
                 if (inboxResponse.IsSuccessStatusCode)
                 {
                     var inboxJson = await inboxResponse.Content.ReadAsStringAsync();
                     inbox = JsonSerializer.Deserialize<List<MessageDto>>(inboxJson, _jsonOptions) ?? new();
+                    inbox = inbox.Where(m => !m.ArchivedDate.HasValue).ToList(); // ✅ filter out archived
                 }
 
+                // Load Sent (only non-archived)
                 var sentResponse = await client.GetAsync($"api/Message/sent/{adminId}");
+                var sent = new List<MessageDto>();
                 if (sentResponse.IsSuccessStatusCode)
                 {
                     var sentJson = await sentResponse.Content.ReadAsStringAsync();
                     sent = JsonSerializer.Deserialize<List<MessageDto>>(sentJson, _jsonOptions) ?? new();
+                    sent = sent.Where(m => !m.ArchivedDate.HasValue).ToList(); // ✅ filter out archived
                 }
+
 
                 model.InboxMessages = inbox;
                 model.SentMessages = sent;
+
+                // Convert timestamps to local time
                 foreach (var msg in model.InboxMessages.Concat(model.SentMessages))
                 {
                     msg.Timestamp = msg.Timestamp.ToLocalTime();
                 }
 
-                // ✅ Detect unread messages for notification light
+                // Detect unread messages for notification light
                 model.HasUnreadMessages = model.InboxMessages.Any(m => !m.IsRead);
 
+                // Build conversations (excluding archived messages)
                 model.Conversations = await BuildConversations(inbox.Concat(sent).ToList(), adminId, client);
 
                 return View(model);
@@ -1103,6 +1202,7 @@ namespace EliteRentals.Controllers
                 return View(new AdminMessagesViewModel());
             }
         }
+
 
         [HttpPost]
         public async Task<IActionResult> SendMessage(Models.ViewModels.SendMessageRequest request)
@@ -1293,6 +1393,99 @@ namespace EliteRentals.Controllers
             bool hasNew = inbox.Any(m => !m.IsRead);
             return Json(new { hasNewMessages = hasNew });
         }
+
+        // ARCHIVE
+        [HttpPost]
+        public async Task<IActionResult> ArchiveMessage(int id)
+        {
+            try
+            {
+                var client = await CreateApiClient();
+                // Send an empty body with proper content type
+                var resp = await client.PutAsync($"api/message/archive/{id}", new StringContent(""));
+
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var errorMsg = await resp.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Failed to archive message: {errorMsg}";
+                }
+                else
+                {
+                    TempData["Success"] = "Message archived successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Exception: {ex.Message}";
+            }
+
+            return RedirectToAction("ArchivedMessages");
+        }
+
+        // RESTORE
+        [HttpPost]
+        public async Task<IActionResult> RestoreMessage(int id)
+        {
+            try
+            {
+                var client = await CreateApiClient();
+                var resp = await client.PutAsync($"api/message/restore/{id}", new StringContent(""));
+
+                if (!resp.IsSuccessStatusCode)
+                {
+                    var errorMsg = await resp.Content.ReadAsStringAsync();
+                    TempData["Error"] = $"Failed to restore message: {errorMsg}";
+                }
+                else
+                {
+                    TempData["Success"] = "Message restored successfully.";
+                }
+            }
+            catch (Exception ex)
+            {
+                TempData["Error"] = $"Exception: {ex.Message}";
+            }
+
+            return RedirectToAction("ArchivedMessages");
+        }
+
+
+
+
+        [HttpGet]
+        public async Task<IActionResult> ArchivedMessages()
+        {
+            var adminId = GetCurrentUserId();
+            var client = await CreateApiClient();
+            var resp = await client.GetAsync($"api/message/archived/{adminId}");
+
+            if (!resp.IsSuccessStatusCode)
+            {
+                ViewBag.Error = "Failed to load archived messages.";
+                return View(new List<MessageDto>());
+            }
+
+            var json = await resp.Content.ReadAsStringAsync();
+            var messages = JsonSerializer.Deserialize<List<MessageDto>>(json, _jsonOptions) ?? new List<MessageDto>();
+            return View(messages);
+        }
+
+
+        // DELETE (Permanent)
+        [HttpPost]
+        public async Task<IActionResult> DeleteMessagePermanent(int id)
+        {
+            var client = await CreateApiClient();
+            var resp = await client.DeleteAsync($"api/message/{id}");
+
+            if (!resp.IsSuccessStatusCode)
+                TempData["Error"] = "Failed to permanently delete message.";
+            else
+                TempData["Success"] = "Message permanently deleted.";
+
+            return RedirectToAction("ArchivedMessages");
+        }
+
 
 
 

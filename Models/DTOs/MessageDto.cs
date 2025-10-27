@@ -17,5 +17,7 @@ namespace EliteRentals.Models.DTOs
 
         public bool IsRead { get; set; }
 
+        public DateTime? ArchivedDate { get; set; }
+
     }
 }

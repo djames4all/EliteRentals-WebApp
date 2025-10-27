@@ -11,7 +11,10 @@
 
             <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
                 <h2 class="h3">Lease Management</h2>
-                <a asp-action="AddLease" class="btn btn-primary">Add New Lease</a>
+                    <div>
+        <a asp-action="AddLease" class="btn btn-primary me-2">Add New Lease</a>
+        <a asp-action="ArchivedLeases" class="btn btn-outline-secondary">Archived Leases</a>
+    </div>
             </div>
 
             @if (ViewBag.Error != null)
@@ -55,11 +58,19 @@
                                                 @lease.Status
                                             </span>
                                         </td>
-                                        <td>
-                                            <a asp-action="ViewLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-info">View</a>
-                                            <a asp-action="EditLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-warning">Edit</a>
-                                            <a asp-action="DeleteLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-danger">Delete</a>
-                                        </td>
+<td>
+    <a asp-action="ViewLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-info">View</a>
+    <a asp-action="EditLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-warning">Edit</a>
+    <a asp-action="DeleteLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-danger">Delete</a>
+<form asp-action="ArchiveLease" asp-route-id="@lease.LeaseId" method="post" class="d-inline">
+    @Html.AntiForgeryToken()
+    <button type="submit" class="btn btn-sm btn-secondary" 
+        onclick="return confirm('Archive this lease?');">
+        Archive
+    </button>
+</form>
+
+</td>
                                     </tr>
                                 }
                             </tbody>

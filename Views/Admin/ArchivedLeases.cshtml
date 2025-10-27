@@ -1,0 +1,76 @@
+﻿@model IEnumerable<EliteRentals.Models.DTOs.LeaseDto>
+@{
+    ViewData["Title"] = "Archived Leases";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Archived Leases</h2>
+                <a asp-action="AdminLeases" class="btn btn-outline-primary">Back to Active</a>
+            </div>
+
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger">@ViewBag.Error</div>
+            }
+            else if (!Model.Any())
+            {
+                <div class="alert alert-warning">No archived leases found.</div>
+            }
+            else
+            {
+                <div class="card shadow-sm">
+                    <div class="card-body">
+                        <table class="table table-hover align-middle">
+                            <thead class="table-light">
+                                <tr>
+                                    <th>Tenant</th>
+                                    <th>Property</th>
+                                    <th>Archived Date</th>
+                                    <th>Status</th>
+                                    <th>Actions</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                @foreach (var lease in Model)
+                                {
+                                    <tr>
+                                        <td>@lease.TenantName</td>
+                                        <td>@lease.PropertyTitle</td>
+                                        <td>
+                                            @(lease.ArchivedDate?.ToLocalTime().ToString("yyyy-MM-dd") ?? "-")
+                                        </td>
+
+                                        <td><span class="badge bg-secondary">Archived</span></td>
+                                        <td>
+                                            <form asp-action="RestoreLease" asp-route-id="@lease.LeaseId" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-success" onclick="return confirm('Restore this lease?');">
+                                                    Restore
+                                                </button>
+                                            </form>
+
+                                            <form asp-action="DeleteLeasePermanent" asp-route-id="@lease.LeaseId" method="post" class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit" class="btn btn-sm btn-danger" onclick="return confirm('Permanently delete this lease?');">
+                                                    Delete
+                                                </button>
+                                            </form>
+
+                                        </td>
+
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            }
+        </main>
+    </div>
+</div>

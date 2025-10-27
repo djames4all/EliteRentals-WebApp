@@ -48,6 +48,10 @@
 
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#sent">Sent</button></li>
                 <li class="nav-item"><button class="nav-link" data-bs-toggle="tab" data-bs-target="#announcements">Announcements</button></li>
+
+                <li class="nav-item">
+                    <a class="nav-link" href="@Url.Action("ArchivedMessages", "PropertyManager")">Archived</a>
+                </li>
             </ul>
 
             <div class="tab-content">
@@ -84,7 +88,14 @@
                     @if (Model.InboxMessages.Any())
                     {
                         <table class="table table-hover">
-                            <thead><tr><th>From</th><th>Message</th><th>Time</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>From</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 @foreach (var msg in Model.InboxMessages)
                                 {
@@ -107,10 +118,14 @@
                                                 }
                                             }
                                         </td>
-
-
                                         <td>@msg.MessageText</td>
                                         <td>@msg.Timestamp.ToLocalTime().ToString("g")</td>
+                                        <td>
+                                            <form method="post" asp-action="ArchiveMessage">
+                                                <input type="hidden" name="id" value="@msg.MessageId" />
+                                                <button type="submit" class="btn btn-sm btn-warning w-100">Archive</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>
@@ -127,7 +142,14 @@
                     @if (Model.SentMessages.Any())
                     {
                         <table class="table table-hover">
-                            <thead><tr><th>To</th><th>Message</th><th>Time</th></tr></thead>
+                            <thead>
+                                <tr>
+                                    <th>To</th>
+                                    <th>Message</th>
+                                    <th>Time</th>
+                                    <th>Action</th>
+                                </tr>
+                            </thead>
                             <tbody>
                                 @foreach (var msg in Model.SentMessages.Where(m => !m.IsBroadcast))
                                 {
@@ -145,11 +167,14 @@
                                                 <span class="text-muted">User @msg.ReceiverId</span>
                                             }
                                         </td>
-
-
-
                                         <td>@msg.MessageText</td>
                                         <td>@msg.Timestamp.ToLocalTime().ToString("g")</td>
+                                        <td>
+                                            <form method="post" asp-action="ArchiveMessage">
+                                                <input type="hidden" name="id" value="@msg.MessageId" />
+                                                <button type="submit" class="btn btn-sm btn-warning w-100">Archive</button>
+                                            </form>
+                                        </td>
                                     </tr>
                                 }
                             </tbody>

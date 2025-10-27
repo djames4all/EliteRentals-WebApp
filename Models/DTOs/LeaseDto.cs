@@ -18,6 +18,8 @@
         // convenience display helpers (for views)
         public string TenantName => $"{Tenant?.FirstName} {Tenant?.LastName}";
         public string PropertyTitle => Property?.Title ?? "Unknown Property";
+
+        public DateTime? ArchivedDate { get; set; }
     }
 
     public class LeaseCreateUpdateDto
