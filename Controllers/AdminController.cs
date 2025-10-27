@@ -1676,14 +1676,34 @@ public class AdminChatAskRequest
 {
     public string Text { get; set; } = "";
 }
-public class AdminChatAskResponse
-{
-    public string Reply { get; set; } = "";
-    public string Intent { get; set; } = "";
+        public class AdminChatAskResponse
+        {
+            public string Reply { get; set; } = "";
+            public string Intent { get; set; } = "";
 
-    // NEW:
-    public bool IsHtml { get; set; } = false;  // if true, the view will render Html as-is
-    public string? Html { get; set; }          // optional rich content
+            // NEW:
+            public bool IsHtml { get; set; } = false;  // if true, the view will render Html as-is
+            public string? Html { get; set; }          // optional rich content
+        }
+public class AdminBroadcastRequest
+{
+    public string Audience { get; set; } = "All";   // All, Tenant, Caretaker, PropertyManager
+    public string Text { get; set; } = "";
+}
+[HttpPost]
+[ValidateAntiForgeryToken]
+[Authorize(Roles = "Admin")]
+public async Task<IActionResult> AdminChatbotBroadcast([FromBody] AdminBroadcastRequest req)
+{
+    if (string.IsNullOrWhiteSpace(req?.Text))
+        return BadRequest(new { error = "Message is required." });
+
+    var ok = await _api.BroadcastAsync(req.Audience ?? "All", req.Text.Trim());
+    if (!ok) return StatusCode(502, new { error = "Broadcast failed via API." });
+
+
+
+    return Ok(new { message = "Broadcast sent." });
 }
 
 
@@ -1859,15 +1879,249 @@ private async Task<AdminChatAskResponse> GenerateAdminBotReplyAsync(string text)
     }
 }
 
-
-    if (msg.Contains("lease") && msg.Contains("expir"))
+if ((msg.Contains("overdue") && msg.Contains("payment")) || msg.Contains("payment summary"))
+{
+    try
     {
-        var (in30, in60, in90) = await LeaseExpiring();
-        return new() {
-            Intent = "lease.expirations",
-            Reply = $"Leases expiring → 30d: {in30}, 60d: {in60}, 90d: {in90}."
+        var pays  = await _api.GetPaymentsAsync() 
+                    ?? new List<EliteRentals.Models.DTOs.PaymentDto>();
+        var users = await _api.GetUsersAsync()    
+                    ?? new List<EliteRentals.Models.DTOs.UserDto>();
+
+        // Build a quick lookup: userId -> "First Last"
+        var nameMap = users.ToDictionary(
+            u => u.UserId,
+            u => $"{(u.FirstName ?? "").Trim()} {(u.LastName ?? "").Trim()}".Trim()
+        );
+
+        static string S(string? s) => (s ?? "").Trim();
+
+        // Overdue = anything not "Paid"
+        var overdueList  = pays.Where(p => !string.Equals(S(p.Status), "Paid", StringComparison.OrdinalIgnoreCase)).ToList();
+        var overdueTotal = overdueList.Sum(p => p.Amount);
+
+        // Latest 6 (unpaid first, then newest)
+        var latest = pays
+            .OrderBy(p => string.Equals(S(p.Status), "Paid", StringComparison.OrdinalIgnoreCase)) // unpaid first
+            .ThenByDescending(p => p.Date)
+            .Take(6)
+            .Select(p => new {
+                p.PaymentId,
+                TenantName = nameMap.TryGetValue(p.TenantId, out var n) && !string.IsNullOrWhiteSpace(n)
+                                ? n
+                                : $"Tenant {p.TenantId}",
+                Amount = p.Amount.ToString("C"),
+                Status = S(p.Status),
+                Date   = p.Date.ToString("yyyy-MM-dd")
+            })
+            .ToList();
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append($@"
+<div class=""mb-2""><strong>Payments:</strong> Overdue total <strong>{overdueTotal.ToString("C")}</strong>.</div>
+<table class=""table table-sm table-striped mb-2"">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tenant</th>
+      <th>Amount</th>
+      <th>Status</th>
+      <th>Date</th>
+    </tr>
+  </thead>
+  <tbody>");
+
+        foreach (var r in latest)
+        {
+            sb.Append($@"
+    <tr>
+      <td>#{r.PaymentId}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.TenantName)}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Amount)}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Status ?? "")}</td>
+      <td>{r.Date}</td>
+    </tr>");
+        }
+
+        sb.Append(@"
+  </tbody>
+</table>
+<a class=""btn btn-sm btn-primary"" href=""__PAY_URL__"">Open Payments</a>");
+
+        return new AdminChatAskResponse {
+            Intent = "payments.overdue",
+            IsHtml = true,
+            Html   = sb.ToString()
         };
     }
+    catch
+    {
+        return new AdminChatAskResponse {
+            Intent = "payments.overdue",
+            Reply  = "Payments lookup failed unexpectedly."
+        };
+    }
+}
+
+if ((msg.Contains("property") && (msg.Contains("stats") || msg.Contains("summary"))) || msg.Contains("vacanc"))
+{
+    try
+    {
+        var props = await _api.GetPropertiesAsync() ?? new List<EliteRentals.Models.DTOs.PropertyReadDto>();
+
+        static string S(string? s) => (s ?? "").Trim();
+
+        int total     = props.Count;
+        int available = props.Count(p => string.Equals(S(p.Status), "Available", StringComparison.OrdinalIgnoreCase));
+        int occupied  = props.Count(p => string.Equals(S(p.Status), "Occupied",  StringComparison.OrdinalIgnoreCase));
+        int vacant    = available; // treating "Available" as "Vacant"
+
+        // latest properties (most recently created/added → fallback to id desc)
+        var latest = props
+            .OrderByDescending(p => p.PropertyId)
+            .Take(6)
+            .Select(p => new {
+                p.PropertyId,
+                Title  = p.Title,
+                Status = p.Status,
+                Rent   = p.RentAmount
+            })
+            .ToList();
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append($@"
+<div class=""mb-2""><strong>Properties:</strong> {total} total • {available} available • {occupied} occupied • {vacant} vacant.</div>
+<table class=""table table-sm table-striped mb-2"">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Title</th>
+      <th>Status</th>
+      <th>Rent</th>
+    </tr>
+  </thead>
+  <tbody>");
+
+        foreach (var r in latest)
+        {
+            sb.Append($@"
+    <tr>
+      <td>#{r.PropertyId}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Title ?? $"Property {r.PropertyId}")}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Status ?? "")}</td>
+      <td>{r.Rent.ToString("C")}</td>
+    </tr>");
+        }
+
+        sb.Append(@"
+  </tbody>
+</table>
+<a class=""btn btn-sm btn-primary"" href=""__PROP_URL__"">Open Properties</a>");
+
+        return new AdminChatAskResponse {
+            Intent = "property.summary",
+            IsHtml = true,
+            Html   = sb.ToString()
+        };
+    }
+    catch
+    {
+        return new AdminChatAskResponse {
+            Intent = "property.summary",
+            Reply  = "Property lookup failed unexpectedly."
+        };
+    }
+}
+
+
+
+            if ((msg.Contains("lease") && msg.Contains("expir")) || msg.Contains("lease summary"))
+{
+    try
+    {
+        var leases = await _api.GetLeasesAsync() ?? new List<EliteRentals.Models.DTOs.LeaseDto>();
+        var users  = await _api.GetUsersAsync()  ?? new List<EliteRentals.Models.DTOs.UserDto>();
+        var props  = await _api.GetPropertiesAsync() ?? new List<EliteRentals.Models.DTOs.PropertyReadDto>();
+
+        // Lookups for names/titles
+        var userName = users.ToDictionary(
+            u => u.UserId,
+            u => $"{(u.FirstName ?? "").Trim()} {(u.LastName ?? "").Trim()}".Trim()
+        );
+        var propTitle = props.ToDictionary(
+            p => p.PropertyId,
+            p => (p.Title ?? $"Property {p.PropertyId}").Trim()
+        );
+
+        var now = DateTime.UtcNow.Date;
+        int in30 = leases.Count(l => l.EndDate.Date > now && l.EndDate.Date <= now.AddDays(30));
+        int in60 = leases.Count(l => l.EndDate.Date > now.AddDays(30) && l.EndDate.Date <= now.AddDays(60));
+        int in90 = leases.Count(l => l.EndDate.Date > now.AddDays(60) && l.EndDate.Date <= now.AddDays(90));
+
+        // Next 6 upcoming expirations
+        var upcoming = leases
+            .Where(l => l.EndDate.Date >= now)
+            .OrderBy(l => l.EndDate)
+            .Take(6)
+            .Select(l => new {
+                l.LeaseId,
+                Tenant = userName.TryGetValue(l.TenantId, out var tn) && !string.IsNullOrWhiteSpace(tn) ? tn : $"Tenant {l.TenantId}",
+                Property = propTitle.TryGetValue(l.PropertyId, out var pt) && !string.IsNullOrWhiteSpace(pt) ? pt : $"Property {l.PropertyId}",
+                EndDate = l.EndDate.ToString("yyyy-MM-dd"),
+                DaysLeft = (l.EndDate.Date - now).Days,
+                Status = l.Status
+            })
+            .ToList();
+
+        var sb = new System.Text.StringBuilder();
+        sb.Append($@"
+<div class=""mb-2""><strong>Leases expiring:</strong> 30d: {in30} • 60d: {in60} • 90d: {in90}</div>
+<table class=""table table-sm table-striped mb-2"">
+  <thead>
+    <tr>
+      <th>ID</th>
+      <th>Tenant</th>
+      <th>Property</th>
+      <th>End Date</th>
+      <th>Days Left</th>
+      <th>Status</th>
+    </tr>
+  </thead>
+  <tbody>");
+
+        foreach (var r in upcoming)
+        {
+            sb.Append($@"
+    <tr>
+      <td>#{r.LeaseId}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Tenant)}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Property)}</td>
+      <td>{r.EndDate}</td>
+      <td>{r.DaysLeft}</td>
+      <td>{System.Net.WebUtility.HtmlEncode(r.Status ?? "")}</td>
+    </tr>");
+        }
+
+        sb.Append(@"
+  </tbody>
+</table>
+<a class=""btn btn-sm btn-primary"" href=""__LEASE_URL__"">Open Leases</a>");
+
+        return new AdminChatAskResponse {
+            Intent = "lease.expirations",
+            IsHtml = true,
+            Html   = sb.ToString()
+        };
+    }
+    catch
+    {
+        return new AdminChatAskResponse {
+            Intent = "lease.expirations",
+            Reply  = "Lease lookup failed unexpectedly."
+        };
+    }
+}
+
 
     if (msg.Contains("assign") && (msg.Contains("caretaker") || msg.Contains("tech")))
     {
@@ -1877,13 +2131,36 @@ private async Task<AdminChatAskResponse> GenerateAdminBotReplyAsync(string text)
         };
     }
 
-    if (msg.Contains("broadcast") || msg.Contains("announcement"))
-    {
-        return new() {
-            Intent = "messages.broadcast",
-            Reply = "Use Admin → Messages → Send Announcement. Choose ‘All’ or a role (Tenant/Caretaker), type message, Send."
-        };
-    }
+   if (msg.Contains("broadcast") || msg.Contains("announcement"))
+{
+    var html = $@"
+<form id=""bc-form"" class=""vstack gap-2"">
+  <div class=""row g-2"">
+    <div class=""col-sm-4"">
+      <label class=""form-label"">Audience</label>
+      <select class=""form-select"" name=""audience"">
+        <option value=""All"">All users</option>
+        <option value=""Tenant"">Tenants</option>
+        <option value=""Caretaker"">Caretakers</option>
+        <option value=""PropertyManager"">Property Managers</option>
+      </select>
+    </div>
+    <div class=""col-sm-8"">
+      <label class=""form-label"">Message</label>
+      <input class=""form-control"" name=""text"" placeholder=""Type your announcement..."" />
+    </div>
+  </div>
+  <div>
+    <button class=""btn btn-sm btn-primary"" type=""submit"">Send broadcast</button>
+    <a class=""btn btn-sm btn-outline-secondary"" href=""__MSG_URL__"">Open Messages</a>
+  </div>
+</form>";
+    return new AdminChatAskResponse {
+        Intent = "messages.broadcast",
+        IsHtml = true,
+        Html = html
+    };
+}
 
     // fallback
     return new() { Intent = "fallback", Reply = "I didn’t catch that. Try “maintenance summary”, “overdue payments”, “property stats”, or “leases expiring”." };

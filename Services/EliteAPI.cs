@@ -152,23 +152,23 @@ namespace EliteRentals.Services
                 list.Add(new MaintenanceDto
                 {
                     MaintenanceId = m.MaintenanceId,
-                    Issue         = m.Description ?? "",          // API Description → DTO Issue
-                    Priority      = m.Urgency,                    // API Urgency     → DTO Priority
-                    Status        = m.Status,
-                    PropertyName  = m.Property?.Title,
-                    PropertyId    = m.PropertyId,
-                    ReportedBy    = m.Tenant == null
+                    Issue = m.Description ?? "",         // API Description → DTO Issue
+                    Priority = m.Urgency,                   // API Urgency     → DTO Priority
+                    Status = m.Status,
+                    PropertyName = m.Property?.Title,
+                    PropertyId = m.PropertyId,
+                    ReportedBy = m.Tenant == null
                                       ? null
                                       : $"{(m.Tenant.FirstName ?? "").Trim()} {(m.Tenant.LastName ?? "").Trim()}".Trim(),
-                    TenantId      = m.TenantId,
-                    AssignedCaretakerId   = m.AssignedCaretakerId,
+                    TenantId = m.TenantId,
+                    AssignedCaretakerId = m.AssignedCaretakerId,
                     AssignedCaretakerName = m.Caretaker == null
                                               ? null
                                               : $"{(m.Caretaker.FirstName ?? "").Trim()} {(m.Caretaker.LastName ?? "").Trim()}".Trim(),
-                    CreatedAt     = m.CreatedAt,
-                    UpdatedAt     = m.UpdatedAt,
-                    ProofData     = m.ProofData,
-                    ProofType     = m.ProofType
+                    CreatedAt = m.CreatedAt,
+                    UpdatedAt = m.UpdatedAt,
+                    ProofData = m.ProofData,
+                    ProofType = m.ProofType
                 });
             }
 
@@ -212,5 +212,124 @@ namespace EliteRentals.Services
             public string? LastName { get; set; }
             public string? Email { get; set; }
         }
+
+        // -------- Admin/Manager: Payments (auth, mapped) --------
+        public async Task<List<PaymentDto>> GetPaymentsAsync(CancellationToken ct = default)
+        {
+            var c = Client(withAuth: true); // needs Admin/PropertyManager
+            var res = await c.GetAsync("api/Payment", ct);
+            if (!res.IsSuccessStatusCode) return new List<PaymentDto>();
+
+            var apiList = await res.Content.ReadFromJsonAsync<List<PaymentApiRead>>(
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, ct
+            ) ?? new List<PaymentApiRead>();
+
+            var list = new List<PaymentDto>(apiList.Count);
+            foreach (var p in apiList)
+            {
+                list.Add(new PaymentDto
+                {
+                    PaymentId = p.PaymentId,
+                    TenantId = p.TenantId,
+                    Amount = p.Amount,
+                    Date = p.Date,
+                    Status = p.Status
+                });
+            }
+            return list;
+        }
+
+        private sealed class PaymentApiRead
+        {
+            public int PaymentId { get; set; }
+            public int TenantId { get; set; }
+            public decimal Amount { get; set; }
+            public DateTime Date { get; set; }
+            public string? Status { get; set; }
+            public byte[]? ProofData { get; set; }
+            public string? ProofType { get; set; }
+        }
+
+        // -------- Admin/Manager: Users (auth) --------
+        public async Task<List<UserDto>> GetUsersAsync(CancellationToken ct = default)
+        {
+            var c = Client(withAuth: true);
+            var res = await c.GetAsync("api/Users", ct);
+            if (!res.IsSuccessStatusCode) return new List<UserDto>();
+
+            return await res.Content.ReadFromJsonAsync<List<UserDto>>(
+                       new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, ct
+                   ) ?? new List<UserDto>();
+        }
+        public async Task<List<LeaseDto>> GetLeasesAsync(CancellationToken ct = default)
+        {
+            var c = Client(withAuth: true); // typically Admin/PropertyManager
+            var res = await c.GetAsync("api/Lease", ct);
+            if (!res.IsSuccessStatusCode) return new List<LeaseDto>();
+
+            var apiList = await res.Content.ReadFromJsonAsync<List<LeaseApiRead>>(
+                new JsonSerializerOptions { PropertyNameCaseInsensitive = true }, ct
+            ) ?? new List<LeaseApiRead>();
+
+            var list = new List<LeaseDto>(apiList.Count);
+            foreach (var l in apiList)
+            {
+                list.Add(new LeaseDto
+                {
+                    LeaseId = l.LeaseId,
+                    TenantId = l.TenantId,
+                    PropertyId = l.PropertyId,
+                    StartDate = l.StartDate,
+                    EndDate = l.EndDate,
+                    Status = l.Status  // keep if present in your DTO; harmless if null
+                });
+            }
+            return list;
+        }
+
+        // internal API read model (minimal, matches your API)
+        private sealed class LeaseApiRead
+        {
+            public int LeaseId { get; set; }
+            public int TenantId { get; set; }
+            public int PropertyId { get; set; }
+            public DateTime StartDate { get; set; }
+            public DateTime EndDate { get; set; }
+            public string? Status { get; set; }
+        }
+
+        public async Task<bool> BroadcastAsync(string audience, string message, CancellationToken ct = default)
+{
+    var c = Client(withAuth: true);
+
+    // Get current sender (UserId) from cookie claims
+    int senderId = 0;
+    var claimsUser = _http.HttpContext?.User;
+    var idClaim = claimsUser?.Claims.FirstOrDefault(x => x.Type == System.Security.Claims.ClaimTypes.NameIdentifier)?.Value;
+    if (!int.TryParse(idClaim, out senderId)) senderId = 0; // fallback
+
+    // Map audience -> TargetRole (null = all users, per API code)
+    string? targetRole = string.Equals(audience, "All", StringComparison.OrdinalIgnoreCase) ? null : audience;
+
+    var payload = new
+    {
+        SenderId = senderId,       // FK to Users table
+        MessageText = message,     // REQUIRED
+        TargetRole = targetRole,   // null => all users
+        IsBroadcast = true         // safe to set; API also sets it
+    };
+
+    // Call the dedicated broadcast endpoint
+    var res = await c.PostAsJsonAsync("api/Message/broadcast", payload, ct);
+
+    // Optional: read body for diagnostics if it fails
+    // var body = await res.Content.ReadAsStringAsync(ct); // log if needed
+
+    return res.IsSuccessStatusCode;
+}
+
+
+
+
     }
 }
