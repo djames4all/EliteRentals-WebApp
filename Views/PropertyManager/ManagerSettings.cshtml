@@ -1,7 +1,19 @@
 ﻿@{
     ViewData["Title"] = "Manager Settings - EliteRentals";
     Layout = "~/Views/Shared/_Layout.cshtml";
+
+    var userId = Context.Session.GetString("UserId");
+    var jwt = Context.Session.GetString("JWT");
 }
+
+@if (string.IsNullOrEmpty(userId) || string.IsNullOrEmpty(jwt))
+{
+    <script>
+        window.location.href = "/Account/Login";
+    </script>
+}
+
+
 
 <div class="container-fluid">
     <div class="row">
@@ -17,124 +29,158 @@
                     <form id="profileForm">
                         <div class="mb-3">
                             <label class="form-label">Full Name</label>
-                            <input type="text" class="form-control" id="fullName" value="Manager">
+                            <input type="text" class="form-control" id="fullName">
                         </div>
                         <div class="mb-3">
                             <label class="form-label">Email</label>
-                            <input type="email" class="form-control" id="email" value="manager@eliterentals.com">
-                        </div>
-                        <div class="mb-3">
-                            <label class="form-label">Password</label>
-                            <div class="input-group">
-                                <input type="password" class="form-control" id="password" value="manager123">
-                                <button type="button" class="btn btn-outline-secondary" id="togglePassword">Show</button>
-                            </div>
+                            <input type="email" class="form-control" id="email">
                         </div>
                         <button type="submit" class="btn btn-primary">Save Changes</button>
                     </form>
                 </div>
             </div>
 
-            <!-- System Preferences -->
+            <!-- Change Password -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
-                    <h5 class="card-title">System Preferences</h5>
-                    <form id="preferencesForm">
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="notifyEmail" checked>
-                            <label class="form-check-label" for="notifyEmail">Email Notifications</label>
+                    <h5 class="card-title">Change Password</h5>
+                    <form id="passwordForm">
+                        <div class="mb-3">
+                            <label class="form-label">Current Password</label>
+                            <input type="password" class="form-control" id="currentPassword">
                         </div>
-                        <div class="form-check mb-2">
-                            <input class="form-check-input" type="checkbox" id="notifySMS">
-                            <label class="form-check-label" for="notifySMS">SMS Notifications</label>
+                        <div class="mb-3">
+                            <label class="form-label">New Password</label>
+                            <input type="password" class="form-control" id="newPassword">
                         </div>
-                        <button type="submit" class="btn btn-primary mt-2">Save Preferences</button>
+                        <button type="submit" class="btn btn-secondary">Update Password</button>
                     </form>
                 </div>
             </div>
 
             <!-- Profile Preview -->
-            <div class="card shadow-sm">
+            <div class="card shadow-sm mt-4">
                 <div class="card-body">
                     <h5 class="card-title">Profile Preview</h5>
-                    <p><strong>Name:</strong> <span id="previewName">Manager</span></p>
-                    <p><strong>Email:</strong> <span id="previewEmail">manager@eliterentals.com</span></p>
+                    <p><strong>Name:</strong> <span id="previewName"></span></p>
+                    <p><strong>Email:</strong> <span id="previewEmail"></span></p>
                     <p><strong>Password:</strong> <span id="previewPassword">••••••••</span></p>
-                    <p><strong>Email Notifications:</strong> <span id="previewEmailNotify">Enabled</span></p>
-                    <p><strong>SMS Notifications:</strong> <span id="previewSMSNotify">Disabled</span></p>
                 </div>
             </div>
-
         </main>
     </div>
 </div>
 
-@section Scripts {
-    <script>
-        // Mock Data
-        let managerProfile = {
-            fullName: "Manager",
-            email: "manager@eliterentals.com",
-            password: "manager123"
+<script>
+    const userId = "@userId";
+    const jwt = "@jwt";
+    const apiBase = "https://eliterentalsapi-czckh7fadmgbgtgf.southafricanorth-01.azurewebsites.net";
+    const headers = {
+        "Content-Type": "application/json",
+        "Authorization": `Bearer ${jwt}`
+    };
+
+    let currentUser = {};
+
+    if (userId && jwt) {
+        fetch(`${apiBase}/api/Users/${userId}`, { headers })
+            .then(async res => {
+                if (!res.ok) {
+                    const errorText = await res.text();
+                    console.error("🔍 GET /api/Users failed:", errorText);
+                    throw new Error(`Fetch failed: ${errorText}`);
+                }
+                return res.json();
+            })
+            .then(data => {
+                currentUser = data;
+                const fullName = `${data.firstName} ${data.lastName}`;
+                document.getElementById('fullName').value = fullName;
+                document.getElementById('email').value = data.email;
+                updatePreview(fullName, data.email);
+            })
+            .catch(err => {
+                console.error("Error loading user:", err);
+                alert("Could not load user profile. Please check your login or session.");
+            });
+    }
+
+    document.getElementById('profileForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const fullName = document.getElementById('fullName').value.trim();
+        const nameParts = fullName.split(" ");
+        const payload = {
+            userId: currentUser.userId,
+            firstName: nameParts[0],
+            lastName: nameParts.slice(1).join(" "),
+            email: document.getElementById('email').value,
+            role: currentUser.role,
+            tenantApproval: currentUser.tenantApproval,
+            isActive: currentUser.isActive,
+            managerId: currentUser.managerId,
+            passwordHash: currentUser.passwordHash || ""
         };
 
-        let systemPreferences = {
-            emailNotify: true,
-            smsNotify: false
-        };
-
-        // Profile form elements
-        const profileForm = document.getElementById('profileForm');
-        const fullNameInput = document.getElementById('fullName');
-        const emailInput = document.getElementById('email');
-        const passwordInput = document.getElementById('password');
-        const togglePasswordBtn = document.getElementById('togglePassword');
-
-        // Toggle password visibility
-        togglePasswordBtn.addEventListener('click', () => {
-            if(passwordInput.type === "password"){
-                passwordInput.type = "text";
-                togglePasswordBtn.textContent = "Hide";
-            } else {
-                passwordInput.type = "password";
-                togglePasswordBtn.textContent = "Show";
+        fetch(`${apiBase}/api/Users/${userId}`, {
+            method: "PUT",
+            headers,
+            body: JSON.stringify(payload)
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error("🔍 PUT /api/Users failed:", errorText);
+                throw new Error(errorText);
             }
+            return res.json();
+        })
+        .then(data => {
+            const updatedName = `${data.firstName} ${data.lastName}`;
+            updatePreview(updatedName, data.email);
+            alert("Profile updated!");
+        })
+        .catch(err => {
+            console.error("Profile update error:", err);
+            alert("Failed to update profile. " + err.message);
         });
+    });
 
-        // Save profile form
-        profileForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            managerProfile.fullName = fullNameInput.value;
-            managerProfile.email = emailInput.value;
-            managerProfile.password = passwordInput.value;
-            updatePreview();
-            alert('Profile settings saved!');
-        });
+    document.getElementById('passwordForm').addEventListener('submit', (e) => {
+        e.preventDefault();
+        const currentPassword = document.getElementById('currentPassword').value;
+        const newPassword = document.getElementById('newPassword').value;
 
-        // Preferences form elements
-        const preferencesForm = document.getElementById('preferencesForm');
-        const notifyEmailInput = document.getElementById('notifyEmail');
-        const notifySMSInput = document.getElementById('notifySMS');
-
-        // Save system preferences
-        preferencesForm.addEventListener('submit', (e) => {
-            e.preventDefault();
-            systemPreferences.emailNotify = notifyEmailInput.checked;
-            systemPreferences.smsNotify = notifySMSInput.checked;
-            updatePreview();
-            alert('System preferences saved!');
-        });
-
-        // Update the preview section
-        function updatePreview() {
-            document.getElementById('previewName').textContent = managerProfile.fullName;
-            document.getElementById('previewEmail').textContent = managerProfile.email;
-            document.getElementById('previewPassword').textContent = "••••••••";
-            document.getElementById('previewEmailNotify').textContent = systemPreferences.emailNotify ? "Enabled" : "Disabled";
-            document.getElementById('previewSMSNotify').textContent = systemPreferences.smsNotify ? "Enabled" : "Disabled";
+        if (!currentPassword || !newPassword) {
+            alert("Please fill in both password fields.");
+            return;
         }
 
-        // Initialize preview
-        updatePreview();
-    </script>
-}
+        fetch(`${apiBase}/api/Users/${userId}/password`, {
+            method: "PATCH",
+            headers,
+            body: JSON.stringify({
+                currentPassword,
+                newPassword
+            })
+        })
+        .then(async res => {
+            if (!res.ok) {
+                const errorText = await res.text();
+                console.error("🔍 PATCH /api/Users/password failed:", errorText);
+                throw new Error(errorText);
+            }
+            alert("Password updated successfully!");
+            document.getElementById('currentPassword').value = "";
+            document.getElementById('newPassword').value = "";
+        })
+        .catch(err => {
+            console.error("Password update error:", err);
+            alert("Failed to update password. " + err.message);
+        });
+    });
+
+    function updatePreview(name, email) {
+        document.getElementById('previewName').textContent = name;
+        document.getElementById('previewEmail').textContent = email;
+    }
+</script>
