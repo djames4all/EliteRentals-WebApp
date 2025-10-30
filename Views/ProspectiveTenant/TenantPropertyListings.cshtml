@@ -5,23 +5,34 @@
 }
 
 <div class="container-fluid p-0">
-    <section class="bg-primary text-white text-center py-5" style="background: linear-gradient(90deg, rgba(0,123,255,0.9), rgba(0,86,179,0.9)), url('https://via.placeholder.com/1600x600') center/cover no-repeat;">
-        <div class="container py-4">
-            <h1 class="display-4 fw-bold">Find Your Perfect Rental</h1>
-            <p class="lead mb-0">Browse verified properties.</p>
+
+    <!-- Find Your Perfect Rental Hero -->
+    <section class="hero-section text-white text-center position-relative d-flex align-items-center justify-content-center"
+             style="background-image: url('/images/find-rental.jpg'); background-position: center; background-size: cover; background-repeat: no-repeat; min-height: 50vh;">
+        <div class="overlay position-absolute top-0 start-0 w-100 h-100"
+             style="background: rgba(0, 0, 0, 0.55);"></div>
+
+        <div class="container position-relative z-1 py-5 px-4">
+            <h1 class="fw-bold mb-3 animate__animated animate__fadeInDown display-4 display-md-3 display-sm-5">
+                Find Your Perfect Rental
+            </h1>
+            <p class="lead mb-0 animate__animated animate__fadeInUp fs-5 fs-md-6" style="max-width: 720px; margin: 0 auto;">
+                Browse verified properties that suit your lifestyle, location, and budget — discover your next home with ease.
+            </p>
         </div>
     </section>
 
-    <section class="bg-light py-3 shadow-sm mb-4">
+    <!-- Filters -->
+    <section class="bg-white py-4 border-bottom shadow-sm sticky-top" style="z-index: 10;">
         <div class="container">
             <form method="get" class="row g-3 align-items-end">
                 <div class="col-md-4">
-                    <label class="form-label">Location</label>
+                    <label class="form-label fw-semibold">Location</label>
                     <input type="text" name="Location" value="@Model.Query.Location" class="form-control" placeholder="City, province, or address" />
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label">Min Bedrooms</label>
+                    <label class="form-label fw-semibold">Bedrooms</label>
                     <select class="form-select" name="MinBedrooms">
                         <option value="">Any</option>
                         @for (var b = 1; b <= 5; b++)
@@ -32,7 +43,7 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label">Pet Friendly</label>
+                    <label class="form-label fw-semibold">Pet Friendly</label>
                     <select class="form-select" name="PetFriendly">
                         <option value="">Any</option>
                         <option value="true" selected="@(Model.Query.PetFriendly == true ? "selected" : null)">Yes</option>
@@ -41,27 +52,30 @@
                 </div>
 
                 <div class="col-md-2">
-                    <label class="form-label">Sort By</label>
+                    <label class="form-label fw-semibold">Sort By</label>
                     <select class="form-select" name="SortBy">
-                        <option value="newest" selected="@(Model.Query.SortBy=="newest" ? "selected" : null)">Newest</option>
-                        <option value="lowest" selected="@(Model.Query.SortBy=="lowest" ? "selected" : null)">Price: Low to High</option>
-                        <option value="highest" selected="@(Model.Query.SortBy=="highest" ? "selected" : null)">Price: High to Low</option>
+                        <option value="newest" selected="@(Model.Query.SortBy == "newest" ? "selected" : null)">Newest</option>
+                        <option value="lowest" selected="@(Model.Query.SortBy == "lowest" ? "selected" : null)">Price: Low to High</option>
+                        <option value="highest" selected="@(Model.Query.SortBy == "highest" ? "selected" : null)">Price: High to Low</option>
                     </select>
                 </div>
 
-                <div class="col-md-2 d-flex gap-2">
-                    <button class="btn btn-primary w-100">Apply</button>
+                <div class="col-md-2">
+                    <button class="btn btn-primary w-100 fw-semibold shadow-sm">
+                        <i class="bi bi-funnel me-1"></i> Apply
+                    </button>
                 </div>
             </form>
         </div>
     </section>
 
-    <div class="container pb-5">
+    <!-- Property Cards -->
+    <div class="container py-5">
         @if (Model.Items.Count == 0)
         {
             <div class="text-center py-5">
-                <h4 class="fw-bold">No properties found</h4>
-                <p class="text-muted">Try clearing filters or checking back later.</p>
+                <h4 class="fw-bold mb-2">No properties found</h4>
+                <p class="text-muted">Try adjusting filters or check back later for new listings.</p>
             </div>
         }
         else
@@ -71,28 +85,34 @@
                 {
                     var imgSrc = $"{Model.ApiBaseUrl}api/Property/{p.PropertyId}/image";
                     <div class="col-12 col-sm-6 col-lg-4">
-                        <div class="card h-100 shadow-sm border-0">
-                            <img src="@imgSrc" class="card-img-top" alt="Property @p.PropertyId"
-                                 onerror="this.src='https://via.placeholder.com/800x600?text=No+Image';" />
+                        <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-shadow transition-all">
+                            <div class="ratio ratio-16x9 bg-light">
+                                <img src="@imgSrc" class="card-img-top object-fit-cover" alt="Property @p.PropertyId"
+                                     onerror="this.src='https://via.placeholder.com/800x600?text=No+Image';" />
+                            </div>
                             <div class="card-body">
-                                <div class="d-flex justify-content-between align-items-start">
-                                    <h5 class="card-title mb-1">@(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "Untitled")</h5>
-                                    <span class="badge bg-@(p.Status?.ToLower()=="available"?"success":(p.Status?.ToLower()=="rented"?"secondary":"warning"))">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h5 class="fw-bold mb-0">@(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "Untitled")</h5>
+                                    <span class="badge bg-@(p.Status?.ToLower() == "available" ? "success" : (p.Status?.ToLower() == "rented" ? "secondary" : "warning"))">
                                         @(p.Status ?? "Unknown")
                                     </span>
                                 </div>
-                                <p class="mb-2 text-muted">@p.Address, @p.City</p>
-                                <div class="small text-muted mb-2">
-                                    <span class="me-3">@p.NumOfBedrooms bed</span>
-                                    <span class="me-3">@p.NumOfBathrooms bath</span>
-                                    <span>@(p.PetFriendly ? "Pet friendly" : "No pets")</span>
+
+                                <p class="text-muted mb-2 small">@p.Address, @p.City</p>
+
+                                <div class="d-flex flex-wrap small text-muted mb-3">
+                                    <span class="me-3"><i class="bi bi-door-open me-1"></i>@p.NumOfBedrooms bed</span>
+                                    <span class="me-3"><i class="bi bi-droplet-half me-1"></i>@p.NumOfBathrooms bath</span>
+                                    <span><i class="bi bi-paw me-1"></i>@(p.PetFriendly ? "Pet friendly" : "No pets")</span>
                                 </div>
-                                <div class="h5 mb-3">R @p.RentAmount</div>
-                                <a class="btn btn-outline-primary w-100"
+
+                                <div class="h5 text-primary fw-bold mb-3">R @p.RentAmount</div>
+
+                                <a class="btn btn-outline-primary w-100 fw-semibold"
                                    asp-controller="ProspectiveTenant"
                                    asp-action="TenantListingDetails"
                                    asp-route-id="@p.PropertyId">
-                                    View details
+                                    View Details
                                 </a>
                             </div>
                         </div>
@@ -100,7 +120,8 @@
                 }
             </div>
 
-            <nav class="mt-4">
+            <!-- Pagination -->
+            <nav class="mt-5">
                 <ul class="pagination justify-content-center">
                     @{
                         int curr = Model.Query.Page;
@@ -110,42 +131,18 @@
                     }
 
                     <li class="page-item @(prevDisabled ? "disabled" : "")">
-                        <a class="page-link"
-                           asp-controller="ProspectiveTenant"
-                           asp-action="TenantPropertyListings"
-                           asp-route-Location="@Model.Query.Location"
-                           asp-route-MinBedrooms="@Model.Query.MinBedrooms"
-                           asp-route-PetFriendly="@Model.Query.PetFriendly"
-                           asp-route-SortBy="@Model.Query.SortBy"
-                           asp-route-PageSize="@Model.Query.PageSize"
-                           asp-route-Page="@(curr - 1)">&laquo;</a>
+                        <a class="page-link" asp-route-Page="@(curr - 1)">&laquo;</a>
                     </li>
 
                     @for (var i = 1; i <= total; i++)
                     {
-                        <li class="page-item @(i==curr?"active":"")">
-                            <a class="page-link"
-                               asp-controller="ProspectiveTenant"
-                               asp-action="TenantPropertyListings"
-                               asp-route-Location="@Model.Query.Location"
-                               asp-route-MinBedrooms="@Model.Query.MinBedrooms"
-                               asp-route-PetFriendly="@Model.Query.PetFriendly"
-                               asp-route-SortBy="@Model.Query.SortBy"
-                               asp-route-PageSize="@Model.Query.PageSize"
-                               asp-route-Page="@i">@i</a>
+                        <li class="page-item @(i == curr ? "active" : "")">
+                            <a class="page-link" asp-route-Page="@i">@i</a>
                         </li>
                     }
 
                     <li class="page-item @(nextDisabled ? "disabled" : "")">
-                        <a class="page-link"
-                           asp-controller="ProspectiveTenant"
-                           asp-action="TenantPropertyListings"
-                           asp-route-Location="@Model.Query.Location"
-                           asp-route-MinBedrooms="@Model.Query.MinBedrooms"
-                           asp-route-PetFriendly="@Model.Query.PetFriendly"
-                           asp-route-SortBy="@Model.Query.SortBy"
-                           asp-route-PageSize="@Model.Query.PageSize"
-                           asp-route-Page="@(curr + 1)">&raquo;</a>
+                        <a class="page-link" asp-route-Page="@(curr + 1)">&raquo;</a>
                     </li>
                 </ul>
             </nav>

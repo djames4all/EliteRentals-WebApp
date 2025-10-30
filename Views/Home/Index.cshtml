@@ -1,93 +1,164 @@
-﻿@{
+﻿@model EliteRentals.Models.ViewModels.PropertyListViewModel
+@{
     ViewData["Title"] = "Home - Elite Rentals";
 }
 
 <div class="container-fluid p-0">
 
-    <!-- Hero Section -->
-    <section class="bg-primary text-white text-center py-5"
-             style="background: url('https://via.placeholder.com/1600x600') center/cover no-repeat; position: relative;">
-        <div style="background-color: rgba(13,110,253,0.6); position: absolute; top:0; left:0; width:100%; height:100%;"></div>
-        <div class="container py-5 position-relative">
-            <h1 class="display-3 fw-bold">Elite Rentals</h1>
-            <p class="lead mb-4">Your trusted platform for renting, managing, and maintaining properties with ease.</p>
-            <div class="d-flex flex-wrap justify-content-center gap-2">
-                <a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings" class="btn btn-light btn-lg">Browse Properties</a>
-                <a asp-controller="Admin" asp-action="AdminDashboard" class="btn btn-outline-light btn-lg">Admin Dashboard</a>
-                <a asp-controller="PropertyManager" asp-action="ManagerDashboard" class="btn btn-outline-light btn-lg">Manager Dashboard</a>
+    <!-- HERO SECTION -->
+    <section class="hero-section position-relative text-white text-center d-flex align-items-center justify-content-center"
+             style="background: url('/images/hero.jpg') center center / cover no-repeat; min-height: 60vh;">
+        <div class="overlay position-absolute top-0 start-0 w-100 h-100"
+             style="background: rgba(0, 0, 0, 0.55);"></div>
+
+        <div class="container position-relative z-1 py-5 px-4">
+            <h1 class="fw-bold mb-3 display-4 animate__animated animate__fadeInDown">
+                Elite Rentals
+            </h1>
+            <p class="lead mb-4 animate__animated animate__fadeInUp fs-5">
+                Your trusted platform for renting, managing, and maintaining properties with ease.
+            </p>
+            <div class="d-flex flex-wrap justify-content-center gap-3 animate__animated animate__fadeInUp">
+                <a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings"
+                   class="btn btn-light btn-lg px-4 py-2 rounded-pill shadow-sm">
+                    <i class="bi bi-house-door-fill me-2"></i> Browse Properties
+                </a>
+                <a asp-controller="Account" asp-action="Register"
+                   class="btn btn-outline-light btn-lg px-4 py-2 rounded-pill">
+                    <i class="bi bi-person-plus-fill me-2"></i> Get Started
+                </a>
             </div>
         </div>
     </section>
 
-    <!-- Featured Listings -->
-    <section class="container my-5">
+    <!-- FEATURED LISTINGS -->
+    <section class="container my-5 py-3">
         <div class="d-flex justify-content-between align-items-center mb-4">
-            <h2 class="fw-bold">Featured Listings</h2>
-            <a asp-controller="ProspectiveTenant" asp-action="AllFeatured" class="btn btn-outline-primary btn-sm">View All Featured</a>
+            <h2 class="fw-bold mb-0">Featured Listings</h2>
+            <a asp-controller="ProspectiveTenant" asp-action="TenantPropertyListings"
+               class="btn btn-outline-primary btn-sm rounded-pill">
+                View All
+            </a>
         </div>
-        <div class="row g-4" id="featuredListings"></div>
+
+        @if (Model.Items != null && Model.Items.Any())
+        {
+            var random = new Random();
+            var featured = Model.Items.OrderBy(x => random.Next()).Take(3).ToList();
+
+            <div class="row g-4">
+                @foreach (var p in featured)
+                {
+                    var imgSrc = $"{Model.ApiBaseUrl}api/Property/{p.PropertyId}/image";
+                    <div class="col-12 col-md-4">
+                        <div class="card shadow-sm border-0 rounded-4 h-100 hover-shadow-lg animate__animated animate__fadeInUp">
+                            <div class="ratio ratio-16x9 rounded-top-4 overflow-hidden">
+                                <img src="@imgSrc" class="w-100 h-100 object-fit-cover" alt="@p.Title"
+                                     onerror="this.src='https://via.placeholder.com/800x600?text=No+Image';" />
+                            </div>
+                            <div class="card-body d-flex flex-column">
+                                <div class="d-flex justify-content-between align-items-start mb-1">
+                                    <h5 class="fw-bold text-primary mb-0">
+                                        @(!string.IsNullOrWhiteSpace(p.Title) ? p.Title : "Untitled Property")
+                                    </h5>
+                                    <span class="badge bg-@(p.Status?.ToLower() == "available" ? "success" : (p.Status?.ToLower() == "rented" ? "secondary" : "warning"))">
+                                        @(p.Status ?? "Unknown")
+                                    </span>
+                                </div>
+                                <p class="text-muted small mb-2">@p.Address, @p.City</p>
+                                <div class="text-muted small mb-3">
+                                    <span class="me-3"><i class="bi bi-door-open"></i> @p.NumOfBedrooms bed</span>
+                                    <span class="me-3"><i class="bi bi-droplet"></i> @p.NumOfBathrooms bath</span>
+                                    <span><i class="bi bi-paw"></i> @(p.PetFriendly ? "Pets allowed" : "No pets")</span>
+                                </div>
+                                <div class="h5 text-dark fw-bold mb-3">R @p.RentAmount</div>
+                                <a asp-controller="ProspectiveTenant" asp-action="TenantListingDetails"
+                                   asp-route-id="@p.PropertyId"
+                                   class="btn btn-outline-primary w-100 mt-auto rounded-pill">
+                                    View Details
+                                </a>
+                            </div>
+                        </div>
+                    </div>
+                }
+            </div>
+        }
+        else
+        {
+            <div class="text-center py-5">
+                <h5 class="fw-bold mb-2">No featured properties available</h5>
+                <p class="text-muted">Please check back later for updates.</p>
+            </div>
+        }
     </section>
 
-    <!-- Popular Locations -->
+    <!-- POPULAR LOCATIONS -->
     <section class="container my-5">
-        <h2 class="fw-bold mb-4">Popular Locations</h2>
+        <h2 class="fw-bold mb-4 text-center">Popular Locations</h2>
         <div class="row g-4">
-            @foreach (var loc in new[]{
-                        new { Name="Sandton", Count=25 },
-                        new { Name="Rosebank", Count=18 },
-                        new { Name="Midrand", Count=12 },
-                        new { Name="Bryanston", Count=8 }
+            @foreach (var loc in new[]
+                        {
+                        new { Name = "Sandton", Count = 25, Image = "/images/sandton.jpg" },
+                        new { Name = "Rosebank", Count = 18, Image = "/images/rosebank.jpg" },
+                        new { Name = "Midrand", Count = 12, Image = "/images/midrand.jpg" },
+                        new { Name = "Bryanston", Count = 8, Image = "/images/bryanston.jpg" }
                         })
             {
-                <div class="col-md-3">
-                    <div class="card shadow-sm rounded-4 p-3 text-center hover-shadow">
-                        <img src="https://via.placeholder.com/300x150" class="rounded-3 mb-2" />
-                        <h5>@loc.Name</h5>
-                        <p class="text-muted">@loc.Count Properties</p>
+                <div class="col-6 col-md-3 d-flex">
+                    <div class="card shadow-sm border-0 rounded-4 text-center flex-fill hover-shadow-lg h-100">
+                        <div class="ratio ratio-16x9 rounded-top-4 overflow-hidden">
+                            <img src="@loc.Image" class="w-100 h-100 object-fit-cover" alt="@loc.Name" />
+                        </div>
+                        <div class="card-body">
+                            <h5 class="fw-bold mb-1">@loc.Name</h5>
+                            <p class="text-muted mb-0">@loc.Count Properties</p>
+                        </div>
                     </div>
                 </div>
             }
         </div>
     </section>
 
-    <!-- How It Works -->
-    <section class="bg-light py-5">
-        <div class="container">
-            <h2 class="fw-bold text-center mb-5">How Elite Rentals Works</h2>
-            <div class="row g-4 justify-content-center">
-                @foreach (var step in new[]{
-                                new { Icon="bi-search", Title="Search Properties", Text="Browse verified listings in apartments, houses, and townhouses quickly and easily." },
-                                new { Icon="bi-file-text", Title="Apply Online", Text="Complete rental applications securely with a few clicks, from anywhere." },
-                                new { Icon="bi-check2-circle", Title="Move In", Text="Get approved and move in quickly with seamless digital processes and instant notifications." }
-                                })
-                {
-                    <div class="col-md-4">
-                        <div class="card shadow-sm rounded-4 h-100 text-center p-4 border-0 hover-shadow animate__animated animate__fadeInUp">
-                            <div class="icon-circle mx-auto mb-3">
-                                <i class="bi @step.Icon display-4 text-primary"></i>
-                            </div>
+    <!-- HOW IT WORKS -->
+    <section class="container my-5">
+        <h2 class="fw-bold mb-4 text-center">How Elite Rentals Works</h2>
+        <div class="row g-4">
+            @foreach (var step in new[]
+                        {
+                        new { Title = "Search Properties", Text = "Browse verified listings in apartments, houses, and townhouses quickly and easily.", Image = "/images/search-properties.jpg" },
+                        new { Title = "Apply Online", Text = "Complete rental applications securely with a few clicks, from anywhere.", Image = "/images/apply-online.jpg" },
+                        new { Title = "Move In", Text = "Get approved and move in quickly with seamless digital processes and instant notifications.", Image = "/images/move-in.jpg" }
+                        })
+            {
+                <div class="col-12 col-md-4 d-flex">
+                    <div class="card shadow-sm border-0 rounded-4 text-center flex-fill hover-shadow-lg h-100">
+                        <div class="ratio ratio-16x9 rounded-top-4 overflow-hidden">
+                            <img src="@step.Image" class="w-100 h-100 object-fit-cover" alt="@step.Title" />
+                        </div>
+                        <div class="card-body">
                             <h5 class="fw-bold mb-2">@step.Title</h5>
-                            <p class="text-muted">@step.Text</p>
+                            <p class="text-muted mb-0">@step.Text</p>
                         </div>
                     </div>
-                }
-            </div>
+                </div>
+            }
         </div>
     </section>
 
-    <!-- Testimonials -->
+    <!-- TESTIMONIALS -->
     <section class="container my-5">
         <h2 class="fw-bold mb-4 text-center">What Our Users Say</h2>
         <div class="row g-4">
-            @foreach (var testimonial in new[]{
-                        new { Text="Elite Rentals made finding my apartment fast and stress-free. Highly recommend!", Author="Jane D." },
-                        new { Text="Applying and moving in was so smooth. The platform is very user-friendly.", Author="Mike S." },
-                        new { Text="Excellent listings and responsive support. I found my dream rental here!", Author="Sarah K." }
+            @foreach (var testimonial in new[]
+                        {
+                        new { Text = "Elite Rentals made finding my apartment fast and stress-free. Highly recommend!", Author = "Evee J." },
+                        new { Text = "Applying and moving in was so smooth. The platform is very user-friendly.", Author = "Sophia H." },
+                        new { Text = "Excellent listings and responsive support. I found my dream rental here!", Author = "Sarah K." }
                         })
             {
-                <div class="col-md-4">
-                    <div class="card shadow-sm p-3 rounded-4 hover-shadow animate__animated animate__fadeInUp">
-                        <p>"@testimonial.Text"</p>
+                <div class="col-12 col-md-4">
+                    <div class="card shadow-sm border-0 p-4 rounded-4 text-center hover-shadow-lg animate__animated animate__fadeInUp">
+                        <p class="fst-italic text-muted">"@testimonial.Text"</p>
                         <h6 class="fw-bold mt-3">– @testimonial.Author</h6>
                     </div>
                 </div>
@@ -95,84 +166,39 @@
         </div>
     </section>
 
-    <!-- Platform Stats -->
+    <!-- PLATFORM STATS -->
     <section class="bg-light py-5 text-center">
         <div class="container">
-            <div class="row g-4" id="platformStats"></div>
+            <div class="row g-4" id="platformStats">
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-primary mb-0">+1,200</h3>
+                    <p class="text-muted">Active Listings</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-primary mb-0">+800</h3>
+                    <p class="text-muted">Happy Tenants</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-primary mb-0">+150</h3>
+                    <p class="text-muted">Property Managers</p>
+                </div>
+                <div class="col-6 col-md-3">
+                    <h3 class="fw-bold text-primary mb-0">24/7</h3>
+                    <p class="text-muted">Support Available</p>
+                </div>
+            </div>
         </div>
     </section>
 
-    <!-- Call to Action -->
+    <!-- CALL TO ACTION -->
     <section class="bg-primary text-white text-center py-5">
         <div class="container">
-            <h2 class="fw-bold">Ready to get started?</h2>
+            <h2 class="fw-bold mb-3">Ready to get started?</h2>
             <p class="mb-4">Whether you are a tenant, manager, or admin, Elite Rentals makes rental management simple and efficient.</p>
-            <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg">Sign Up Now</a>
+            <a asp-controller="Account" asp-action="Register" class="btn btn-light btn-lg rounded-pill shadow-sm">
+                Sign Up Now
+            </a>
         </div>
     </section>
+
 </div>
-
-@section Scripts {
-    <script>
-        // Featured Properties Mock Data (Expanded)
-        const featuredProperties = [
-            { id:101, type:"Apartment", price:12000, bedrooms:1, address:"123 Main St, Sandton", status:"Available", image:"https://via.placeholder.com/400x250" },
-            { id:201, type:"House", price:22000, bedrooms:3, address:"101 Maple Ave, Sandown", status:"Available", image:"https://via.placeholder.com/400x250" },
-            { id:301, type:"Townhouse", price:18000, bedrooms:2, address:"11 Willow Ln, Sandton", status:"Available", image:"https://via.placeholder.com/400x250" }
-        ];
-
-        const featuredContainer = document.getElementById("featuredListings");
-
-        function renderFeatured(properties){
-            featuredContainer.innerHTML='';
-            properties.forEach(p=>{
-                const col=document.createElement("div");
-                col.className="col-md-4";
-                const badgeClass = p.status==="Available" ? "bg-success" : "bg-warning text-dark";
-                const applyBtnClass = p.status==="Available" ? "btn-primary" : "btn-outline-secondary disabled";
-                col.innerHTML=`
-                    <div class="card shadow-sm rounded-4 h-100 hover-shadow">
-                        <img src="${p.image}" class="card-img-top rounded-top-4" alt="${p.type}">
-                        <div class="card-body">
-                            <h5 class="card-title text-primary">R${p.price.toLocaleString()} / month</h5>
-                            <p class="card-text">${p.bedrooms}-Bedroom – ${p.address}</p>
-                            <span class="badge ${badgeClass} mb-3">${p.status}</span>
-                            <div class="d-flex gap-2 mt-2">
-                                <a href="/ProspectiveTenant/TenantListingDetails?propertyId=${p.id}" class="btn btn-outline-primary btn-sm flex-fill">View Details</a>
-                                <a href="/ProspectiveTenant/TenantApplicationForm?propertyId=${p.id}" class="btn ${applyBtnClass} btn-sm flex-fill">Apply Now</a>
-                            </div>
-                        </div>
-                    </div>
-                `;
-                featuredContainer.appendChild(col);
-            });
-        }
-
-        renderFeatured(featuredProperties);
-
-        // Platform Stats Mock
-        const platformStats=[
-            { count:500, label:"Active Listings" },
-            { count:200, label:"Happy Property Owners" },
-            { count:1000, label:"Tenants Served" },
-            { count:150, label:"Trusted Managers" }
-        ];
-
-        const statsContainer=document.getElementById("platformStats");
-
-        function renderStats(stats){
-            statsContainer.innerHTML='';
-            stats.forEach(s=>{
-                const col=document.createElement("div");
-                col.className="col-md-3";
-                col.innerHTML=`
-                    <h3 class="fw-bold text-primary">${s.count.toLocaleString()}+</h3>
-                    <p>${s.label}</p>
-                `;
-                statsContainer.appendChild(col);
-            });
-        }
-
-        renderStats(platformStats);
-    </script>
-}
