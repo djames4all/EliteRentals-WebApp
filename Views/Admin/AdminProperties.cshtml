@@ -1,104 +1,178 @@
-﻿@using EliteRentals.Models.DTOs
-@model IEnumerable<PropertyDto>
+﻿@model IEnumerable<EliteRentals.Models.DTOs.PropertyReadDto>
 @{
+    ViewData["Title"] = "Admin • Properties";
     Layout = "_Layout";
-    string q = Context.Request.Query["q"];
-
-    string ImageOf(PropertyDto p)
-    {
-        var url  = p?.GetType().GetProperty("ImageUrl")?.GetValue(p)?.ToString();
-        var path = p?.GetType().GetProperty("ImagePath")?.GetValue(p)?.ToString();
-        var b64  = p?.GetType().GetProperty("ImageBase64")?.GetValue(p)?.ToString();
-
-        if (!string.IsNullOrWhiteSpace(url))  return Url.Content(url);
-        if (!string.IsNullOrWhiteSpace(path)) return Url.Content(path);
-        if (!string.IsNullOrWhiteSpace(b64))  return $"data:image/jpeg;base64,{b64}";
-        return Url.Content("~/images/placeholders/property.jpg"); // fallback
-    }
 }
 
-<div class="container-fluid">
-  <div class="row">
-    <!-- Left sidebar -->
-    <aside class="col-12 col-lg-3 col-xl-2 py-3">
-      @{ try { await Html.RenderPartialAsync("_ManagerSidebar"); } catch { } }
-    </aside>
-
-    <!-- Main content -->
-    <main class="col-12 col-lg-9 col-xl-10 py-3">
-      <div class="d-flex flex-wrap align-items-center justify-content-between gap-2 mb-3">
-        <h3 class="m-0">Properties</h3>
-        <div class="d-flex gap-2">
-          <form method="get" class="d-flex" role="search">
-            <input name="q" value="@q" class="form-control" placeholder="Search title or description..." />
-            <button class="btn btn-primary ms-2" type="submit">Search</button>
-          </form>
-          <a asp-action="AdminPropertyCreate" class="btn btn-success">+ Add Property</a>
-        </div>
-      </div>
-
-      <div class="card shadow-sm">
-        <div class="table-responsive">
-          <table class="table table-hover align-middle mb-0">
-            <thead class="table-light">
-              <tr>
-                <th style="width:4rem;">#</th>
-                <th style="width:7rem;">Image</th>
-                <th>Title</th>
-                <th>Description</th>
-                <th class="text-end" style="width:8rem;">Rent</th>
-                <th class="text-end" style="width:12rem;">Actions</th>
-              </tr>
-            </thead>
-            <tbody>
-              @if (Model == null || !Model.Any())
-              {
-                <tr><td colspan="6" class="text-center py-5 text-muted">No properties found.</td></tr>
-              }
-              else
-              {
-                var i = 1;
-                foreach (var p in Model)
-                {
-                  <tr>
-                    <td>@i</td>
-                    <td>
-                      <img src="@ImageOf(p)" alt="Property" class="rounded"
-                           style="width:72px;height:72px;object-fit:cover;border:1px solid #eee;" />
-                    </td>
-                    <td class="fw-semibold">@p.Title</td>
-                    <td class="text-truncate" style="max-width:520px;">@p.Description</td>
-                    <td class="text-end">R @p.RentAmount.ToString("N0")</td>
-                    <td class="text-end">
-                      <div class="btn-group">
-                        <a class="btn btn-outline-secondary btn-sm" asp-action="AdminPropertyView" asp-route-id="@p.PropertyId">View</a>
-                        <a class="btn btn-outline-primary btn-sm" asp-action="AdminPropertyEdit" asp-route-id="@p.PropertyId">Edit</a>
-                        <form asp-action="AdminPropertyDelete" asp-route-id="@p.PropertyId" method="post" class="d-inline">
-                          @Html.AntiForgeryToken()
-                          <button type="submit" class="btn btn-outline-danger btn-sm"
-                                  onclick="return confirm('Delete this property?');">Delete</button>
-                        </form>
-                      </div>
-                    </td>
-                  </tr>
-                  i++;
-                }
-              }
-            </tbody>
-          </table>
-        </div>
-      </div>
-
-      @if (TempData["AdminPropertyErr"] != null)
-      { <div class="alert alert-danger mt-3">@TempData["AdminPropertyErr"]</div> }
-      @if (TempData["AdminPropertyMsg"] != null)
-      { <div class="alert alert-success mt-3">@TempData["AdminPropertyMsg"]</div> }
-    </main>
-  </div>
-</div>
-
 <style>
-  /* Manager-like density + safe truncation */
-  @@media (max-width: 1200px) { .table .text-truncate { max-width: 360px !important; } }
-  @@media (max-width: 992px)  { .table .text-truncate { max-width: 260px !important; } }
+    :root {
+        --mgr-sidebar-w: 240px;
+    }
+
+    @@media (min-width: 768px) {
+        .manager-main {
+            margin-left: var(--mgr-sidebar-w);
+            padding: 1.25rem 1.5rem;
+        }
+
+        .manager-sidebar {
+            width: var(--mgr-sidebar-w);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+    }
+
+    .table thead th {
+        position: sticky;
+        top: 0;
+        z-index: 1;
+        background: #f8f9fa;
+    }
+
+    .status-badge {
+        font-weight: 500;
+    }
+
+    .text-truncate {
+        overflow: hidden;
+        text-overflow: ellipsis;
+        white-space: nowrap;
+    }
+
+    /* --- Button styling fixes --- */
+    .table .btn {
+        padding: 0.45rem 0.9rem;
+        font-size: 0.875rem;
+        border-radius: 6px;
+        font-weight: 500;
+    }
+
+        .table .btn + .btn,
+        .table .btn + form {
+            margin-left: 0.4rem;
+        }
+
+    .table .btn-warning {
+        background-color: #ffc107;
+        border-color: #ffc107;
+        color: #000;
+    }
+
+    .table .btn-info {
+        background-color: #0dcaf0;
+        border-color: #0dcaf0;
+        color: #fff;
+    }
+
+    .table .btn-danger {
+        background-color: #dc3545;
+        border-color: #dc3545;
+        color: #fff;
+    }
+
+    .table .btn:hover {
+        opacity: 0.85;
+    }
+
+    .card {
+        border-radius: 0.75rem;
+    }
 </style>
+
+<div class="container-fluid">
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
+
+        <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+            <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
+                <h2 class="h3">Property Management</h2>
+                <a asp-action="AdminPropertyCreate" class="btn btn-primary px-4 py-2 fw-semibold shadow-sm">Add Property</a>
+            </div>
+
+            @if (TempData["Toast"] is string ok && !string.IsNullOrWhiteSpace(ok))
+            {
+                <div class="alert alert-success py-2 mb-3">@ok</div>
+            }
+            @if (TempData["ToastError"] is string err && !string.IsNullOrWhiteSpace(err))
+            {
+                <div class="alert alert-danger py-2 mb-3">@err</div>
+            }
+            @if (ViewBag.Error != null)
+            {
+                <div class="alert alert-danger py-2 mb-3">@ViewBag.Error</div>
+            }
+
+            <div class="card shadow-sm">
+                <div class="card-body">
+                    <table class="table table-hover align-middle">
+                        <thead class="table-light">
+                            <tr>
+                                <th style="width:90px;">ID</th>
+                                <th style="min-width:220px;">Title</th>
+                                <th style="min-width:280px;">Address</th>
+                                <th style="width:180px;">City</th>
+                                <th style="width:140px;">Status</th>
+                                <th style="width:230px;" class="text-end">Actions</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            @if (Model != null && Model.Any())
+                            {
+                                foreach (var p in Model)
+                                {
+                                    <tr>
+                                        <td class="text-muted">#@p.PropertyId</td>
+                                        <td class="fw-semibold">@p.Title</td>
+                                        <td class="text-truncate">@p.Address</td>
+                                        <td>@p.City</td>
+                                        <td>
+                                            @{
+                                                var isAvail = string.Equals(p.Status, "Available", System.StringComparison.OrdinalIgnoreCase);
+                                                var badgeCls = isAvail ? "bg-success" : "bg-warning text-dark";
+                                            }
+                                            <span class="badge @badgeCls status-badge">@p.Status</span>
+                                        </td>
+                                        <td class="text-end">
+                                            <div class="d-flex justify-content-end flex-wrap gap-2">
+                                                <a asp-action="AdminPropertyEdit"
+                                                   asp-route-id="@p.PropertyId"
+                                                   class="btn btn-warning">Edit</a>
+
+                                                <a asp-controller="ProspectiveTenant"
+                                                   asp-action="TenantListingDetails"
+                                                   asp-route-id="@p.PropertyId"
+                                                   class="btn btn-info">View</a>
+
+                                                <form asp-action="DeleteProperty"
+                                                      asp-route-id="@p.PropertyId"
+                                                      method="post"
+                                                      class="d-inline">
+                                                    @Html.AntiForgeryToken()
+                                                    <button type="submit"
+                                                            class="btn btn-danger"
+                                                            onclick="return confirm('Delete property #@p.PropertyId (@p.Title)?')">
+                                                        Delete
+                                                    </button>
+                                                </form>
+                                            </div>
+                                        </td>
+                                    </tr>
+                                }
+                            }
+                            else
+                            {
+                                <tr>
+                                    <td colspan="6" class="text-center text-muted py-4">
+                                        No properties found.
+                                    </td>
+                                </tr>
+                            }
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>

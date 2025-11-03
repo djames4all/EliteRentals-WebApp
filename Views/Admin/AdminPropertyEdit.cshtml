@@ -1,104 +1,152 @@
-@using EliteRentals.Models.DTOs
-@model PropertyDto
+@model EliteRentals.Models.DTOs.PropertyUploadDto
 @{
-    Layout = "_Layout";
-    var isCreate = Model == null || Model.PropertyId == 0;
-    ViewData["Title"] = isCreate ? "Create Property" : "Edit Property";
-
-    string CurrentImage()
-    {
-        var url  = Model?.GetType().GetProperty("ImageUrl")?.GetValue(Model)?.ToString();
-        var path = Model?.GetType().GetProperty("ImagePath")?.GetValue(Model)?.ToString();
-        var b64  = Model?.GetType().GetProperty("ImageBase64")?.GetValue(Model)?.ToString();
-
-        if (!string.IsNullOrWhiteSpace(url))  return Url.Content(url);
-        if (!string.IsNullOrWhiteSpace(path)) return Url.Content(path);
-        if (!string.IsNullOrWhiteSpace(b64))  return $"data:image/jpeg;base64,{b64}";
-        return Url.Content("~/images/placeholders/property.jpg");
-    }
+    ViewData["Title"] = "Admin • Properties • Edit";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+    var id = (int)(ViewData["PropertyId"] ?? 0);
 }
+
+<style>
+    :root {
+        --mgr-sidebar-w: 240px;
+    }
+
+    /* Layout adjustments for sidebar */
+    @@media (min-width: 768px) {
+        .manager-sidebar {
+            width: var(--mgr-sidebar-w);
+            position: fixed;
+            top: 0;
+            bottom: 0;
+            overflow-y: auto;
+        }
+
+        .manager-main {
+            margin-left: var(--mgr-sidebar-w);
+            padding: 2rem;
+            max-width: 1100px;
+        }
+    }
+
+    @@media (max-width: 767.98px) {
+        .manager-main {
+            padding: 1rem;
+        }
+    }
+
+    /* Card styling */
+    .property-card {
+        background-color: #fff;
+        border-radius: 1rem;
+        padding: 2rem;
+        box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+    }
+
+        .property-card h2 {
+            font-weight: 600;
+            margin-bottom: 1.5rem;
+        }
+
+    .form-label {
+        font-weight: 500;
+    }
+</style>
+
 
 <div class="container-fluid">
-  <div class="row">
-    <!-- Left sidebar -->
-    <aside class="col-12 col-lg-3 col-xl-2 py-3">
-      @{ try { await Html.RenderPartialAsync("_ManagerSidebar"); } catch { } }
-    </aside>
+    <div class="row">
+        @await Html.PartialAsync("_AdminSidebar")
 
-    <!-- Main content -->
-    <main class="col-12 col-lg-9 col-xl-10 py-3">
-      <div class="d-flex justify-content-between align-items-center mb-3">
-        <h3 class="m-0">@ViewData["Title"]</h3>
-        <a asp-action="AdminProperties" class="btn btn-outline-secondary">Back</a>
-      </div>
+        <main class="col-md-9 ms-sm-auto col-lg-10">
+            <div class="manager-main mx-auto">
+                <div class="property-card">
+                    <h2>Edit Property #@id</h2>
 
-      <div class="card shadow-sm">
-        <div class="card-body">
-          <form asp-action="@(isCreate ? "AdminPropertyCreate" : "AdminPropertyEdit")"
-                asp-route-id="@(isCreate ? null : Model.PropertyId)"
-                method="post" enctype="multipart/form-data">
-            @Html.AntiForgeryToken()
+                    <form asp-action="AdminPropertyEdit" asp-route-id="@id" method="post" enctype="multipart/form-data">
+                        @Html.AntiForgeryToken()
+                        <div asp-validation-summary="ModelOnly" class="text-danger mb-3"></div>
 
-            <div class="row g-4">
-              <div class="col-12 col-lg-8">
-                <div class="row g-3">
-                  <div class="col-12 col-md-7">
-                    <label asp-for="Title" class="form-label"></label>
-                    <input asp-for="Title" class="form-control" />
-                    <span asp-validation-for="Title" class="text-danger"></span>
-                  </div>
+                        <div class="row g-3">
+                            <div class="col-md-6">
+                                <label class="form-label">Title</label>
+                                <input asp-for="Title" class="form-control" />
+                                <span asp-validation-for="Title" class="text-danger"></span>
+                            </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Status</label>
+                                <select asp-for="Status" class="form-select">
+                                    <option value="Available">Available</option>
+                                    <option value="Occupied">Occupied</option>
+                                </select>
+                                <span asp-validation-for="Status" class="text-danger"></span>
+                            </div>
 
-                  <div class="col-12 col-md-5">
-                    <label asp-for="RentAmount" class="form-label"></label>
-                    <input asp-for="RentAmount" type="number" step="0.01" class="form-control" />
-                    <span asp-validation-for="RentAmount" class="text-danger"></span>
-                  </div>
+                            <div class="col-12">
+                                <label class="form-label">Description</label>
+                                <textarea asp-for="Description" class="form-control" rows="3"></textarea>
+                                <span asp-validation-for="Description" class="text-danger"></span>
+                            </div>
 
-                  <div class="col-12">
-                    <label asp-for="Description" class="form-label"></label>
-                    <textarea asp-for="Description" rows="5" class="form-control"></textarea>
-                    <span asp-validation-for="Description" class="text-danger"></span>
-                  </div>
+                            <div class="col-md-6">
+                                <label class="form-label">Address</label>
+                                <input asp-for="Address" class="form-control" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">City</label>
+                                <input asp-for="City" class="form-control" />
+                            </div>
+                            <div class="col-md-3">
+                                <label class="form-label">Province</label>
+                                <input asp-for="Province" class="form-control" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Country</label>
+                                <input asp-for="Country" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Rent Amount</label>
+                                <input asp-for="RentAmount" type="number" step="0.01" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Pet Friendly</label>
+                                <select asp-for="PetFriendly" class="form-select">
+                                    <option value="true">Yes</option>
+                                    <option value="false">No</option>
+                                </select>
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Bedrooms</label>
+                                <input asp-for="NumOfBedrooms" type="number" min="0" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Bathrooms</label>
+                                <input asp-for="NumOfBathrooms" type="number" min="0" class="form-control" />
+                            </div>
+                            <div class="col-md-4">
+                                <label class="form-label">Parking Type</label>
+                                <input asp-for="ParkingType" class="form-control" placeholder="Garage / Carport / Street / None" />
+                            </div>
+
+                            <div class="col-md-4">
+                                <label class="form-label">Number of Parking Spots</label>
+                                <input asp-for="NumOfParkingSpots" type="number" min="0" class="form-control" />
+                            </div>
+
+                            <div class="col-12">
+                                <label class="form-label">Replace Cover Image (optional)</label>
+                                <input name="image" type="file" class="form-control" accept=".jpg,.jpeg,.png,.webp" />
+                                <div class="form-text">Leave empty to keep the current image.</div>
+                            </div>
+
+                            <div class="col-12 d-flex gap-2 mt-4">
+                                <button class="btn btn-primary px-4">Save Changes</button>
+                                <a asp-action="AdminProperties" class="btn btn-outline-secondary px-4">Cancel</a>
+                            </div>
+                        </div>
+                    </form>
                 </div>
-              </div>
-
-              <div class="col-12 col-lg-4">
-                <div class="border rounded p-2">
-                  <div class="ratio ratio-4x3 mb-2" style="background:#f8f9fa;border:1px solid #eee;">
-                    <img id="propPreview"
-                         src="@CurrentImage()"
-                         alt="Preview"
-                         style="width:100%;height:100%;object-fit:cover;"/>
-                  </div>
-                  <label class="form-label">Image</label>
-                  <input name="image" type="file" class="form-control" accept="image/*" onchange="previewImage(this)" />
-                  <div class="form-text">Optional. Upload to add/replace the image.</div>
-                </div>
-              </div>
             </div>
-
-            <div class="d-flex justify-content-end gap-2 mt-4">
-              <a asp-action="AdminProperties" class="btn btn-outline-secondary">Cancel</a>
-              <button type="submit" class="btn btn-primary">@((isCreate) ? "Create" : "Save changes")</button>
-            </div>
-          </form>
-        </div>
-      </div>
-
-      @if (TempData["AdminPropertyErr"] != null)
-      { <div class="alert alert-danger mt-3">@TempData["AdminPropertyErr"]</div> }
-    </main>
-  </div>
+        </main>
+    </div>
 </div>
-
-@section Scripts {
-  <partial name="_ValidationScriptsPartial" />
-  <script>
-    function previewImage(input) {
-      if (!input.files || !input.files[0]) return;
-      const reader = new FileReader();
-      reader.onload = e => document.getElementById('propPreview').src = e.target.result;
-      reader.readAsDataURL(input.files[0]);
-    }
-  </script>
-}

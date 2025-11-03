@@ -281,7 +281,7 @@ namespace EliteRentals.Services
                     PropertyId = l.PropertyId,
                     StartDate = l.StartDate,
                     EndDate = l.EndDate,
-                    Status = l.Status  // keep if present in your DTO; harmless if null
+                    Status = l.Status  
                 });
             }
             return list;

@@ -35,8 +35,6 @@ namespace EliteRentals.Controllers
             _emailService = emailService;
         }
         //public IActionResult AdminChatbot() => View();
-
-        public IActionResult AdminProperties() => View();
         public IActionResult AdminReports() => View();
         public IActionResult AdminSettings() => View();
 
@@ -950,20 +948,10 @@ namespace EliteRentals.Controllers
         // ===================== ADMIN • PROPERTIES =====================
 
         // LIST
-        [HttpGet]
         public async Task<IActionResult> AdminProperties(CancellationToken ct)
         {
-            var client = await CreateApiClient();
-            var resp = await client.GetAsync("api/property", ct);
-            if (!resp.IsSuccessStatusCode)
-            {
-                ViewBag.Error = "Failed to load properties.";
-                return View(new List<PropertyReadDto>()); // Views/Admin/AdminProperties.cshtml
-            }
-
-            var json = await resp.Content.ReadAsStringAsync(ct);
-            var items = JsonSerializer.Deserialize<List<PropertyReadDto>>(json, _jsonOptions) ?? new List<PropertyReadDto>();
-            return View(items); // Views/Admin/AdminProperties.cshtml
+            var all = await _api.GetPropertiesAsync(ct);
+            return View(all);
         }
 
         // VIEW DETAILS
@@ -996,42 +984,16 @@ namespace EliteRentals.Controllers
         public async Task<IActionResult> AdminPropertyCreate(PropertyUploadDto form, IFormFile? image, CancellationToken ct)
         {
             NormalizeStatus(form);
+            if (!ModelState.IsValid) return View(form);
 
-            if (!ModelState.IsValid)
-                return View(form); // Views/Admin/AdminPropertyCreate.cshtml
-
-            var client = await CreateApiClient();
-            using var content = new MultipartFormDataContent();
-            content.Add(new StringContent(form.Title ?? ""), "Title");
-            content.Add(new StringContent(form.Description ?? ""), "Description");
-            content.Add(new StringContent(form.Address ?? ""), "Address");
-            content.Add(new StringContent(form.City ?? ""), "City");
-            content.Add(new StringContent(form.Province ?? ""), "Province");
-            content.Add(new StringContent(form.Country ?? ""), "Country");
-            content.Add(new StringContent(form.RentAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)), "RentAmount");
-            content.Add(new StringContent(form.NumOfBedrooms.ToString()), "NumOfBedrooms");
-            content.Add(new StringContent(form.NumOfBathrooms.ToString()), "NumOfBathrooms");
-            content.Add(new StringContent(form.ParkingType ?? ""), "ParkingType");
-            content.Add(new StringContent(form.NumOfParkingSpots.ToString()), "NumOfParkingSpots");
-            content.Add(new StringContent(form.PetFriendly ? "true" : "false"), "PetFriendly");
-            content.Add(new StringContent(form.Status ?? "Available"), "Status");
-
-            if (image != null && image.Length > 0)
+            var id = await _api.CreatePropertyAsync(form, image, ct);
+            if (id == null)
             {
-                var stream = image.OpenReadStream();
-                var file = new StreamContent(stream);
-                file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(image.ContentType);
-                content.Add(file, "Image", image.FileName);
+                ModelState.AddModelError(string.Empty, "Could not create property. Check your input and try again.");
+                return View(form);
             }
 
-            var resp = await client.PostAsync("api/property", content, ct);
-            if (!resp.IsSuccessStatusCode)
-            {
-                TempData["AdminPropertyErr"] = "Could not create property.";
-                return View(form); // Views/Admin/AdminPropertyCreate.cshtml
-            }
-
-            TempData["AdminPropertyMsg"] = "Property created successfully.";
+            TempData["ManagerPropertyMsg"] = "Property created successfully.";
             return RedirectToAction(nameof(AdminProperties));
         }
 
@@ -1039,13 +1001,8 @@ namespace EliteRentals.Controllers
         [HttpGet]
         public async Task<IActionResult> AdminPropertyEdit(int id, CancellationToken ct)
         {
-            var client = await CreateApiClient();
-            var resp = await client.GetAsync($"api/property/{id}", ct);
-            if (!resp.IsSuccessStatusCode) return RedirectToAction(nameof(AdminProperties));
-
-            var json = await resp.Content.ReadAsStringAsync(ct);
-            var p = JsonSerializer.Deserialize<PropertyReadDto>(json, _jsonOptions);
-            if (p == null) return RedirectToAction(nameof(AdminProperties));
+            var p = await _api.GetPropertyAsync(id, ct);
+            if (p == null) return NotFound();
 
             var vm = new PropertyUploadDto
             {
@@ -1061,11 +1018,10 @@ namespace EliteRentals.Controllers
                 ParkingType = p.ParkingType ?? "",
                 NumOfParkingSpots = p.NumOfParkingSpots,
                 PetFriendly = p.PetFriendly,
-                Status = (p.Status ?? "Available").Equals("Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available"
+                Status = (p.Status ?? "Available").Equals("Occupied", System.StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available"
             };
             ViewData["PropertyId"] = p.PropertyId;
-
-            return View(vm); // Views/Admin/AdminPropertyEdit.cshtml
+            return View(vm);
         }
 
         // EDIT (POST)
@@ -1074,43 +1030,14 @@ namespace EliteRentals.Controllers
         public async Task<IActionResult> AdminPropertyEdit(int id, PropertyUploadDto form, IFormFile? image, CancellationToken ct)
         {
             NormalizeStatus(form);
+            if (!ModelState.IsValid) { ViewData["PropertyId"] = id; return View(form); }
 
-            if (!ModelState.IsValid)
+            var ok = await _api.UpdatePropertyAsync(id, form, image, ct);
+            if (!ok)
             {
+                ModelState.AddModelError(string.Empty, "Update failed. Please try again.");
                 ViewData["PropertyId"] = id;
-                return View(form); // Views/Admin/AdminPropertyEdit.cshtml
-            }
-
-            var client = await CreateApiClient();
-            using var content = new MultipartFormDataContent();
-            content.Add(new StringContent(form.Title ?? ""), "Title");
-            content.Add(new StringContent(form.Description ?? ""), "Description");
-            content.Add(new StringContent(form.Address ?? ""), "Address");
-            content.Add(new StringContent(form.City ?? ""), "City");
-            content.Add(new StringContent(form.Province ?? ""), "Province");
-            content.Add(new StringContent(form.Country ?? ""), "Country");
-            content.Add(new StringContent(form.RentAmount.ToString(System.Globalization.CultureInfo.InvariantCulture)), "RentAmount");
-            content.Add(new StringContent(form.NumOfBedrooms.ToString()), "NumOfBedrooms");
-            content.Add(new StringContent(form.NumOfBathrooms.ToString()), "NumOfBathrooms");
-            content.Add(new StringContent(form.ParkingType ?? ""), "ParkingType");
-            content.Add(new StringContent(form.NumOfParkingSpots.ToString()), "NumOfParkingSpots");
-            content.Add(new StringContent(form.PetFriendly ? "true" : "false"), "PetFriendly");
-            content.Add(new StringContent(form.Status ?? "Available"), "Status");
-
-            if (image != null && image.Length > 0)
-            {
-                var stream = image.OpenReadStream();
-                var file = new StreamContent(stream);
-                file.Headers.ContentType = new System.Net.Http.Headers.MediaTypeHeaderValue(image.ContentType);
-                content.Add(file, "Image", image.FileName);
-            }
-
-            var resp = await client.PutAsync($"api/property/{id}", content, ct);
-            if (!resp.IsSuccessStatusCode)
-            {
-                TempData["AdminPropertyErr"] = "Update failed. Please try again.";
-                ViewData["PropertyId"] = id;
-                return View(form); // Views/Admin/AdminPropertyEdit.cshtml
+                return View(form);
             }
 
             TempData["AdminPropertyMsg"] = "Property updated.";
@@ -1122,10 +1049,8 @@ namespace EliteRentals.Controllers
         [ValidateAntiForgeryToken]
         public async Task<IActionResult> AdminPropertyDelete(int id, CancellationToken ct)
         {
-            var client = await CreateApiClient();
-            var resp = await client.DeleteAsync($"api/property/{id}", ct);
-
-            TempData["AdminPropertyMsg"] = resp.IsSuccessStatusCode ? "Property deleted." : "Delete failed.";
+            var ok = await _api.DeletePropertyAsync(id, ct);
+            TempData["AdminPropertyMsg"] = ok ? "Property deleted." : "Delete failed.";
             return RedirectToAction(nameof(AdminProperties));
         }
 
