@@ -83,11 +83,12 @@
             <div class="row g-4">
                 @foreach (var p in Model.Items)
                 {
-                    var imgSrc = $"{Model.ApiBaseUrl}api/Property/{p.PropertyId}/image";
+                    var imgSrc = p.ImageUrls?.FirstOrDefault() ?? "https://via.placeholder.com/800x600?text=No+Image";
+
                     <div class="col-12 col-sm-6 col-lg-4">
                         <div class="card h-100 border-0 shadow-sm rounded-4 overflow-hidden hover-shadow transition-all">
                             <div class="ratio ratio-16x9 bg-light">
-                                <img src="@imgSrc" class="card-img-top object-fit-cover" alt="Property @p.PropertyId"
+                                <img src="@imgSrc" class="card-img-top object-fit-cover" alt="Property @p.PropertyId" />
                                      onerror="this.src='https://via.placeholder.com/800x600?text=No+Image';" />
                             </div>
                             <div class="card-body">

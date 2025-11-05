@@ -44,15 +44,15 @@ namespace EliteRentals.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ManagerPropertyCreate(PropertyUploadDto form, IFormFile? image, CancellationToken ct)
+        public async Task<IActionResult> ManagerPropertyCreate(PropertyUploadDto form, List<IFormFile>? images, CancellationToken ct)
         {
             NormalizeStatus(form);
             if (!ModelState.IsValid) return View(form);
 
-            var id = await _api.CreatePropertyAsync(form, image, ct);
+            var id = await _api.CreatePropertyAsync(form, images, ct);
             if (id == null)
             {
-                ModelState.AddModelError(string.Empty, "Could not create property. Check your input and try again.");
+                ModelState.AddModelError(string.Empty, "Could not create property. Try again.");
                 return View(form);
             }
 
@@ -89,15 +89,15 @@ namespace EliteRentals.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ManagerPropertyEdit(int id, PropertyUploadDto form, IFormFile? image, CancellationToken ct)
+        public async Task<IActionResult> ManagerPropertyEdit(int id, PropertyUploadDto form, List<IFormFile>? images, CancellationToken ct)
         {
             NormalizeStatus(form);
             if (!ModelState.IsValid) { ViewData["PropertyId"] = id; return View(form); }
 
-            var ok = await _api.UpdatePropertyAsync(id, form, image, ct);
+            var ok = await _api.UpdatePropertyAsync(id, form, images, ct);
             if (!ok)
             {
-                ModelState.AddModelError(string.Empty, "Update failed. Please try again.");
+                ModelState.AddModelError(string.Empty, "Update failed.");
                 ViewData["PropertyId"] = id;
                 return View(form);
             }

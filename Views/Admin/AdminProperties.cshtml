@@ -111,6 +111,7 @@
                             <tr>
                                 <th style="width:90px;">ID</th>
                                 <th style="min-width:220px;">Title</th>
+                                <th style="width:120px">Image</th>
                                 <th style="min-width:280px;">Address</th>
                                 <th style="width:180px;">City</th>
                                 <th style="width:140px;">Status</th>
@@ -124,6 +125,16 @@
                                 {
                                     <tr>
                                         <td class="text-muted">#@p.PropertyId</td>
+                                        <td>
+                                            @if (p.ImageUrls != null && p.ImageUrls.Any())
+                                            {
+                                                <img src="@p.ImageUrls.First()" class="img-thumbnail" style="max-height:80px;" />
+                                            }
+                                            else
+                                            {
+                                                <span class="text-muted small">No image</span>
+                                            }
+                                        </td>
                                         <td class="fw-semibold">@p.Title</td>
                                         <td class="text-truncate">@p.Address</td>
                                         <td>@p.City</td>

@@ -49,11 +49,11 @@
             <div class="row g-4">
                 @foreach (var p in featured)
                 {
-                    var imgSrc = $"{Model.ApiBaseUrl}api/Property/{p.PropertyId}/image";
+                    var imgSrc = p.ImageUrls?.FirstOrDefault() ?? "https://via.placeholder.com/800x600?text=No+Image";
                     <div class="col-12 col-md-4">
                         <div class="card shadow-sm border-0 rounded-4 h-100 hover-shadow-lg animate__animated animate__fadeInUp">
                             <div class="ratio ratio-16x9 rounded-top-4 overflow-hidden">
-                                <img src="@imgSrc" class="w-100 h-100 object-fit-cover" alt="@p.Title"
+                                <img src="@imgSrc" class="w-100 h-100 object-fit-cover" alt="@p.Title" />
                                      onerror="this.src='https://via.placeholder.com/800x600?text=No+Image';" />
                             </div>
                             <div class="card-body d-flex flex-column">

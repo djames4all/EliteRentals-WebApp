@@ -17,6 +17,8 @@ namespace EliteRentals.Models.DTOs
         public bool PetFriendly { get; set; }
         public string? Status { get; set; }
         public ManagerReadDto? Manager { get; set; }
+
+        public List<string>? ImageUrls { get; set; }
     }
 
     public class ManagerReadDto

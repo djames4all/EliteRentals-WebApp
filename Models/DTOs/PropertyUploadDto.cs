@@ -15,5 +15,7 @@ namespace EliteRentals.Models.DTOs
         public int NumOfParkingSpots { get; set; }
         public bool PetFriendly { get; set; }
         public string Status { get; set; } = "Available";
+
+        public List<IFormFile>? Images { get; set; }
     }
 }

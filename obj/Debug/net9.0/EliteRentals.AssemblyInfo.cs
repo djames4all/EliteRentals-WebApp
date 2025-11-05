@@ -16,7 +16,7 @@ using System.Reflection;
 [assembly: System.Reflection.AssemblyCompanyAttribute("EliteRentals")]
 [assembly: System.Reflection.AssemblyConfigurationAttribute("Debug")]
 [assembly: System.Reflection.AssemblyFileVersionAttribute("1.0.0.0")]
-[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3612782a75406b09acd4b886a00583e9da05e118")]
+[assembly: System.Reflection.AssemblyInformationalVersionAttribute("1.0.0+3fa153bda7f8e1c66180734108b824d0ba699dd7")]
 [assembly: System.Reflection.AssemblyProductAttribute("EliteRentals")]
 [assembly: System.Reflection.AssemblyTitleAttribute("EliteRentals")]
 [assembly: System.Reflection.AssemblyVersionAttribute("1.0.0.0")]

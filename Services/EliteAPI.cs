@@ -76,24 +76,21 @@ namespace EliteRentals.Services
         private class RentalApplicationCreatedProxy { public int ApplicationId { get; set; } }
 
         // -------- Manager: Properties (auth) --------
-        public async Task<int?> CreatePropertyAsync(PropertyUploadDto dto, IFormFile? image, CancellationToken ct = default)
+        public async Task<int?> CreatePropertyAsync(PropertyUploadDto dto, List<IFormFile>? images, CancellationToken ct = default)
         {
             var c = Client(withAuth: true);
-            using var form = BuildPropertyForm(dto, image);
+            using var form = BuildPropertyForm(dto, images);
             var resp = await c.PostAsync("api/Property", form, ct);
             if (!resp.IsSuccessStatusCode) return null;
-            try
-            {
-                var created = await resp.Content.ReadFromJsonAsync<CreatedPropertyProxy>(cancellationToken: ct);
-                return created?.PropertyId ?? 0;
-            }
-            catch { return 0; }
+
+            var created = await resp.Content.ReadFromJsonAsync<CreatedPropertyProxy>(cancellationToken: ct);
+            return created?.PropertyId ?? 0;
         }
 
-        public async Task<bool> UpdatePropertyAsync(int propertyId, PropertyUploadDto dto, IFormFile? image, CancellationToken ct = default)
+        public async Task<bool> UpdatePropertyAsync(int propertyId, PropertyUploadDto dto, List<IFormFile>? images, CancellationToken ct = default)
         {
             var c = Client(withAuth: true);
-            using var form = BuildPropertyForm(dto, image);
+            using var form = BuildPropertyForm(dto, images);
             var resp = await c.PutAsync($"api/Property/{propertyId}", form, ct);
             return resp.IsSuccessStatusCode;
         }
@@ -105,9 +102,11 @@ namespace EliteRentals.Services
             return resp.IsSuccessStatusCode;
         }
 
-        private MultipartFormDataContent BuildPropertyForm(PropertyUploadDto dto, IFormFile? image)
+        private MultipartFormDataContent BuildPropertyForm(PropertyUploadDto dto, List<IFormFile>? images)
         {
             var form = new MultipartFormDataContent();
+
+            // Add text fields
             form.Add(new StringContent(dto.Title ?? ""), nameof(dto.Title));
             form.Add(new StringContent(dto.Description ?? ""), nameof(dto.Description));
             form.Add(new StringContent(dto.Address ?? ""), nameof(dto.Address));
@@ -120,15 +119,22 @@ namespace EliteRentals.Services
             form.Add(new StringContent(dto.ParkingType ?? ""), nameof(dto.ParkingType));
             form.Add(new StringContent(dto.NumOfParkingSpots.ToString()), nameof(dto.NumOfParkingSpots));
             form.Add(new StringContent(dto.PetFriendly.ToString()), nameof(dto.PetFriendly));
-            var status = (dto.Status ?? "Available").Equals("Occupied", StringComparison.OrdinalIgnoreCase) ? "Occupied" : "Available";
-            form.Add(new StringContent(status), nameof(dto.Status));
+            form.Add(new StringContent(dto.Status ?? "Available"), nameof(dto.Status));
 
-            if (image != null && image.Length > 0)
+            // ✅ Add multiple files
+            if (images != null)
             {
-                var sc = new StreamContent(image.OpenReadStream());
-                sc.Headers.ContentType = new MediaTypeHeaderValue(image.ContentType ?? "application/octet-stream");
-                form.Add(sc, "image", image.FileName);
+                foreach (var img in images)
+                {
+                    if (img.Length > 0)
+                    {
+                        var sc = new StreamContent(img.OpenReadStream());
+                        sc.Headers.ContentType = new MediaTypeHeaderValue(img.ContentType ?? "application/octet-stream");
+                        form.Add(sc, "images", img.FileName);
+                    }
+                }
             }
+
             return form;
         }
 
@@ -327,8 +333,6 @@ namespace EliteRentals.Services
 
     return res.IsSuccessStatusCode;
 }
-
-
 
 
     }

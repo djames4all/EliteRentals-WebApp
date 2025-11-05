@@ -3,7 +3,7 @@
     ViewData["Title"] = (Model?.Title ?? "Property Details") + " - EliteRentals";
     Layout = "~/Views/Shared/_Layout.cshtml";
     var apiBase = (string)(ViewData["ApiBaseUrl"] ?? "");
-    var imgSrc = (Model != null) ? $"{apiBase}api/Property/{Model.PropertyId}/image" : "https://via.placeholder.com/1200x900?text=No+Image";
+    var imgSrc = Model?.ImageUrls?.FirstOrDefault() ?? "https://via.placeholder.com/1200x900?text=No+Image";
 }
 
 @if (TempData["AppSubmitted"] is string ok && !string.IsNullOrWhiteSpace(ok))
@@ -44,10 +44,36 @@
         <div class="row g-4 align-items-start">
             <div class="col-lg-6">
                 <div class="card shadow-sm rounded-4">
-                    <img src="@imgSrc" class="card-img-top rounded-top-4"
-                         alt="Property @Model.PropertyId"
-                         onerror="this.src='https://via.placeholder.com/1200x900?text=No+Image';">
+                    @if (Model.ImageUrls != null && Model.ImageUrls.Count > 1)
+                    {
+                        var carouselId = $"carousel-{Model.PropertyId}";
+                        <div id="@carouselId" class="carousel slide rounded-top-4" data-bs-ride="carousel">
+                            <div class="carousel-inner rounded-top-4">
+                                @for (int i = 0; i < Model.ImageUrls.Count; i++)
+                                {
+                                    var url = Model.ImageUrls[i];
+                                    <div class="carousel-item @(i == 0 ? "active" : "")">
+                                        <img src="@url" class="d-block w-100 object-fit-cover" style="max-height: 500px;" alt="Property image @(i + 1)">
+                                    </div>
+                                }
+                            </div>
+                            <button class="carousel-control-prev" type="button" data-bs-target="#@carouselId" data-bs-slide="prev">
+                                <span class="carousel-control-prev-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Previous</span>
+                            </button>
+                            <button class="carousel-control-next" type="button" data-bs-target="#@carouselId" data-bs-slide="next">
+                                <span class="carousel-control-next-icon" aria-hidden="true"></span>
+                                <span class="visually-hidden">Next</span>
+                            </button>
+                        </div>
+                    }
+                    else
+                    {
+                        var fallback = Model.ImageUrls?.FirstOrDefault() ?? "https://via.placeholder.com/1200x900?text=No+Image";
+                        <img src="@fallback" class="card-img-top rounded-top-4" alt="Property @Model.PropertyId" />
+                    }
                 </div>
+
             </div>
 
             <div class="col-lg-6">
