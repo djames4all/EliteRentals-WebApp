@@ -262,3 +262,27 @@ section.bg-primary p {
             box-shadow: 0 10px 30px rgba(0,0,0,0.2);
         }
 
+
+/* ContactUs Page */
+.map-container iframe {
+    transition: all 0.3s ease;
+    border-radius: 0.75rem;
+}
+
+.map-container:hover {
+    transform: scale(1.02);
+}
+
+.card:hover {
+    transform: translateY(-4px);
+    transition: 0.3s ease;
+}
+
+section.bg-primary {
+    background: linear-gradient(135deg, #007bff, #004aad);
+}
+
+.modal-content iframe {
+    border-radius: 0 0 0.75rem 0.75rem;
+}
+

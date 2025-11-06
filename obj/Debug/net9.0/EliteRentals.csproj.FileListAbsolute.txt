@@ -1215,6 +1215,7 @@ C:\Users\lab_services_student\Documents\GitHub\EliteRentals-WebApp\obj\Debug\net
 C:\Users\lab_services_student\Documents\GitHub\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.pdb
 C:\Users\lab_services_student\Documents\GitHub\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.genruntimeconfig.cache
 C:\Users\lab_services_student\Documents\GitHub\EliteRentals-WebApp\obj\Debug\net9.0\ref\EliteRentals.dll
+C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\compressed\7ej0cnzqq4-estbh4lzsf.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\bin\Debug\net9.0\appsettings.json
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\bin\Debug\net9.0\EliteRentals.staticwebassets.runtime.json
@@ -1445,6 +1446,7 @@ C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\a3ygk
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\nezrqnk58p-muycvpuwrr.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\v0zgfp0y55-87fc7y1x7t.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\yfc7ypekbg-mlv21k5csn.gz
+C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\7ej0cnzqq4-yj3ucmovsu.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\59gkpu9x4l-61n19gt1b8.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\82fr7f7lon-sxi44r39zo.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\vr9reerkdl-xtxxf3hu2r.gz
@@ -1520,5 +1522,3 @@ C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\refint\EliteRent
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.pdb
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.genruntimeconfig.cache
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\ref\EliteRentals.dll
-C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\compressed\7ej0cnzqq4-estbh4lzsf.gz
-C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\compressed\7ej0cnzqq4-estbh4lzsf.gz
