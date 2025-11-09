@@ -1,4 +1,5 @@
-﻿@model List<EliteRentals.Models.DTOs.PaymentDto>
+﻿@model List<EliteRentals.Models.ViewModels.MonthlyPaymentsViewModel>
+
 
 @{
     ViewData["Title"] = "Admin Payments - EliteRentals";
@@ -17,64 +18,97 @@
                 <div class="alert alert-danger">@ViewBag.Error</div>
             }
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <table class="table table-hover align-middle" id="paymentsTable">
-                        <thead>
-                            <tr>
-                                <th>Tenant</th>
-                                <th>Amount</th>
-                                <th>Status</th>
-                                <th>Date</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @if (Model != null && Model.Any())
-                            {
-                                foreach (var p in Model)
-                                {
-                                    var statusClass = p.Status switch
-                                    {
-                                        "Paid" => "bg-success",
-                                        "Pending" => "bg-warning text-dark",
-                                        "Revoked" or "Rejected" => "bg-danger",
-                                        _ => "bg-secondary"
-                                    };
-
-                                    <tr>
-                                        <td>@(p.TenantName ?? $"Tenant #{p.TenantId}")</td>
-                                        <td>@($"R{p.Amount}")</td>
-
-                                        <td>
-                                            <button class="btn btn-sm status-btn @statusClass">@p.Status</button>
-                                        </td>
-                                        <td>@p.Date.ToString("dd/MM/yyyy")</td>
-                                        <td>
-                                            <a href="@Url.Action("ViewPayment", "Admin", new { id = p.PaymentId })"
-                                               class="btn btn-sm btn-info">View</a>
-                                            <form asp-action="UpdatePaymentStatus" method="post" style="display:inline;">
-                                                <input type="hidden" name="id" value="@p.PaymentId" />
-                                                <input type="hidden" name="status" value="Paid" />
-                                                <button type="submit" class="btn btn-sm btn-success">Confirm</button>
-                                            </form>
-                                            <form asp-action="UpdatePaymentStatus" method="post" style="display:inline;">
-                                                <input type="hidden" name="id" value="@p.PaymentId" />
-                                                <input type="hidden" name="status" value="Revoked" />
-                                                <button type="submit" class="btn btn-sm btn-danger">Revoke</button>
-                                            </form>
-                                        </td>
-                                    </tr>
-                                }
-                            }
-                            else
-                            {
-                                <tr><td colspan="5" class="text-center">No payments found.</td></tr>
-                            }
-                        </tbody>
-                    </table>
+            @if (Model != null && Model.Any())
+            {
+                <div class="d-flex justify-content-between align-items-center mb-3">
+                    <h5 class="mb-0">Filter by Month</h5>
+                    <select id="monthFilter" class="form-select w-auto">
+                        <option value="all">Show All</option>
+                        @foreach (var group in Model)
+                        {
+                            <option value="@group.MonthName">@group.MonthName</option>
+                        }
+                    </select>
                 </div>
-            </div>
+
+                @foreach (var group in Model)
+                {
+                    <div class="card shadow-sm mb-4 payment-group" data-month="@group.MonthName">
+                        <div class="card-header bg-primary text-white fw-bold">
+                            @group.MonthName
+                        </div>
+                        <div class="card-body p-0">
+                            <table class="table table-hover align-middle mb-0">
+                                <thead class="table-light">
+                                    <tr>
+                                        <th>Tenant</th>
+                                        <th>Amount</th>
+                                        <th>Status</th>
+                                        <th>Date</th>
+                                        <th>Actions</th>
+                                    </tr>
+                                </thead>
+                                <tbody>
+                                    @foreach (var p in group.Payments)
+                                    {
+                                        var statusClass = p.Status switch
+                                        {
+                                            "Paid" => "bg-success",
+                                            "Pending" => "bg-warning text-dark",
+                                            "Revoked" or "Rejected" => "bg-danger",
+                                            _ => "bg-secondary"
+                                        };
+
+                                        <tr>
+                                            <td>@(p.TenantName ?? $"Tenant #{p.TenantId}")</td>
+                                            <td>@($"R{p.Amount}")</td>
+                                            <td>
+                                                <button class="btn btn-sm status-btn @statusClass">@p.Status</button>
+                                            </td>
+                                            <td>@p.Date.ToString("dd/MM/yyyy")</td>
+                                            <td>
+                                                <a href="@Url.Action("ViewPayment", "Admin", new { id = p.PaymentId })"
+                                                   class="btn btn-sm btn-info">View</a>
+                                                <form asp-action="UpdatePaymentStatus" method="post" style="display:inline;">
+                                                    <input type="hidden" name="id" value="@p.PaymentId" />
+                                                    <input type="hidden" name="status" value="Paid" />
+                                                    <button type="submit" class="btn btn-sm btn-success">Confirm</button>
+                                                </form>
+                                                <form asp-action="UpdatePaymentStatus" method="post" style="display:inline;">
+                                                    <input type="hidden" name="id" value="@p.PaymentId" />
+                                                    <input type="hidden" name="status" value="Revoked" />
+                                                    <button type="submit" class="btn btn-sm btn-danger">Revoke</button>
+                                                </form>
+                                            </td>
+                                        </tr>
+                                    }
+                                </tbody>
+                            </table>
+                        </div>
+                    </div>
+                }
+
+                <script>
+                    document.getElementById("monthFilter").addEventListener("change", function () {
+                        const selectedMonth = this.value;
+                        const groups = document.querySelectorAll(".payment-group");
+
+                        groups.forEach(g => {
+                            if (selectedMonth === "all" || g.dataset.month === selectedMonth) {
+                                g.style.display = "";
+                            } else {
+                                g.style.display = "none";
+                            }
+                        });
+                    });
+                </script>
+            }
+            else
+            {
+                <div class="alert alert-info">No payments found.</div>
+            }
         </main>
+
+
     </div>
 </div>

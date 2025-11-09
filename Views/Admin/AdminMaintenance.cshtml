@@ -1,4 +1,4 @@
-﻿@model List<EliteRentals.Models.DTOs.MaintenanceDto>
+﻿@model List<EliteRentals.Models.ViewModels.MonthlyMaintenanceViewModel>
 
 
 @{
@@ -15,75 +15,96 @@
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
             <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
                 <h2 class="h3">Maintenance Requests</h2>
+                <select id="monthFilter" class="form-select w-auto">
+                    <option value="all">Show All</option>
+                    @foreach (var group in Model)
+                    {
+                        <option value="@group.MonthName">@group.MonthName</option>
+                    }
+                </select>
             </div>
 
-            <div class="card shadow-sm">
-                <div class="card-body">
-                    <table class="table table-hover align-middle">
-                        <thead>
-                            <tr>
-                                <th>Issue</th>
-                                <th>Property</th>
-                                <th>Reported By</th>
-                                <th>Status</th>
-                                <th>Priority</th>
-                                <th>Assigned Caretaker</th>
-                                <th>Actions</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            @foreach (var task in Model)
-
-                            {
+            @foreach (var group in Model)
+            {
+                <div class="card shadow-sm mb-4 maintenance-group" data-month="@group.MonthName">
+                    <div class="card-header bg-primary text-white fw-bold">
+                        @group.MonthName
+                    </div>
+                    <div class="card-body p-0">
+                        <table class="table table-hover align-middle mb-0">
+                            <thead class="table-light">
                                 <tr>
-                                    <td>@(task.Issue ?? "N/A")</td>
-                                    <td>@(task.PropertyName ?? $"Property #{task.PropertyName}")</td>
-                                    <td>@(task.ReportedBy ?? $"Tenant #{task.ReportedBy}")</td>
-                                    <td>
-                                        <form asp-action="UpdateMaintenanceStatus" method="post" class="d-flex flex-column">
-                                            <input type="hidden" name="maintenanceId" value="@task.MaintenanceId" />
-                                            <select name="status" class="form-select form-select-sm mb-1">
-                                                @foreach (var s in statuses)
-                                                {
-                                                    <option value="@s" selected="@(task.Status == s)">@s</option>
-                                                }
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-primary">Update</button>
-                                        </form>
-                                    </td>
-                                    <td>
-                                        <span class="priority-badge @(task.Priority?.ToLower() ?? "low")">
-                                            @(task.Priority ?? "Low")
-                                        </span>
-                                    </td>
-
-
-                                    <td>
-                                        <form asp-action="AssignCaretaker" method="post">
-                                            <input type="hidden" name="maintenanceId" value="@task.MaintenanceId" />
-                                            <select name="caretakerId" class="form-select form-select-sm">
-                                                <option value="">-- Select --</option>
-                                                @foreach (var c in caretakers)
-                                                {
-                                                    <option value="@c.UserId" selected="@(task.AssignedCaretakerId == c.UserId)">
-                                                        @c.FirstName @c.LastName
-                                                    </option>
-                                                }
-                                            </select>
-                                            <button type="submit" class="btn btn-sm btn-success mt-1">Assign</button>
-                                        </form>
-                                    </td>
-
-                                    <td>
-                                        <a class="btn btn-sm btn-info" asp-controller="Admin" asp-action="ViewMaintenance" asp-route-id="@task.MaintenanceId">View</a>
-                                    </td>
+                                    <th>Issue</th>
+                                    <th>Property</th>
+                                    <th>Reported By</th>
+                                    <th>Status</th>
+                                    <th>Priority</th>
+                                    <th>Assigned Caretaker</th>
+                                    <th>Actions</th>
                                 </tr>
-                            }
-                        </tbody>
-                    </table>
+                            </thead>
+                            <tbody>
+                                @foreach (var task in group.Maintenances)
+                                {
+                                    <tr>
+                                        <td>@(task.Issue ?? "N/A")</td>
+                                        <td>@(task.PropertyName ?? $"Property #{task.PropertyName}")</td>
+                                        <td>@(task.ReportedBy ?? $"Tenant #{task.ReportedBy}")</td>
+                                        <td>
+                                            <form asp-action="UpdateMaintenanceStatus" method="post" class="d-flex flex-column">
+                                                <input type="hidden" name="maintenanceId" value="@task.MaintenanceId" />
+                                                <select name="status" class="form-select form-select-sm mb-1">
+                                                    @foreach (var s in new[] { "Pending", "In Progress", "Resolved" })
+                                                    {
+                                                        <option value="@s" selected="@(task.Status == s)">@s</option>
+                                                    }
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-primary">Update</button>
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <span class="priority-badge @(task.Priority?.ToLower() ?? "low")">
+                                                @(task.Priority ?? "Low")
+                                            </span>
+                                        </td>
+                                        <td>
+                                            <form asp-action="AssignCaretaker" method="post">
+                                                <input type="hidden" name="maintenanceId" value="@task.MaintenanceId" />
+                                                <select name="caretakerId" class="form-select form-select-sm">
+                                                    <option value="">-- Select --</option>
+                                                    @foreach (var c in ViewBag.Caretakers as List<EliteRentals.Models.DTOs.UserDto>)
+                                                    {
+                                                        <option value="@c.UserId" selected="@(task.AssignedCaretakerId == c.UserId)">
+                                                            @c.FirstName @c.LastName
+                                                        </option>
+                                                    }
+                                                </select>
+                                                <button type="submit" class="btn btn-sm btn-success mt-1">Assign</button>
+                                            </form>
+                                        </td>
+                                        <td>
+                                            <a class="btn btn-sm btn-info" asp-controller="Admin" asp-action="ViewMaintenance" asp-route-id="@task.MaintenanceId">View</a>
+                                        </td>
+                                    </tr>
+                                }
+                            </tbody>
+                        </table>
+                    </div>
                 </div>
-            </div>
+            }
+
+            <script>
+                document.getElementById("monthFilter").addEventListener("change", function () {
+                    const selectedMonth = this.value;
+                    const groups = document.querySelectorAll(".maintenance-group");
+
+                    groups.forEach(g => {
+                        g.style.display = (selectedMonth === "all" || g.dataset.month === selectedMonth) ? "" : "none";
+                    });
+                });
+            </script>
         </main>
+
     </div>
 </div>
 

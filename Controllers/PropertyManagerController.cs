@@ -4,6 +4,7 @@ using EliteRentals.Models.ViewModels;
 using EliteRentals.Services;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
+using System.Globalization;
 using System.Linq; // for LINQ
 using System.Security.Claims;
 using System.Text;
@@ -222,7 +223,7 @@ namespace EliteRentals.Controllers
         public async Task<IActionResult> ManagerLeases()
         {
             var client = await CreateApiClient();
-            var resp = await client.GetAsync("api/lease"); // matches API
+            var resp = await client.GetAsync("api/lease"); 
             if (!resp.IsSuccessStatusCode)
             {
                 ViewBag.Error = "Failed to load leases.";
@@ -237,8 +238,8 @@ namespace EliteRentals.Controllers
         [HttpGet]
         public async Task<IActionResult> AddLease(int? propertyId)
         {
-            ViewBag.Tenants = await FetchTenants();
-            ViewBag.Properties = await FetchProperties();
+            ViewBag.Tenants = await FetchUnassignedTenants();
+            ViewBag.Properties = await FetchAvailableProperties();
 
             return View(new LeaseCreateUpdateDto
             {
@@ -260,8 +261,8 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode)
             {
                 TempData["Error"] = "Failed to create lease.";
-                ViewBag.Tenants = await FetchTenants();
-                ViewBag.Properties = await FetchProperties();
+                ViewBag.Tenants = await FetchUnassignedTenants();
+                ViewBag.Properties = await FetchAvailableProperties();
                 return View(dto);
             }
 
@@ -482,12 +483,12 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode)
             {
                 ViewBag.Error = "Failed to load maintenance requests.";
-                ViewBag.Caretakers = new List<Models.DTOs.UserDto>();
-                return View(new List<MaintenanceDto>());
+                ViewBag.Caretakers = new List<Models.UserDto>();
+                return View(new List<MonthlyMaintenanceViewModel>());
             }
 
             var json = await resp.Content.ReadAsStringAsync();
-            var raw = JsonSerializer.Deserialize<List<Maintenance>>(json, _jsonOptions) ?? new();
+            var raw = JsonSerializer.Deserialize<List<Maintenance>>(json, _jsonOptions) ?? new List<Maintenance>();
 
             var maintenance = raw.Select(m => new MaintenanceDto
             {
@@ -509,7 +510,19 @@ namespace EliteRentals.Controllers
 
             ViewBag.Caretakers = await FetchCaretakers();
 
-            return View(maintenance);
+            // Group by Month + Year based on CreatedAt
+            var grouped = maintenance
+                .GroupBy(m => new { m.CreatedAt.Year, m.CreatedAt.Month })
+                .OrderByDescending(g => g.Key.Year)
+                .ThenByDescending(g => g.Key.Month)
+                .Select(g => new MonthlyMaintenanceViewModel
+                {
+                    MonthName = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(g.Key.Month)} {g.Key.Year}",
+                    Maintenances = g.ToList()
+                })
+                .ToList();
+
+            return View(grouped);
         }
 
         [HttpPost]
@@ -601,6 +614,7 @@ namespace EliteRentals.Controllers
         // ===========================
 
         [HttpGet]
+        [HttpGet]
         public async Task<IActionResult> ManagerPayments()
         {
             var client = await CreateApiClient();
@@ -609,20 +623,34 @@ namespace EliteRentals.Controllers
             if (!resp.IsSuccessStatusCode)
             {
                 ViewBag.Error = "Failed to load payments.";
-                return View(new List<PaymentDto>());
+                return View(new List<MonthlyPaymentsViewModel>());
             }
 
             var json = await resp.Content.ReadAsStringAsync();
-            var payments = JsonSerializer.Deserialize<List<PaymentDto>>(json, _jsonOptions) ?? new();
+            var payments = JsonSerializer.Deserialize<List<PaymentDto>>(json, _jsonOptions) ?? new List<PaymentDto>();
 
+            // Fetch tenants for display names
             var tenants = await FetchTenants();
             foreach (var p in payments)
             {
                 var tenant = tenants.FirstOrDefault(t => t.UserId == p.TenantId);
-                if (tenant != null) p.TenantName = $"{tenant.FirstName} {tenant.LastName}";
+                if (tenant != null)
+                    p.TenantName = $"{tenant.FirstName} {tenant.LastName}";
             }
 
-            return View(payments);
+            // Group by month and year
+            var grouped = payments
+                .GroupBy(p => new { p.Date.Year, p.Date.Month })
+                .OrderByDescending(g => g.Key.Year)
+                .ThenByDescending(g => g.Key.Month)
+                .Select(g => new MonthlyPaymentsViewModel
+                {
+                    MonthName = $"{CultureInfo.CurrentCulture.DateTimeFormat.GetMonthName(g.Key.Month)} {g.Key.Year}",
+                    Payments = g.ToList()
+                })
+                .ToList();
+
+            return View(grouped);
         }
 
         [HttpGet]
@@ -1405,6 +1433,31 @@ namespace EliteRentals.Controllers
             {
                 return null;
             }
+        }
+
+        private async Task<List<TenantDto>> FetchUnassignedTenants()
+        {
+            var allTenants = await FetchTenants(); // original method
+            var client = await CreateApiClient();
+
+            var leaseResp = await client.GetAsync("api/lease");
+            if (!leaseResp.IsSuccessStatusCode) return allTenants;
+
+            var leaseJson = await leaseResp.Content.ReadAsStringAsync();
+            var leases = JsonSerializer.Deserialize<List<LeaseDto>>(leaseJson, _jsonOptions) ?? new List<LeaseDto>();
+
+            var tenantIdsWithLease = leases
+                .Where(l => l.Status == "Active" || l.Status == "Pending Approval")
+                .Select(l => l.TenantId)
+                .ToHashSet();
+
+            return allTenants.Where(t => !tenantIdsWithLease.Contains(t.UserId)).ToList();
+        }
+
+        private async Task<List<PropertyDto>> FetchAvailableProperties()
+        {
+            var allProperties = await FetchProperties(); // original method
+            return allProperties.Where(p => p.Status == "Available").ToList();
         }
     }
 }
