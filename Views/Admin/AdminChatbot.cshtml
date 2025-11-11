@@ -1,174 +1,374 @@
 ﻿@{
-    ViewData["Title"] = "Admin Chatbot";
-    Layout = "_Layout";
+    ViewData["Title"] = "Admin • Chatbot";
+    Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
-<section class="container py-4">
-  <div class="d-flex align-items-center justify-content-between mb-3">
-    <h2 class="m-0">Admin Chatbot</h2>
-    <small class="text-muted">Hardcoded intents • Live data via API</small>
-  </div>
+@Html.AntiForgeryToken()
 
-  <div id="chat" class="border rounded p-3 mb-3" style="height:420px;overflow-y:auto;background:#fafafa;">
-    <div class="bot mb-2 bubble"><strong>Bot:</strong> Hi! Try <em>“maintenance summary”</em>, <em>“overdue payments”</em>, <em>“property stats”</em>, or <em>“leases expiring”</em>.</div>
-  </div>
+<!-- Keep the admin sidebar visible -->
+@await Html.PartialAsync("~/Views/Shared/_AdminSidebar.cshtml")
 
-  <div class="d-flex gap-2 mb-2 flex-wrap">
-    <button class="btn btn-sm btn-outline-secondary quick">maintenance summary</button>
-    <button class="btn btn-sm btn-outline-secondary quick">overdue payments</button>
-    <button class="btn btn-sm btn-outline-secondary quick">property stats</button>
-    <button class="btn btn-sm btn-outline-secondary quick">leases expiring</button>
-    <button class="btn btn-sm btn-outline-secondary quick">broadcast to tenants</button>
-  </div>
+<div class="adm-main">
+    <!-- header -->
+    <div class="acb-header shadow-sm">
+        <div class="d-flex align-items-center gap-2">
+            <span class="acb-badge"><i class="bi bi-robot"></i></span>
+            <div>
+                <div class="fw-semibold">Admin Assistant</div>
+                <div class="text-muted small">Ask about maintenance, payments, properties, leases, or send a broadcast</div>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary btn-sm" id="btnOpenBroadcast">
+                <i class="bi bi-megaphone"></i> Broadcast
+            </button>
+        </div>
+    </div>
 
-  <form id="chat-form" class="d-flex gap-2" autocomplete="off">
-    @Html.AntiForgeryToken()
-    <input id="msg" class="form-control" placeholder="Type a message…" />
-    <button id="sendBtn" class="btn btn-primary" type="submit">Send</button>
-  </form>
-</section>
+    <!-- quick chips -->
+    <div class="acb-chips">
+        <button class="btn btn-chip" data-prompt="maintenance summary">Maintenance summary</button>
+        <button class="btn btn-chip" data-prompt="overdue payments">Overdue payments</button>
+        <button class="btn btn-chip" data-prompt="property stats">Property stats</button>
+        <button class="btn btn-chip" data-prompt="leases expiring">Leases expiring</button>
+        <button class="btn btn-chip" data-prompt="broadcast">Broadcast</button>
+    </div>
 
-@section Scripts{
+    <!-- chat card with fixed composer INSIDE -->
+    <div class="acb-chat card">
+        <div id="chatScroll" class="acb-chat-scroll">
+            <div class="acb-msg acb-msg-bot">
+                <div class="acb-avatar"><i class="bi bi-robot"></i></div>
+                <div class="acb-bubble">
+                    <div class="acb-name">Admin assistant</div>
+                    <div class="acb-text">
+                        Hi! I can show <strong>maintenance</strong>, <strong>payment</strong>,
+                        <strong>property</strong> and <strong>lease</strong> summaries. Try a chip above,
+                        or type your question.
+                    </div>
+                    <div class="acb-time">@DateTime.Now.ToString("HH:mm")</div>
+                </div>
+            </div>
+        </div>
+
+        <div class="acb-composer">
+            <div class="acb-input-wrap">
+                <textarea id="composer" class="form-control acb-input" rows="1"
+                          placeholder="Type your message… (Shift+Enter for newline)"></textarea>
+                <div id="typing" class="acb-typing d-none"><span></span><span></span><span></span></div>
+            </div>
+            <button id="send" class="btn btn-primary acb-send" title="Send">
+                <i class="bi bi-send-fill"></i>
+            </button>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ONE source of truth for offsets so layout doesn’t drift */
+    :root{
+        --adm-sidebar-w: 240px;   /* match _AdminSidebar.cshtml */
+        --adm-navbar-h: 56px;     /* match your top navbar height */
+        --acb-maxw: 880px;
+        --acb-blue: #0d6efd;
+        --acb-bg: #f7f9fc;
+        --acb-bot: #ffffff;
+        --acb-me: #e7f1ff;
+    }
+
+    /* Push content right and down to clear fixed sidebar + navbar */
+    .adm-main{
+        margin-left: var(--adm-sidebar-w);
+        padding: 1rem 1.25rem;
+        padding-top: calc(var(--adm-navbar-h) + 1rem);
+        background: var(--acb-bg);
+        min-height: calc(100vh - var(--adm-navbar-h));
+    }
+    @@media (max-width: 767.98px){
+        .adm-main{
+            margin-left: 0;
+            padding-top: calc(var(--adm-navbar-h) + 0.5rem);
+        }
+    }
+
+    /* header */
+    .acb-header{
+        max-width: var(--acb-maxw);
+        margin: 0 auto .75rem;
+        padding: .75rem 1rem;
+        border-radius: .75rem;
+        background: #fff;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    .acb-badge{
+        width: 40px; height: 40px; border-radius: 10px;
+        display:inline-grid; place-items:center;
+        background: rgba(13,110,253,.12); color: var(--acb-blue);
+        font-size: 1.2rem;
+    }
+
+    /* chips */
+    .acb-chips{
+        max-width: var(--acb-maxw);
+        margin: .25rem auto 1rem; display:flex; flex-wrap:wrap; gap:.5rem;
+    }
+    .btn-chip{
+        background:#fff; border:1px solid rgba(0,0,0,.07);
+        border-radius:999px; padding:.35rem .8rem; font-size:.9rem;
+    }
+    .btn-chip:hover{ border-color: rgba(13,110,253,.35); color: var(--acb-blue); }
+
+    /* chat card */
+    .acb-chat{
+        max-width: var(--acb-maxw);
+        margin: 0 auto;
+        border: 0;
+        border-radius: 1rem;
+        background: #fff;
+        box-shadow: 0 1px 2px rgba(0,0,0,.03);
+        display: flex;
+        flex-direction: column;
+
+        /* size the card so inner scroll works no matter what’s above */
+        /* -  (header + chips + paddings ≈ ~220px; tweak if your header differs) */
+        min-height: 420px;
+        max-height: calc(100vh - var(--adm-navbar-h) - 220px);
+        height: calc(100vh - var(--adm-navbar-h) - 220px);
+    }
+
+    /* scrollable messages */
+    .acb-chat-scroll{
+        padding: .75rem;
+        overflow-y: auto;
+        flex: 1 1 auto;
+    }
+
+    /* composer pinned inside card */
+    .acb-composer{
+        position: sticky;
+        bottom: 0;
+        z-index: 1;
+        padding: .75rem;
+        border-top: 1px solid rgba(0,0,0,.06);
+        background: #fff;
+        display:flex; gap:.5rem;
+    }
+    .acb-input-wrap{
+        position: relative; flex:1;
+        background: #fff; border:1px solid rgba(0,0,0,.08);
+        border-radius: .9rem; padding: .35rem .5rem;
+    }
+    .acb-input{
+        resize: none; border:0; outline:0; box-shadow:none;
+        padding: .35rem .5rem; max-height: 180px; overflow-y:auto;
+    }
+    .acb-send{
+        border-radius: .8rem; padding: .6rem .9rem;
+        display:inline-flex; align-items:center; gap:.4rem;
+    }
+
+    /* messages */
+    .acb-msg{ display:flex; gap:.6rem; margin:.4rem 0; }
+    .acb-msg-bot .acb-bubble{ background: var(--acb-bot); border:1px solid rgba(0,0,0,.05); }
+    .acb-msg-me{ flex-direction: row-reverse; }
+    .acb-msg-me .acb-bubble{
+        background: var(--acb-me);
+        border:1px solid rgba(13,110,253,.15);
+    }
+    .acb-avatar{
+        width: 36px; height: 36px; border-radius: 10px;
+        background: rgba(13,110,253,.1); color: var(--acb-blue);
+        display:grid; place-items:center; font-size:1rem; flex: 0 0 36px;
+    }
+    .acb-msg-me .acb-avatar{ background: rgba(25,135,84,.12); color:#198754; }
+    .acb-bubble{
+        max-width: 72%;
+        padding: .6rem .75rem;
+        border-radius: .9rem;
+        position: relative;
+        word-break: break-word;
+    }
+    .acb-name{ font-size:.8rem; font-weight:600; margin-bottom:.1rem; color:#6c757d; }
+    .acb-time{ font-size:.75rem; color:#98a2af; margin-top:.25rem; }
+    .acb-bubble .table{ font-size:.9rem; }
+
+    /* typing dots */
+    .acb-typing{
+        position: absolute; right: .65rem; bottom: .4rem; display:flex; gap:4px;
+    }
+    .acb-typing span{
+        width: 6px; height: 6px; border-radius: 50%;
+        background: rgba(0,0,0,.35); display:inline-block; animation: acbBlink 1.2s infinite ease-in-out;
+    }
+    .acb-typing span:nth-child(2){ animation-delay: .2s; }
+    .acb-typing span:nth-child(3){ animation-delay: .4s; }
+    @@keyframes acbBlink{ 0%,80%,100%{opacity:.2;} 40%{opacity:1;} }
+</style>
+
 <script>
 (function(){
-  const chat  = document.getElementById('chat');
-  // Server-side URLs substituted into bot HTML
-  const MAINT_URL = '@Url.Action("AdminMaintenance","Admin")';
-  const PAY_URL   = '@Url.Action("AdminPayments","Admin")';
-  const PROP_URL  = '@Url.Action("AdminProperties","Admin")';
-  const LEASE_URL = '@Url.Action("AdminLeases","Admin")';
-  const BC_URL    = '@Url.Action("AdminChatbotBroadcast","Admin")';
-  const MSG_URL   = '@Url.Action("AdminMessages","Admin")';
+    const chatScroll = document.getElementById('chatScroll');
+    const composer   = document.getElementById('composer');
+    const sendBtn    = document.getElementById('send');
+    const typing     = document.getElementById('typing');
+    const chips      = document.querySelectorAll('.btn-chip');
+    const openBc     = document.getElementById('btnOpenBroadcast');
 
-  const form  = document.getElementById('chat-form');
-  const input = document.getElementById('msg');
-  const send  = document.getElementById('sendBtn');
+    // Admin routes for CTA replacements (if your controller returns placeholders)
+    const URL_MAINT = '@Url.Action("AdminMaintenance","Admin")';
+    const URL_PAY   = '@Url.Action("AdminPayments","Admin")';
+    const URL_PROP  = '@Url.Action("AdminProperties","Admin")';
+    const URL_LEASE = '@Url.Action("AdminLeases","Admin")';
+    const URL_MSG   = '@Url.Action("AdminMessages","Admin")';
 
-  function escapeHtml(s){
-    return (s ?? '').replace(/[&<>"']/g, m => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[m]));
-  }
-  function addText(role, text){
-    const div = document.createElement('div');
-    div.className = (role === 'bot' ? 'bot' : 'me') + ' mb-2 bubble';
-    div.innerHTML = `<strong>${role==='bot'?'Bot':'You'}:</strong> ${escapeHtml(text ?? '')}`;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-  }
-  function addHtml(html){
-    // Replace tokens from controller with real, server-generated URLs
-    let h = String(html ?? '');
-    h = h.replaceAll('__MAINT_URL__', MAINT_URL);
-    h = h.replaceAll('__PAY_URL__',   PAY_URL);
-    h = h.replaceAll('__PROP_URL__',  PROP_URL);
-    h = h.replaceAll('__LEASE_URL__', LEASE_URL);
-    h = h.replaceAll('__MSG_URL__',   MSG_URL);
+    // Anti-forgery
+    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const AF_TOKEN = tokenInput ? tokenInput.value : '';
 
-    const div = document.createElement('div');
-    div.className = 'bot mb-2 bubble';
-    div.innerHTML = h;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-  }
-  function addTyping(){
-    const div = document.createElement('div');
-    div.className = 'bot mb-2 bubble typing';
-    div.innerHTML = `<strong>Bot:</strong> <span class="dots"><span>.</span><span>.</span><span>.</span></span>`;
-    chat.appendChild(div);
-    chat.scrollTop = chat.scrollHeight;
-    return div;
-  }
-
-  // Quick chips
-  document.querySelectorAll('.quick').forEach(b=>{
-    b.addEventListener('click', ()=>{
-      input.value = b.textContent.trim();
-      form.requestSubmit();
+    /* autosize input */
+    composer.addEventListener('input', () => {
+        composer.style.height = 'auto';
+        composer.style.height = Math.min(composer.scrollHeight, 180) + 'px';
     });
-  });
 
-  // Main chat submit
-  form.addEventListener('submit', async (e)=>{
-    e.preventDefault();
-    const text = (input.value || '').trim();
-    if(!text) return;
+    /* enter to send (shift+enter newline) */
+    composer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey){
+            e.preventDefault();
+            send();
+        }
+    });
+    sendBtn.addEventListener('click', send);
 
-    addText('me', text);
-    input.value = '';
-    input.focus();
+    chips.forEach(c => c.addEventListener('click', () => {
+        composer.value = c.dataset.prompt || '';
+        composer.dispatchEvent(new Event('input'));
+        send();
+    }));
+    openBc.addEventListener('click', () => {
+        composer.value = 'broadcast';
+        composer.dispatchEvent(new Event('input'));
+        send();
+    });
 
-    const typing = addTyping();
-    send.disabled = true;
+    function scrollToBottom(){ chatScroll.scrollTop = chatScroll.scrollHeight; }
 
-    try{
-      const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-      const res = await fetch('@Url.Action("AdminChatbotAsk","Admin")', {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'RequestVerificationToken': token },
-        body: JSON.stringify({ text })
-      });
-
-      typing.remove();
-
-      if(!res.ok){
-        addText('bot', 'Sorry — the server didn’t like that request.');
-        return;
-      }
-
-      const data = await res.json();
-      if (data.isHtml && data.html){
-        addHtml(data.html);
-      } else {
-        addText('bot', data.reply ?? 'Hmm, I had trouble answering that.');
-      }
-    }catch(err){
-      typing.remove();
-      addText('bot', 'Sorry — something went wrong connecting to the server.');
-    }finally{
-      send.disabled = false;
+    function addMeBubble(text){
+        const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        const wrap = document.createElement('div');
+        wrap.className = 'acb-msg acb-msg-me';
+        wrap.innerHTML = `
+            <div class="acb-avatar"><i class="bi bi-person-fill"></i></div>
+            <div class="acb-bubble">
+                <div class="acb-name">You</div>
+                <div class="acb-text"></div>
+                <div class="acb-time">${t}</div>
+            </div>`;
+        wrap.querySelector('.acb-text').innerText = text;
+        chatScroll.appendChild(wrap);
+        scrollToBottom();
     }
-  });
 
-  // In-chat broadcast form submit (event delegation)
-  chat.addEventListener('submit', async (e)=>{
-    const target = e.target;
-    if (!target || target.id !== 'bc-form') return;
-    e.preventDefault();
+    function addBotBubbleHtml(html){
+        let fixed = (html || '')
+            .replaceAll('__MAINT_URL__', URL_MAINT)
+            .replaceAll('__PAY_URL__',   URL_PAY)
+            .replaceAll('__PROP_URL__',  URL_PROP)
+            .replaceAll('__LEASE_URL__', URL_LEASE)
+            .replaceAll('__MSG_URL__',   URL_MSG);
 
-    const fd = new FormData(target);
-    const audience = (fd.get('audience') || 'All').toString();
-    const text     = (fd.get('text') || '').toString().trim();
-    if(!text){
-      alert('Please enter a message');
-      return;
-      }
-
-    try{
-      const token = document.querySelector('input[name="__RequestVerificationToken"]').value;
-      const res = await fetch(BC_URL, {
-        method:'POST',
-        headers:{ 'Content-Type':'application/json', 'RequestVerificationToken': token },
-        body: JSON.stringify({ audience, text })
-      });
-      if(!res.ok){
-        addText('bot', 'Broadcast failed.');
-        return;
-      }
-      addText('bot', 'Broadcast sent ✅');
-      // Optionally remove the form after success
-      target.remove();
-    }catch(err){
-      addText('bot', 'Broadcast failed (network).');
+        const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        const wrap = document.createElement('div');
+        wrap.className = 'acb-msg acb-msg-bot';
+        wrap.innerHTML = `
+            <div class="acb-avatar"><i class="bi bi-robot"></i></div>
+            <div class="acb-bubble">
+                <div class="acb-name">Admin assistant</div>
+                <div class="acb-text">${fixed}</div>
+                <div class="acb-time">${t}</div>
+            </div>`;
+        chatScroll.appendChild(wrap);
+        scrollToBottom();
+        wireBroadcastFormIfPresent();
     }
-  });
+    function addBotBubbleText(text){
+        const div = document.createElement('div');
+        div.innerText = text ?? '';
+        addBotBubbleHtml(div.innerHTML.replace(/\n/g,'<br/>'));
+    }
+
+    async function send(){
+        const msg = (composer.value || '').trim();
+        if (!msg) return;
+
+        addMeBubble(msg);
+        composer.value = '';
+        composer.dispatchEvent(new Event('input'));
+        setTyping(true);
+
+        try{
+            const res = await fetch('@Url.Action("AdminChatbotAsk","Admin")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': AF_TOKEN
+                },
+                body: JSON.stringify({ text: msg })
+            });
+
+            const ok = res.ok;
+            const data = ok ? await res.json() : null;
+            setTyping(false);
+
+            if (ok && data){
+                if (data.isHtml && data.html) addBotBubbleHtml(data.html);
+                else if (data.reply)        addBotBubbleText(data.reply);
+                else                        addBotBubbleText('No reply received.');
+            } else {
+                addBotBubbleText('Sorry — something went wrong processing that.');
+            }
+        } catch {
+            setTyping(false);
+            addBotBubbleText('Network error. Please try again.');
+        }
+    }
+
+    function setTyping(on){
+        typing.classList.toggle('d-none', !on);
+    }
+
+    function wireBroadcastFormIfPresent(){
+        const form = document.getElementById('bc-form');
+        if(!form) return;
+
+        form.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            const fd = new FormData(form);
+            const payload = { audience: fd.get('audience'), text: fd.get('text') };
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+
+            try{
+                const res = await fetch('@Url.Action("AdminChatbotBroadcast","Admin")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': AF_TOKEN
+                    },
+                    body: JSON.stringify(payload)
+                });
+                addBotBubbleText(res.ok ? 'Broadcast sent ✅' : 'Broadcast failed ❌');
+            }catch{
+                addBotBubbleText('Broadcast failed ❌');
+            }finally{
+                btn.disabled = false;
+            }
+        }, { once:true });
+    }
+
+    /* Ensure initial scroll is at bottom of the welcome message */
+    scrollToBottom();
 })();
 </script>
-<style>
-.bubble{ padding:.5rem .75rem; border-radius:.5rem; }
-#chat .bot{ background:#eef6ff; }
-#chat .me { background:#fff; border:1px solid #eee; }
-.typing .dots span{ animation: blink 1.4s infinite both; display:inline-block; }
-.typing .dots span:nth-child(2){ animation-delay:.2s; }
-.typing .dots span:nth-child(3){ animation-delay:.4s; }
-@@keyframes blink{ 0%,80%,100%{opacity:0} 40%{opacity:1} }
-</style>
-}
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />

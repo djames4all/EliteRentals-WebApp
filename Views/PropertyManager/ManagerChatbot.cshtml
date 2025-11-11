@@ -1,0 +1,360 @@
+@{
+    ViewData["Title"] = "Manager • Chatbot";
+    Layout = "~/Views/Shared/_Layout.cshtml";
+}
+
+@Html.AntiForgeryToken()
+@await Html.PartialAsync("~/Views/Shared/_ManagerSidebar.cshtml")
+
+<div class="mgr-content">
+    <div class="pmcb-header shadow-sm">
+        <div class="d-flex align-items-center gap-2">
+            <span class="pmcb-badge"><i class="bi bi-robot"></i></span>
+            <div>
+                <div class="fw-semibold">Property Manager Assistant</div>
+                <div class="text-muted small">Ask about maintenance, payments, leases, or broadcast messages</div>
+            </div>
+        </div>
+        <div>
+            <button class="btn btn-outline-primary btn-sm" id="btnOpenBroadcast">
+                <i class="bi bi-megaphone"></i> Broadcast
+            </button>
+        </div>
+    </div>
+
+    <div class="pmcb-frame">
+        <!-- quick chips -->
+        <div class="pmcb-chips">
+            <button class="btn btn-chip" data-prompt="maintenance summary">Maintenance summary</button>
+            <button class="btn btn-chip" data-prompt="overdue payments">Overdue payments</button>
+            <button class="btn btn-chip" data-prompt="property stats">Property stats</button>
+            <button class="btn btn-chip" data-prompt="leases expiring">Leases expiring</button>
+            <button class="btn btn-chip" data-prompt="broadcast">Broadcast</button>
+        </div>
+
+        <!-- CHAT CARD (messages scroll, composer fixed at bottom INSIDE) -->
+        <div id="chat" class="pmcb-chat card">
+            <div id="messages" class="pmcb-messages">
+                <div class="pmcb-msg pmcb-msg-bot">
+                    <div class="pmcb-avatar"><i class="bi bi-robot"></i></div>
+                    <div class="pmcb-bubble">
+                        <div class="pmcb-name">A property manager assistant</div>
+                        <div class="pmcb-text">
+                            Hi! I can show <strong>maintenance</strong>, <strong>payment</strong>, <strong>property</strong>,
+                            and <strong>lease</strong> summaries. Try a chip above, or type your question.
+                        </div>
+                        <div class="pmcb-time">@DateTime.Now.ToString("HH:mm")</div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- composer lives INSIDE the card -->
+            <div class="pmcb-composer-inline">
+                <div class="pmcb-input-wrap">
+                    <textarea id="composer" class="form-control pmcb-input" rows="1"
+                              placeholder="Type your message… (Shift+Enter for newline)"></textarea>
+                    <div id="typing" class="pmcb-typing d-none"><span></span><span></span><span></span></div>
+                </div>
+                <button id="send" class="btn btn-primary pmcb-send" title="Send">
+                    <i class="bi bi-send-fill"></i>
+                </button>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    :root{
+        --mgr-sidebar-w: 240px;
+        --pmcb-maxw: 880px;
+        --pmcb-blue: #0d6efd;
+        --pmcb-bg: #f7f9fc;
+        --pmcb-bot: #ffffff;
+        --pmcb-me: #e7f1ff;
+        --pmcb-edge: 1.25rem;
+        --pmcb-composer-h: 72px;
+    }
+
+    .mgr-content{
+        margin-left: var(--mgr-sidebar-w);
+        padding: 1rem var(--pmcb-edge);
+        background: var(--pmcb-bg);
+        height: calc(100vh - var(--mgr-navbar-h, 56px));
+        overflow: hidden; /* page itself doesn't scroll */
+    }
+    @@media (max-width: 767.98px){
+        .mgr-content{ margin-left: 0; }
+    }
+
+    .pmcb-header{
+        max-width: var(--pmcb-maxw);
+        margin: 0 auto .75rem;
+        padding: .75rem 1rem;
+        border-radius: .75rem;
+        background: #fff;
+        display:flex; align-items:center; justify-content:space-between;
+    }
+    .pmcb-badge{
+        width: 40px; height: 40px; border-radius: 10px;
+        display:inline-grid; place-items:center;
+        background: rgba(13,110,253,.12); color: var(--pmcb-blue);
+        font-size: 1.2rem;
+    }
+
+    .pmcb-frame{
+        max-width: var(--pmcb-maxw);
+        margin: 0 auto;
+        height: calc(100% - 84px); /* header height approx */
+        display: flex; flex-direction: column; gap: .6rem;
+        min-height: 0; /* allow child to flex */
+    }
+
+    .pmcb-chips{
+        flex: 0 0 auto;
+        display:flex; flex-wrap:wrap; gap:.5rem;
+    }
+    .btn-chip{
+        background:#fff; border:1px solid rgba(0,0,0,.07);
+        border-radius:999px; padding:.35rem .8rem; font-size:.9rem;
+    }
+    .btn-chip:hover{ border-color: rgba(13,110,253,.35); color: var(--pmcb-blue); }
+
+    /* CHAT CARD */
+    .pmcb-chat{
+        flex: 1 1 auto; min-height: 0;
+        display: flex; flex-direction: column;
+        border: 0; border-radius: 1rem; background:#fff;
+        box-shadow: 0 1px 2px rgba(0,0,0,.03);
+    }
+
+    /* scrollable messages area ONLY */
+    .pmcb-messages{
+        flex: 1 1 auto; min-height: 0;
+        overflow: auto;
+        padding: .75rem;
+    }
+
+    .pmcb-msg{ display:flex; gap:.6rem; margin:.4rem 0; }
+    .pmcb-msg-bot .pmcb-bubble{ background: var(--pmcb-bot); border:1px solid rgba(0,0,0,.05); }
+    .pmcb-msg-me{ flex-direction: row-reverse; }
+    .pmcb-msg-me .pmcb-bubble{ background: var(--pmcb-me); border:1px solid rgba(13,110,253,.15); }
+    .pmcb-avatar{
+        width: 36px; height: 36px; border-radius: 10px;
+        background: rgba(13,110,253,.1); color: var(--pmcb-blue);
+        display:grid; place-items:center; font-size:1rem; flex: 0 0 36px;
+    }
+    .pmcb-msg-me .pmcb-avatar{ background: rgba(25,135,84,.12); color:#198754; }
+    .pmcb-bubble{ max-width: 72%; padding: .6rem .75rem; border-radius: .9rem; word-break: break-word; }
+    .pmcb-name{ font-size:.8rem; font-weight:600; margin-bottom:.1rem; color:#6c757d; }
+    .pmcb-time{ font-size:.75rem; color:#98a2af; margin-top:.25rem; }
+    .pmcb-bubble .table{ font-size:.9rem; }
+    .pmcb-bubble .table td, .pmcb-bubble .table th{ vertical-align: middle; }
+
+    /* inline composer INSIDE card */
+    .pmcb-composer-inline{
+        border-top: 1px solid rgba(0,0,0,.08);
+        padding: .6rem .6rem .6rem .75rem;
+        display:flex; gap:.5rem; align-items: center;
+        flex: 0 0 auto; background:#fff; border-bottom-left-radius: 1rem; border-bottom-right-radius: 1rem;
+    }
+    .pmcb-input-wrap{
+        position: relative; flex:1;
+        background: #fff; border:1px solid rgba(0,0,0,.08);
+        border-radius: .9rem; padding: .35rem .5rem;
+        display:flex; align-items: center;
+        min-height: 44px;
+    }
+    .pmcb-input{
+        resize: none; border:0; outline:0; box-shadow:none;
+        width: 100%; padding: .35rem .5rem; line-height: 1.35;
+        max-height: 120px; overflow-y: auto;
+    }
+    .pmcb-send{
+        border-radius: .8rem; padding: .55rem .9rem;
+        display:inline-flex; align-items:center; gap:.4rem;
+    }
+
+    /* typing dots */
+    .pmcb-typing{
+        position: absolute; right: .65rem; bottom: .4rem; display:flex; gap:4px;
+    }
+    .pmcb-typing span{
+        width: 6px; height: 6px; border-radius: 50%;
+        background: rgba(0,0,0,.35); display:inline-block; animation: pmcbBlink 1.2s infinite ease-in-out;
+    }
+    .pmcb-typing span:nth-child(2){ animation-delay: .2s; }
+    .pmcb-typing span:nth-child(3){ animation-delay: .4s; }
+    @@keyframes pmcbBlink{ 0%,80%,100%{opacity:.2;} 40%{opacity:1;} }
+</style>
+
+<script>
+(function(){
+    const messages = document.getElementById('messages');  // scroll container
+    const composer = document.getElementById('composer');
+    const sendBtn = document.getElementById('send');
+    const typing = document.getElementById('typing');
+    const chips = document.querySelectorAll('.btn-chip');
+    const openBc = document.getElementById('btnOpenBroadcast');
+
+    // anti-forgery token
+    const tokenInput = document.querySelector('input[name="__RequestVerificationToken"]');
+    const AF_TOKEN = tokenInput ? tokenInput.value : '';
+
+    // autosize textarea
+    composer.addEventListener('input', () => {
+        composer.style.height = 'auto';
+        composer.style.height = Math.min(composer.scrollHeight, 120) + 'px';
+    });
+
+    // Enter to send (Shift+Enter for newline)
+    composer.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && !e.shiftKey){
+            e.preventDefault();
+            send();
+        }
+    });
+    sendBtn.addEventListener('click', send);
+
+    chips.forEach(c => c.addEventListener('click', () => {
+        composer.value = c.dataset.prompt || '';
+        composer.dispatchEvent(new Event('input'));
+        send();
+    }));
+
+    if (openBc){
+        openBc.addEventListener('click', () => {
+            composer.value = 'broadcast';
+            composer.dispatchEvent(new Event('input'));
+            send();
+        });
+    }
+
+    function scrollToBottom(){
+        messages.scrollTop = messages.scrollHeight;
+    }
+
+    function addMeBubble(text){
+        const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        const wrap = document.createElement('div');
+        wrap.className = 'pmcb-msg pmcb-msg-me';
+        wrap.innerHTML = `
+            <div class="pmcb-avatar"><i class="bi bi-person-fill"></i></div>
+            <div class="pmcb-bubble">
+                <div class="pmcb-name">You</div>
+                <div class="pmcb-text"></div>
+                <div class="pmcb-time">${t}</div>
+            </div>`;
+        wrap.querySelector('.pmcb-text').innerText = text;
+        messages.appendChild(wrap);
+        scrollToBottom();
+    }
+
+    function addBotBubbleHtml(html){
+        const t = new Date().toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'});
+        const wrap = document.createElement('div');
+        wrap.className = 'pmcb-msg pmcb-msg-bot';
+        wrap.innerHTML = `
+            <div class="pmcb-avatar"><i class="bi bi-robot"></i></div>
+            <div class="pmcb-bubble">
+                <div class="pmcb-name">A property manager assistant</div>
+                <div class="pmcb-text">${html}</div>
+                <div class="pmcb-time">${t}</div>
+            </div>`;
+        messages.appendChild(wrap);
+        scrollToBottom();
+    }
+
+    function addBotBubbleText(text){
+        addBotBubbleHtml(escapeHtml(text).replace(/\n/g,'<br/>'));
+    }
+
+    function setTyping(on){
+        typing.classList.toggle('d-none', !on);
+    }
+
+    function escapeHtml(s){
+        const div = document.createElement('div');
+        div.innerText = s ?? '';
+        return div.innerHTML;
+    }
+
+    async function send(){
+        const msg = (composer.value || '').trim();
+        if (!msg) return;
+
+        addMeBubble(msg);
+        composer.value = '';
+        composer.dispatchEvent(new Event('input'));
+        setTyping(true);
+
+        try{
+            const res = await fetch('@Url.Action("ManagerChatbotAsk","PropertyManager")', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json',
+                    'RequestVerificationToken': AF_TOKEN
+                },
+                body: JSON.stringify({ text: msg })
+            });
+
+            if(!res.ok){
+                setTyping(false);
+                addBotBubbleText('Sorry — something went wrong processing that.');
+                return;
+            }
+
+            const data = await res.json();
+            setTyping(false);
+
+            if (data && data.isHtml && data.html){
+                addBotBubbleHtml(data.html);
+                wireBroadcastFormIfPresent();
+            } else if (data && data.reply){
+                addBotBubbleText(data.reply);
+            } else {
+                addBotBubbleText('No reply received.');
+            }
+        } catch(e){
+            setTyping(false);
+            addBotBubbleText('Network error. Please try again.');
+        }
+    }
+
+    // if bot returns the broadcast mini-form, wire it once
+    function wireBroadcastFormIfPresent(){
+        const form = document.getElementById('bc-form');
+        if(!form) return;
+
+        form.addEventListener('submit', async (e)=>{
+            e.preventDefault();
+            const fd = new FormData(form);
+            const payload = { audience: fd.get('audience'), text: fd.get('text') };
+
+            const btn = form.querySelector('button[type="submit"]');
+            btn.disabled = true;
+
+            try{
+                const res = await fetch('@Url.Action("ManagerChatbotBroadcast","PropertyManager")', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json',
+                        'RequestVerificationToken': AF_TOKEN
+                    },
+                    body: JSON.stringify(payload)
+                });
+                if(res.ok){
+                    addBotBubbleText('Broadcast sent ✅');
+                }else{
+                    addBotBubbleText('Broadcast failed ❌');
+                }
+            }catch{
+                addBotBubbleText('Broadcast failed ❌');
+            }finally{
+                btn.disabled = false;
+            }
+        }, { once:true });
+    }
+})();
+</script>
+
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/bootstrap-icons@1.11.3/font/bootstrap-icons.css" />

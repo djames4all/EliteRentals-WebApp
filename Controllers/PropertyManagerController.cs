@@ -8,6 +8,7 @@ using System.Globalization;
 using System.Linq; // for LINQ
 using System.Security.Claims;
 using System.Text;
+using System.Net.Http.Json;
 using System.Text.Json;
 
 namespace EliteRentals.Controllers
@@ -223,7 +224,7 @@ namespace EliteRentals.Controllers
         public async Task<IActionResult> ManagerLeases()
         {
             var client = await CreateApiClient();
-            var resp = await client.GetAsync("api/lease"); 
+            var resp = await client.GetAsync("api/lease");
             if (!resp.IsSuccessStatusCode)
             {
                 ViewBag.Error = "Failed to load leases.";
@@ -613,7 +614,7 @@ namespace EliteRentals.Controllers
         // PAYMENTS
         // ===========================
 
-        [HttpGet]
+        
         [HttpGet]
         public async Task<IActionResult> ManagerPayments()
         {
@@ -830,10 +831,10 @@ namespace EliteRentals.Controllers
 
             // 1) Properties via IEliteApi
             var properties = await _api.GetPropertiesAsync(ct) ?? new List<PropertyReadDto>();
-            vm.TotalProperties      = properties.Count;
-            vm.PropertiesAvailable  = properties.Count(p => string.Equals(p.Status, "Available", System.StringComparison.OrdinalIgnoreCase));
-            vm.PropertiesOccupied   = properties.Count(p => string.Equals(p.Status, "Occupied",  System.StringComparison.OrdinalIgnoreCase));
-            vm.RecentProperties     = properties.OrderByDescending(p => p.PropertyId).Take(5).ToList();
+            vm.TotalProperties = properties.Count;
+            vm.PropertiesAvailable = properties.Count(p => string.Equals(p.Status, "Available", System.StringComparison.OrdinalIgnoreCase));
+            vm.PropertiesOccupied = properties.Count(p => string.Equals(p.Status, "Occupied", System.StringComparison.OrdinalIgnoreCase));
+            vm.RecentProperties = properties.OrderByDescending(p => p.PropertyId).Take(5).ToList();
 
             // 2) Leases
             var client = await CreateApiClient();
@@ -844,7 +845,7 @@ namespace EliteRentals.Controllers
                 {
                     var leasesJson = await leasesResp.Content.ReadAsStringAsync(ct);
                     var leases = System.Text.Json.JsonSerializer.Deserialize<List<LeaseDto>>(leasesJson, _jsonOptions) ?? new();
-                    vm.TotalLeases  = leases.Count;
+                    vm.TotalLeases = leases.Count;
                     vm.ActiveLeases = leases.Count(l => string.Equals(l.Status, "Active", System.StringComparison.OrdinalIgnoreCase));
                 }
             }
@@ -860,8 +861,8 @@ namespace EliteRentals.Controllers
                     var maint = System.Text.Json.JsonSerializer.Deserialize<List<EliteRentals.Models.Maintenance>>(mJson, _jsonOptions) ?? new();
 
                     vm.OpenMaintenance = maint.Count(m =>
-                        string.Equals(m.Status ?? "Pending", "Pending",     System.StringComparison.OrdinalIgnoreCase) ||
-                        string.Equals(m.Status ?? "",           "In Progress", System.StringComparison.OrdinalIgnoreCase));
+                        string.Equals(m.Status ?? "Pending", "Pending", System.StringComparison.OrdinalIgnoreCase) ||
+                        string.Equals(m.Status ?? "", "In Progress", System.StringComparison.OrdinalIgnoreCase));
 
                     vm.RecentMaintenance = maint
                         .OrderByDescending(m => m.CreatedAt)
@@ -881,7 +882,7 @@ namespace EliteRentals.Controllers
                     var apps = System.Text.Json.JsonSerializer.Deserialize<List<EliteRentals.Models.DTOs.RentalApplicationDto>>(aJson, _jsonOptions) ?? new();
 
                     vm.PendingApplications = apps.Count(a => string.Equals(a.Status, "Pending", System.StringComparison.OrdinalIgnoreCase));
-                    vm.RecentApplications  = apps.OrderByDescending(a => a.ApplicationId).Take(5).ToList();
+                    vm.RecentApplications = apps.OrderByDescending(a => a.ApplicationId).Take(5).ToList();
                 }
             }
             catch { /* ignore */ }
@@ -1459,5 +1460,364 @@ namespace EliteRentals.Controllers
             var allProperties = await FetchProperties(); // original method
             return allProperties.Where(p => p.Status == "Available").ToList();
         }
+
+        // ===========================
+    // MANAGER CHATBOT (PM side)
+    // ===========================
+
+    public class PMChatAskRequest
+    {
+        public string Text { get; set; } = "";
+    }
+
+    public class PMChatAskResponse
+    {
+        public string Reply { get; set; } = "";
+        public string Intent { get; set; } = "";
+        public bool IsHtml { get; set; } = false;
+        public string? Html { get; set; }
+    }
+
+    public class PMBroadcastRequest
+    {
+        public string Audience { get; set; } = "All"; // All, Tenant, Caretaker, PropertyManager
+        public string Text { get; set; } = "";
+    }
+
+        [HttpGet]
+        public IActionResult ManagerChatbot() => View();
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManagerChatbotBroadcast([FromBody] PMBroadcastRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req?.Text))
+                return BadRequest(new { error = "Message is required." });
+
+            // Send via API broadcast you already use on PM side
+            var client = await CreateApiClient();
+            var payload = new
+            {
+                SenderId = GetCurrentUserId(),
+                ReceiverId = (int?)null,
+                MessageText = req.Text.Trim(),
+                Timestamp = DateTime.UtcNow,
+                IsChatbot = false,
+                IsBroadcast = true,
+                TargetRole = string.IsNullOrWhiteSpace(req.Audience) ? null : req.Audience
+            };
+
+            var res = await client.PostAsJsonAsync("api/Message/broadcast", payload);
+            if (!res.IsSuccessStatusCode)
+                return StatusCode(502, new { error = "Broadcast failed via API." });
+
+            return Ok(new { message = "Broadcast sent." });
+        }
+
+        [HttpPost]
+        [ValidateAntiForgeryToken]
+        public async Task<IActionResult> ManagerChatbotAsk([FromBody] PMChatAskRequest req)
+        {
+            if (string.IsNullOrWhiteSpace(req?.Text))
+                return BadRequest(new { error = "Empty message" });
+
+            var answer = await GenerateManagerBotReplyAsync(req.Text);
+
+            // (optional) log Q/A to Messages
+            try
+            {
+                var client = await CreateApiClient();
+                var me = GetCurrentUserId();
+                var now = DateTime.UtcNow;
+                await client.PostAsJsonAsync("api/Message", new {
+                    SenderId = me, ReceiverId = 0, MessageText = req.Text, Timestamp = now, IsChatbot = false
+                });
+                await client.PostAsJsonAsync("api/Message", new {
+                    SenderId = me, ReceiverId = 0, MessageText = answer.Reply ?? answer.Html, Timestamp = now, IsChatbot = true
+                });
+            }
+            catch { /* non-blocking */ }
+
+            return Ok(answer);
+        }
+
+        private async Task<PMChatAskResponse> GenerateManagerBotReplyAsync(string text)
+        {
+            var msg = (text ?? "").Trim().ToLowerInvariant();
+            var client = await CreateApiClient();
+
+            // Small helpers to pull data directly from your API
+            async Task<List<EliteRentals.Models.DTOs.PropertyReadDto>> GetProps()
+            {
+                var res = await client.GetAsync("api/property");
+                if (!res.IsSuccessStatusCode) return new();
+                return await res.Content.ReadFromJsonAsync<List<EliteRentals.Models.DTOs.PropertyReadDto>>() ?? new();
+            }
+            async Task<List<EliteRentals.Models.DTOs.PaymentDto>> GetPays()
+            {
+                var res = await client.GetAsync("api/payment");
+                if (!res.IsSuccessStatusCode) return new();
+                return await res.Content.ReadFromJsonAsync<List<EliteRentals.Models.DTOs.PaymentDto>>() ?? new();
+            }
+            async Task<List<EliteRentals.Models.DTOs.LeaseDto>> GetLeases()
+            {
+                var res = await client.GetAsync("api/lease");
+                if (!res.IsSuccessStatusCode) return new();
+                return await res.Content.ReadFromJsonAsync<List<EliteRentals.Models.DTOs.LeaseDto>>() ?? new();
+            }
+            async Task<List<EliteRentals.Models.Maintenance>> GetMaint()
+            {
+                var res = await client.GetAsync("api/maintenance");
+                if (!res.IsSuccessStatusCode) return new();
+                return await res.Content.ReadFromJsonAsync<List<EliteRentals.Models.Maintenance>>() ?? new();
+            }
+            async Task<List<EliteRentals.Models.DTOs.UserDto>> GetUsers()
+            {
+                var res = await client.GetAsync("api/users");
+                if (!res.IsSuccessStatusCode) return new();
+                return await res.Content.ReadFromJsonAsync<List<EliteRentals.Models.DTOs.UserDto>>() ?? new();
+            }
+
+            string linkMaint = Url.Action("ManagerMaintenance", "PropertyManager")!;
+            string linkPays = Url.Action("ManagerPayments", "PropertyManager")!;
+            string linkProps = Url.Action("ManagerProperties", "PropertyManager")!;
+            string linkLeases = Url.Action("ManagerLeases", "PropertyManager")!;
+            string linkMsgs = Url.Action("ManagerMessages", "PropertyManager")!;
+
+            // ---------- Intents ----------
+            if (msg.Contains("mainten") || msg.Contains("repair") || msg.Contains("fix"))
+            {
+                try
+                {
+                    var items = await GetMaint();
+                    static string S(string? x) => (x ?? "").Trim();
+
+                    int pending = items.Count(m => string.Equals(S(m.Status), "Pending", StringComparison.OrdinalIgnoreCase));
+                    int inProg = items.Count(m => string.Equals(S(m.Status), "In Progress", StringComparison.OrdinalIgnoreCase)
+                                                || string.Equals(S(m.Status), "InProgress", StringComparison.OrdinalIgnoreCase));
+                    int open = pending + inProg;
+
+                    var rows = items
+                        .Where(m => S(m.Status).Equals("Pending", StringComparison.OrdinalIgnoreCase)
+                                 || S(m.Status).Equals("In Progress", StringComparison.OrdinalIgnoreCase)
+                                 || S(m.Status).Equals("InProgress", StringComparison.OrdinalIgnoreCase))
+                        .OrderByDescending(m => m.CreatedAt)
+                        .Take(6)
+                        .Select(m => new {
+                            m.MaintenanceId,
+                            Property = m.Property?.Title ?? $"Property #{m.PropertyId}",
+                            ReportedBy = m.Tenant != null ? $"{m.Tenant.FirstName} {m.Tenant.LastName}" : $"Tenant #{m.TenantId}",
+                            Priority = string.IsNullOrWhiteSpace(m.Urgency) ? "—" : m.Urgency,
+                            Status = m.Status ?? "",
+                            Created = m.CreatedAt.ToString("yyyy-MM-dd")
+                        }).ToList();
+
+                    var sb = new System.Text.StringBuilder();
+                    sb.Append($@"
+<div class=""mb-2""><strong>Maintenance:</strong> {pending} pending, {inProg} in-progress • {open} open.</div>
+<table class=""table table-sm table-striped mb-2"">
+  <thead><tr><th>ID</th><th>Property</th><th>Reported By</th><th>Priority</th><th>Status</th><th>Created</th></tr></thead>
+  <tbody>");
+                    foreach (var r in rows)
+                    {
+                        sb.Append($@"<tr>
+  <td>#{r.MaintenanceId}</td>
+  <td>{System.Net.WebUtility.HtmlEncode(r.Property)}</td>
+  <td>{System.Net.WebUtility.HtmlEncode(r.ReportedBy)}</td>
+  <td>{System.Net.WebUtility.HtmlEncode(r.Priority)}</td>
+  <td>{System.Net.WebUtility.HtmlEncode(r.Status)}</td>
+  <td>{r.Created}</td>
+</tr>");
+                    }
+                    sb.Append($@"</tbody></table>
+<a class=""btn btn-sm btn-primary"" href=""{linkMaint}"">Open Maintenance</a>");
+
+                    return new PMChatAskResponse { Intent = "maintenance.summary", IsHtml = true, Html = sb.ToString() };
+                }
+                catch
+                {
+                    return new PMChatAskResponse { Intent = "maintenance.summary", Reply = "Maintenance lookup failed unexpectedly." };
+                }
+            }
+
+            if ((msg.Contains("overdue") && msg.Contains("payment")) || msg.Contains("payment summary"))
+            {
+                try
+                {
+                    var pays = await GetPays();
+                    var users = await GetUsers();
+                    var nameMap = users.ToDictionary(u => u.UserId, u => $"{(u.FirstName ?? "").Trim()} {(u.LastName ?? "").Trim()}".Trim());
+                    static string S(string? x) => (x ?? "").Trim();
+
+                    var overdue = pays.Where(p => !string.Equals(S(p.Status), "Paid", StringComparison.OrdinalIgnoreCase)).ToList();
+                    var overdueTotal = overdue.Sum(p => p.Amount);
+
+                    var latest = pays
+                        .OrderBy(p => string.Equals(S(p.Status), "Paid", StringComparison.OrdinalIgnoreCase)) // unpaid first
+                        .ThenByDescending(p => p.Date)
+                        .Take(6)
+                        .Select(p => new {
+                            p.PaymentId,
+                            Tenant = nameMap.TryGetValue(p.TenantId, out var n) && !string.IsNullOrWhiteSpace(n) ? n : $"Tenant {p.TenantId}",
+                            Amount = p.Amount.ToString("C"),
+                            Status = S(p.Status),
+                            Date = p.Date.ToString("yyyy-MM-dd")
+                        });
+
+                    var sb = new System.Text.StringBuilder();
+                    sb.Append($@"<div class=""mb-2""><strong>Payments:</strong> Overdue total <strong>{overdueTotal.ToString("C")}</strong>.</div>
+<table class=""table table-sm table-striped mb-2""><thead>
+<tr><th>ID</th><th>Tenant</th><th>Amount</th><th>Status</th><th>Date</th></tr></thead><tbody>");
+                    foreach (var r in latest)
+                    {
+                        sb.Append($@"<tr>
+<td>#{r.PaymentId}</td><td>{System.Net.WebUtility.HtmlEncode(r.Tenant)}</td>
+<td>{r.Amount}</td><td>{System.Net.WebUtility.HtmlEncode(r.Status)}</td><td>{r.Date}</td>
+</tr>");
+                    }
+                    sb.Append($@"</tbody></table>
+<a class=""btn btn-sm btn-primary"" href=""{linkPays}"">Open Payments</a>");
+
+                    return new PMChatAskResponse { Intent = "payments.overdue", IsHtml = true, Html = sb.ToString() };
+                }
+                catch
+                {
+                    return new PMChatAskResponse { Intent = "payments.overdue", Reply = "Payments lookup failed unexpectedly." };
+                }
+            }
+
+            if ((msg.Contains("property") && (msg.Contains("stats") || msg.Contains("summary"))) || msg.Contains("vacanc"))
+            {
+                try
+                {
+                    var props = await GetProps();
+                    static string S(string? x) => (x ?? "").Trim();
+
+                    int total = props.Count;
+                    int available = props.Count(p => string.Equals(S(p.Status), "Available", StringComparison.OrdinalIgnoreCase));
+                    int occupied = props.Count(p => string.Equals(S(p.Status), "Occupied", StringComparison.OrdinalIgnoreCase));
+                    int vacant = available;
+
+                    var latest = props.OrderByDescending(p => p.PropertyId).Take(6).Select(p => new {
+                        p.PropertyId, p.Title, p.Status, p.RentAmount
+                    });
+
+                    var sb = new System.Text.StringBuilder();
+                    sb.Append($@"<div class=""mb-2""><strong>Properties:</strong> {total} total • {available} available • {occupied} occupied • {vacant} vacant.</div>
+<table class=""table table-sm table-striped mb-2"">
+<thead><tr><th>ID</th><th>Title</th><th>Status</th><th>Rent</th></tr></thead><tbody>");
+                    foreach (var r in latest)
+                    {
+                        sb.Append($@"<tr>
+<td>#{r.PropertyId}</td>
+<td>{System.Net.WebUtility.HtmlEncode(r.Title ?? $"Property {r.PropertyId}")}</td>
+<td>{System.Net.WebUtility.HtmlEncode(r.Status ?? "")}</td>
+<td>{r.RentAmount.ToString("C")}</td>
+</tr>");
+                    }
+                    sb.Append($@"</tbody></table>
+<a class=""btn btn-sm btn-primary"" href=""{linkProps}"">Open Properties</a>");
+
+                    return new PMChatAskResponse { Intent = "property.summary", IsHtml = true, Html = sb.ToString() };
+                }
+                catch
+                {
+                    return new PMChatAskResponse { Intent = "property.summary", Reply = "Property lookup failed unexpectedly." };
+                }
+            }
+
+            if ((msg.Contains("lease") && msg.Contains("expir")) || msg.Contains("lease summary"))
+            {
+                try
+                {
+                    var leases = await GetLeases();
+                    var users = await GetUsers();
+                    var props = await GetProps();
+
+                    var userName = users.ToDictionary(u => u.UserId, u => $"{(u.FirstName ?? "").Trim()} {(u.LastName ?? "").Trim()}".Trim());
+                    var propTitle = props.ToDictionary(p => p.PropertyId, p => (p.Title ?? $"Property {p.PropertyId}").Trim());
+
+                    var now = DateTime.UtcNow.Date;
+                    int in30 = leases.Count(l => l.EndDate.Date > now && l.EndDate.Date <= now.AddDays(30));
+                    int in60 = leases.Count(l => l.EndDate.Date > now.AddDays(30) && l.EndDate.Date <= now.AddDays(60));
+                    int in90 = leases.Count(l => l.EndDate.Date > now.AddDays(60) && l.EndDate.Date <= now.AddDays(90));
+
+                    var upcoming = leases.Where(l => l.EndDate.Date >= now)
+                        .OrderBy(l => l.EndDate).Take(6)
+                        .Select(l => new {
+                            l.LeaseId,
+                            Tenant = userName.TryGetValue(l.TenantId, out var tn) && !string.IsNullOrWhiteSpace(tn) ? tn : $"Tenant {l.TenantId}",
+                            Property = propTitle.TryGetValue(l.PropertyId, out var pt) && !string.IsNullOrWhiteSpace(pt) ? pt : $"Property {l.PropertyId}",
+                            EndDate = l.EndDate.ToString("yyyy-MM-dd"),
+                            DaysLeft = (l.EndDate.Date - now).Days,
+                            l.Status
+                        });
+
+                    var sb = new System.Text.StringBuilder();
+                    sb.Append($@"<div class=""mb-2""><strong>Leases expiring:</strong> 30d: {in30} • 60d: {in60} • 90d: {in90}</div>
+<table class=""table table-sm table-striped mb-2"">
+<thead><tr><th>ID</th><th>Tenant</th><th>Property</th><th>End Date</th><th>Days Left</th><th>Status</th></tr></thead><tbody>");
+                    foreach (var r in upcoming)
+                    {
+                        sb.Append($@"<tr>
+<td>#{r.LeaseId}</td><td>{System.Net.WebUtility.HtmlEncode(r.Tenant)}</td>
+<td>{System.Net.WebUtility.HtmlEncode(r.Property)}</td>
+<td>{r.EndDate}</td><td>{r.DaysLeft}</td>
+<td>{System.Net.WebUtility.HtmlEncode(r.Status ?? "")}</td>
+</tr>");
+                    }
+                    sb.Append($@"</tbody></table>
+<a class=""btn btn-sm btn-primary"" href=""{linkLeases}"">Open Leases</a>");
+
+                    return new PMChatAskResponse { Intent = "lease.expirations", IsHtml = true, Html = sb.ToString() };
+                }
+                catch
+                {
+                    return new PMChatAskResponse { Intent = "lease.expirations", Reply = "Lease lookup failed unexpectedly." };
+                }
+            }
+
+            if (msg.Contains("assign") && (msg.Contains("caretaker") || msg.Contains("tech")))
+            {
+                return new PMChatAskResponse {
+                    Intent = "maintenance.assign",
+                    Reply = "Go to Manager → Maintenance, open a ticket, choose a caretaker in the dropdown, click Assign, then update status as work progresses."
+                };
+            }
+
+            if (msg.Contains("broadcast") || msg.Contains("announcement"))
+            {
+                var html = $@"
+<form id=""bc-form"" class=""vstack gap-2"">
+  <div class=""row g-2"">
+    <div class=""col-sm-4"">
+      <label class=""form-label"">Audience</label>
+      <select class=""form-select"" name=""audience"">
+        <option value=""All"">All users</option>
+        <option value=""Tenant"">Tenants</option>
+        <option value=""Caretaker"">Caretakers</option>
+        <option value=""PropertyManager"">Property Managers</option>
+      </select>
+    </div>
+    <div class=""col-sm-8"">
+      <label class=""form-label"">Message</label>
+      <input class=""form-control"" name=""text"" placeholder=""Type your announcement..."" />
+    </div>
+  </div>
+  <div class=""mt-2"">
+    <button class=""btn btn-sm btn-primary"" type=""submit"">Send broadcast</button>
+    <a class=""btn btn-sm btn-outline-secondary"" href=""{linkMsgs}"">Open Messages</a>
+  </div>
+</form>";
+                return new PMChatAskResponse { Intent = "messages.broadcast", IsHtml = true, Html = html };
+            }
+
+            return new PMChatAskResponse {
+                Intent = "fallback",
+                Reply = "Try “maintenance summary”, “overdue payments”, “property stats”, or “leases expiring”."
+            };
+        }
     }
 }
+
+    

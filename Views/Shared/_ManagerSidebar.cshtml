@@ -84,9 +84,16 @@
                    href="@Url.Action("ManagerMessages", "PropertyManager")">Messages</a>
             </li>
             <li class="nav-item">
+    <a class="nav-link @(currentTitle.Contains("Chatbot", System.StringComparison.OrdinalIgnoreCase) ? "active" : "")"
+       href="@Url.Action("ManagerChatbot", "PropertyManager")">
+        AI Chatbot
+    </a>
+</li>
+
+            @* <li class="nav-item">
                 <a class="nav-link @(currentTitle.Contains("Escalations") ? "active" : "")"
                    href="@Url.Action("ManagerEscalations", "PropertyManager")">Escalations</a>
-            </li>
+            </li> *@
             <li class="nav-item">
                 <a class="nav-link @(currentTitle.Contains("Settings") ? "active" : "")"
                    href="@Url.Action("ManagerSettings", "PropertyManager")">Settings</a>
