@@ -9,12 +9,12 @@
         @await Html.PartialAsync("_AdminSidebar")
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
 
-            @if (TempData["Toast"] is string msg && !string.IsNullOrWhiteSpace(msg))
+            @if (TempData["LeaseSuccess"] is string msg && !string.IsNullOrWhiteSpace(msg))
 {
     <div class="alert alert-success py-2 mb-3">@msg</div>
 }
 
-@if (TempData["Error"] is string err && !string.IsNullOrWhiteSpace(err))
+@if (TempData["LeaseError"] is string err && !string.IsNullOrWhiteSpace(err))
 {
     <div class="alert alert-danger py-2 mb-3">@err</div>
 }

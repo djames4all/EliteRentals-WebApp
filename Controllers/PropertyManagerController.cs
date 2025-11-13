@@ -293,12 +293,12 @@ namespace EliteRentals.Controllers
             if (resp.IsSuccessStatusCode)
             {
                 // Show a toast after successful creation
-                TempData["Toast"] = "Lease created successfully!";
+                TempData["LeaseSuccess"] = "Lease created successfully!";
                 return RedirectToAction("ManagerLeases");
             }
 
             // Handle errors gracefully
-            TempData["Error"] = $"Failed to create lease. ({resp.StatusCode}) {respBody}";
+            TempData["LeaseError"] = $"Failed to create lease. ({resp.StatusCode}) {respBody}";
             ViewBag.Tenants = await FetchUnassignedTenants();
             ViewBag.Properties = await FetchAvailableProperties();
             return View(dto);
@@ -316,7 +316,7 @@ namespace EliteRentals.Controllers
             var lease = JsonSerializer.Deserialize<LeaseDto>(json, _jsonOptions);
             if (lease == null)
             {
-                TempData["Error"] = "Lease not found.";
+                TempData["LeaseError"] = "Lease not found.";
                 return RedirectToAction(nameof(ManagerLeases));
             }
 
@@ -362,7 +362,7 @@ namespace EliteRentals.Controllers
 
             if (!resp.IsSuccessStatusCode)
             {
-                TempData["Error"] = $"Failed to update lease. ({resp.StatusCode})";
+                TempData["LeaseError"] = $"Failed to update lease. ({resp.StatusCode})";
                 ViewBag.Tenants = await FetchTenants();
                 ViewBag.Properties = await FetchProperties();
                 return View(dto);
@@ -383,7 +383,7 @@ namespace EliteRentals.Controllers
 
             if (lease == null)
             {
-                TempData["Error"] = "Lease not found.";
+                TempData["LeaseError"] = "Lease not found.";
                 return RedirectToAction(nameof(ManagerLeases));
             }
 
@@ -428,9 +428,9 @@ namespace EliteRentals.Controllers
             var resp = await client.PutAsync($"api/lease/archive/{id}", null);
 
             if (!resp.IsSuccessStatusCode)
-                TempData["Error"] = "Failed to archive lease.";
+                TempData["LeaseError"] = "Failed to archive lease.";
             else
-                TempData["Success"] = "Lease archived successfully.";
+                TempData["LeaseSuccess"] = "Lease archived successfully.";
 
             return RedirectToAction("ManagerLeases");
         }
@@ -449,9 +449,9 @@ namespace EliteRentals.Controllers
             var resp = await client.PutAsync($"api/lease/restore/{id}", null);
 
             if (!resp.IsSuccessStatusCode)
-                TempData["Error"] = "Failed to restore lease.";
+                TempData["LeaseError"] = "Failed to restore lease.";
             else
-                TempData["Success"] = "Lease restored successfully.";
+                TempData["LeaseSuccess"] = "Lease restored successfully.";
 
             return RedirectToAction("ArchivedLeases");
         }
@@ -497,9 +497,9 @@ namespace EliteRentals.Controllers
             var resp = await client.DeleteAsync($"api/lease/{id}");
 
             if (!resp.IsSuccessStatusCode)
-                TempData["Error"] = "Failed to delete lease permanently.";
+                TempData["LeaseError"] = "Failed to delete lease permanently.";
             else
-                TempData["Success"] = "Lease permanently deleted.";
+                TempData["LeaseSuccess"] = "Lease permanently deleted.";
 
             return RedirectToAction("ArchivedLeases");
         }
