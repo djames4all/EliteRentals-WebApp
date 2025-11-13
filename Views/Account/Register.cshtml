@@ -8,49 +8,92 @@
 <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;600&display=swap" rel="stylesheet">
 
 <style>
-    body {
-        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
+    /* Global layout reset */
+    html, body {
         margin: 0;
         padding: 0;
-    }
-
-    /* Page background */
-    .register-page {
+        width: 100%;
+        overflow-x: hidden;
+        font-family: 'Inter', -apple-system, BlinkMacSystemFont, sans-serif;
         min-height: 100vh;
         display: flex;
-        align-items: center;
-        justify-content: center;
-        padding: 2rem;
-        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('https://cdn.trendir.com/wp-content/uploads/2016/06/Modern-Mansion-in-Beverly-Hills.jpg') no-repeat center center fixed;
-        background-size: cover;
-        position: relative;
-        overflow: hidden;
+        flex-direction: column;
     }
 
-    /* Transparent card (glass) */
-    .register-card {
+    .navbar {
+        margin-bottom: 0 !important;
+    }
+
+    .content-wrapper {
+        flex: 1;
+        display: flex;
+        flex-direction: column;
+    }
+
+    /* Full-width, edge-to-edge background for register page */
+    .register-page {
         position: relative;
-        z-index: 1;
+        flex-grow: 1;
+        width: 100vw;
+        margin: 0;
+        margin-top: -1px;
+        padding: 5rem 2rem;
+        left: 50%;
+        transform: translateX(-50%);
+        background: linear-gradient(rgba(0, 0, 0, 0.55), rgba(0, 0, 0, 0.55)), url('/images/Registerpage.jpg') center center / cover no-repeat fixed;
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        box-sizing: border-box;
+    }
+
+    /* Frosted-glass registration card */
+    .register-card {
         width: 100%;
-        max-width: 460px;
+        max-width: 420px;
         background: rgba(255, 255, 255, 0.1);
-        border: 1px solid rgba(255,255,255,0.2);
+        border: 1px solid rgba(255, 255, 255, 0.2);
         border-radius: 1.5rem;
         backdrop-filter: blur(15px);
-        box-shadow: 0 12px 30px rgba(0,0,0,0.35);
+        box-shadow: 0 12px 30px rgba(0, 0, 0, 0.35);
         padding: 2rem 2.5rem;
         color: #fff;
         transition: all 0.3s ease;
     }
 
         .register-card:hover {
-            transform: translateY(-3px);
-            box-shadow: 0 16px 40px rgba(0,0,0,0.45);
+            transform: translateY(-4px);
+            box-shadow: 0 18px 40px rgba(0,0,0,0.45);
         }
 
-        /* Scope heading color to the card only (do not override global .text-dark) */
-        .register-card .text-dark {
-            color: #fff !important;
+    /* Inputs and selects */
+    .form-control,
+    .form-select {
+        background: rgba(0, 0, 0, 0.4);
+        border: 1px solid rgba(255,255,255,0.3);
+        color: #fff;
+        transition: all 0.3s ease;
+    }
+
+        .form-control::placeholder {
+            color: rgba(255,255,255,0.65);
+        }
+
+        .form-select option {
+            background-color: #1a1a1a;
+            color: #fff;
+        }
+
+        .form-select:focus option {
+            background-color: #222;
+        }
+
+        .form-control:focus,
+        .form-select:focus {
+            background: rgba(0, 0, 0, 0.55);
+            border-color: #00bcd4;
+            box-shadow: 0 0 0 0.2rem rgba(0,188,212,0.25);
+            color: #fff;
         }
 
     .form-label {
@@ -58,30 +101,11 @@
         color: #f1f1f1;
     }
 
-    .form-control, .form-select {
-        background: rgba(255,255,255,0.15);
-        border: 1px solid rgba(255,255,255,0.3);
-        color: #fff;
-        border-radius: 0.75rem;
-        transition: all 0.3s ease;
-    }
-
-        .form-control::placeholder,
-        .form-select option {
-            color: rgba(255,255,255,0.65);
-        }
-
-        .form-control:focus, .form-select:focus {
-            background: rgba(255,255,255,0.25);
-            border-color: #00bcd4;
-            box-shadow: 0 0 0 0.2rem rgba(0,188,212,0.25);
-        }
-
+    /* Buttons */
     .btn-primary {
         background: linear-gradient(135deg, #007bff, #00bcd4);
         border: none;
         font-weight: 600;
-        transition: all 0.3s ease;
     }
 
         .btn-primary:hover {
@@ -92,7 +116,6 @@
     .btn-light {
         background: rgba(255,255,255,0.9);
         color: #444;
-        transition: all 0.3s ease;
     }
 
         .btn-light:hover {
@@ -100,10 +123,41 @@
             transform: scale(1.03);
         }
 
-    .divider hr {
-        border-top: 1px solid rgba(255,255,255,0.25);
+    /* Divider */
+    .divider {
+        display: flex;
+        align-items: center;
+        text-align: center;
+        color: rgba(255,255,255,0.6);
+        margin: 1.5rem 0;
     }
 
+        .divider::before,
+        .divider::after {
+            content: "";
+            flex: 1;
+            border-bottom: 1px solid rgba(255,255,255,0.2);
+        }
+
+        .divider:not(:empty)::before {
+            margin-right: .75em;
+        }
+
+        .divider:not(:empty)::after {
+            margin-left: .75em;
+        }
+
+    /* Footer link */
+    .register-footer a {
+        color: #00bcd4;
+        transition: color 0.3s;
+    }
+
+        .register-footer a:hover {
+            color: #80deea;
+        }
+
+    /* Logo */
     .logo-circle {
         width: 80px;
         height: 80px;
@@ -113,70 +167,46 @@
         box-shadow: 0 0 12px rgba(0,0,0,0.4);
         margin-bottom: 1rem;
     }
-
-    .text-muted {
-        color: rgba(255,255,255,0.75) !important;
-    }
-
-    .bg-white {
-        background-color: rgba(255,255,255,0.85) !important;
-    }
-
-    @@media (prefers-reduced-motion: reduce) {
-        .register-card, .btn-primary, .btn-light
-
-    {
-        transition: none !important;
-    }
-
-    .register-card:hover,
-    .btn-primary:hover,
-    .btn-light:hover {
-        transform: none !important;
-    }
-
-    }
 </style>
 
-<div class="register-page">
-    <div class="register-card" role="form" aria-labelledby="registerTitle">
+<div class="content-wrapper register-page">
+    <div class="register-card">
         <div class="text-center mb-4">
             <div class="logo-circle mx-auto d-flex align-items-center justify-content-center">
-                <img src="~/images/logo.jpg" alt="Elite Rentals Logo"
-                     class="img-fluid rounded-circle" style="max-height: 60px;">
+                <img src="~/images/logo.jpg" alt="Elite Rentals Logo" class="img-fluid rounded-circle" style="max-height:60px;">
             </div>
-            <h3 id="registerTitle" class="fw-bold text-dark mb-1">Create an Account</h3>
-            <p class="text-muted mb-0">Join Elite Rentals and experience smarter property management.</p>
+            <h3 class="fw-bold">Create an Account</h3>
+            <p class="text-light opacity-75 mb-0">Join Elite Rentals and experience smarter property management.</p>
         </div>
 
-        <form asp-action="Register" method="post" class="mt-3">
+        <form asp-action="Register" method="post" class="mt-4">
             <div class="mb-3">
                 <label asp-for="FirstName" class="form-label">First Name</label>
-                <input asp-for="FirstName" class="form-control form-control-lg" placeholder="Enter your first name" />
+                <input asp-for="FirstName" class="form-control form-control-lg rounded-3" placeholder="Enter your first name" />
                 <span asp-validation-for="FirstName" class="text-warning small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="LastName" class="form-label">Last Name</label>
-                <input asp-for="LastName" class="form-control form-control-lg" placeholder="Enter your last name" />
+                <input asp-for="LastName" class="form-control form-control-lg rounded-3" placeholder="Enter your last name" />
                 <span asp-validation-for="LastName" class="text-warning small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Email" class="form-label">Email</label>
-                <input asp-for="Email" class="form-control form-control-lg" placeholder="Enter your email" />
+                <input asp-for="Email" class="form-control form-control-lg rounded-3" placeholder="Enter your email" />
                 <span asp-validation-for="Email" class="text-warning small"></span>
             </div>
 
             <div class="mb-3">
                 <label asp-for="Password" class="form-label">Password</label>
-                <input asp-for="Password" type="password" class="form-control form-control-lg" placeholder="Create a strong password" />
+                <input asp-for="Password" type="password" class="form-control form-control-lg rounded-3" placeholder="Create a strong password" />
                 <span asp-validation-for="Password" class="text-warning small"></span>
             </div>
 
             <div class="mb-4">
                 <label asp-for="Role" class="form-label">Select Role</label>
-                <select asp-for="Role" class="form-select form-select-lg">
+                <select asp-for="Role" class="form-select form-select-lg rounded-3">
                     <option value="">-- Choose your role --</option>
                     <option value="Tenant">Tenant</option>
                 </select>
@@ -187,25 +217,21 @@
                 <button type="submit" class="btn btn-primary btn-lg rounded-pill shadow-sm">Register</button>
             </div>
 
-            <div class="divider text-center text-muted position-relative my-3">
-                <hr>
-                <span class="position-absolute top-50 start-50 translate-middle bg-white px-3 small">OR</span>
-            </div>
+            <div class="divider">or</div>
 
             <a asp-controller="Account" asp-action="GoogleLogin"
-               class="btn btn-light btn-lg border rounded-pill d-flex align-items-center justify-content-center shadow-sm mb-2 fw-semibold">
+               class="btn btn-light btn-lg rounded-pill d-flex align-items-center justify-content-center shadow-sm fw-semibold">
                 <img src="https://www.gstatic.com/images/branding/product/1x/gsa_64dp.png"
                      alt="Google Logo" style="height: 24px; width: 24px; margin-right: 10px;">
                 Sign up with Google
             </a>
         </form>
 
-        <div class="text-center mt-4">
-            <p class="mb-1 text-muted">
+        <div class="register-footer mt-4 text-center">
+            <p class="mb-0 opacity-75">
                 Already have an account?
-                <a asp-controller="Account" asp-action="Login" class="fw-semibold text-info text-decoration-none">Login here</a>
+                <a asp-controller="Account" asp-action="Login" class="fw-bold text-decoration-none">Login here</a>
             </p>
-            <a asp-controller="Home" asp-action="Index" class="text-muted small text-decoration-none d-inline-block mt-1">← Back to Home</a>
         </div>
     </div>
 </div>
