@@ -115,9 +115,19 @@ namespace EliteRentals.Controllers
 
 
             // --- Overdue Payments ---
-            var overduePayments = payments
-                .Where(p => !p.Status?.Equals("Paid", StringComparison.OrdinalIgnoreCase) == true)
+            // --- Overdue Payments: Total rent for occupied properties minus paid payments ---
+            var occupiedPropertiesRent = properties
+                .Where(p => p.Status?.Equals("Occupied", StringComparison.OrdinalIgnoreCase) == true)
+                .Sum(p => p.RentAmount);
+
+            var totalPaidThisMonth = payments
+                .Where(p => string.Equals(p.Status, "Paid", StringComparison.OrdinalIgnoreCase)
+                            && p.Date.Year == now.Year
+                            && p.Date.Month == now.Month)
                 .Sum(p => p.Amount);
+
+            var overduePayments = Math.Max(occupiedPropertiesRent - totalPaidThisMonth, 0);
+
 
             // --- Maintenance KPIs ---
             var activeMaintenance = maintenance.Count(m =>

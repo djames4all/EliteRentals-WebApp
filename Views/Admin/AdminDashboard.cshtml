@@ -4,6 +4,17 @@
     Layout = "~/Views/Shared/_Layout.cshtml";
 }
 
+<style>
+    /* KPI Card Styling */
+    .kpi-value {
+        white-space: nowrap;       /* Prevent line breaks */
+        overflow: hidden;          /* Hide overflow */
+        text-overflow: ellipsis;   /* Show ... if too long */
+        font-size: clamp(1.8rem, 2.5vw, 2.5rem); /* Scales for very large numbers */
+        font-weight: 700;
+    }
+</style>
+
 <div class="container-fluid">
     <div class="row">
         @await Html.PartialAsync("_AdminSidebar")
@@ -19,7 +30,7 @@
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title text-muted">Occupancy Rate</h6>
-                            <p class="display-6 text-success fw-bold">@Model.OccupancyRate%</p>
+                            <p class="text-success kpi-value">@Model.OccupancyRate%</p>
                         </div>
                     </div>
                 </div>
@@ -27,7 +38,7 @@
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title text-muted">Overdue Payments</h6>
-                            <p class="display-6 text-danger fw-bold">@($"R{Model.OverduePayments:N2}")</p>
+                            <p class="text-danger kpi-value">@($"R{Model.OverduePayments:N2}")</p>
                         </div>
                     </div>
                 </div>
@@ -35,7 +46,7 @@
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title text-muted">Active Maintenance</h6>
-                            <p class="display-6 text-warning fw-bold">@Model.ActiveMaintenance</p>
+                            <p class="text-warning kpi-value">@Model.ActiveMaintenance</p>
                         </div>
                     </div>
                 </div>
@@ -43,16 +54,16 @@
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
                             <h6 class="card-title text-muted">Pending Requests</h6>
-                            <p class="display-6 text-primary fw-bold">@Model.PendingRequests</p>
+                            <p class="text-primary kpi-value">@Model.PendingRequests</p>
                         </div>
                     </div>
                 </div>
             </div>
+
             <div class="d-flex justify-content-end mb-3">
                 <a class="btn btn-outline-secondary me-2" href="@Url.Action("ExportActivities", "Admin")">Export Activities</a>
                 <a class="btn btn-outline-secondary" href="@Url.Action("ExportMaintenance", "Admin")">Export Maintenance</a>
             </div>
-
 
             <!-- Recent Activities Table -->
             <div class="card shadow-sm mb-4">
@@ -79,9 +90,32 @@
                                         <td>@act.Date.ToString("dd/MM/yyyy")</td>
                                         <td>
                                             @{
-                                                var badgeClass = act.Action == "Payment"
-                                                ? (act.Status?.Equals("Paid", StringComparison.OrdinalIgnoreCase) == true ? "bg-success" : "bg-warning text-dark")
-                                                : (act.Status?.Equals("Pending", StringComparison.OrdinalIgnoreCase) == true ? "bg-warning text-dark" : "bg-primary");
+                                                string badgeClass;
+
+                                                if (act.Action == "Payment")
+                                                {
+                                                    badgeClass = act.Status?.ToLower() switch
+                                                    {
+                                                        "paid" => "bg-success",
+                                                        "revoked" => "bg-danger",
+                                                        "pending" => "bg-warning text-dark",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                else if (act.Action == "Maintenance")
+                                                {
+                                                    badgeClass = act.Status?.ToLower() switch
+                                                    {
+                                                        "pending" => "bg-warning text-dark",
+                                                        "in progress" => "bg-info text-dark",
+                                                        "resolved" => "bg-success",
+                                                        _ => "bg-secondary"
+                                                    };
+                                                }
+                                                else
+                                                {
+                                                    badgeClass = "bg-secondary";
+                                                }
                                             }
                                             <span class="badge @badgeClass">@((act.Status ?? "Unknown"))</span>
                                         </td>
@@ -92,6 +126,7 @@
                     </div>
                 </div>
             </div>
+
 
             <!-- Charts -->
             <div class="row mb-4">
