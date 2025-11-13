@@ -67,13 +67,47 @@
             <h2 class="fw-bold text-center mb-5">Our Branches Across South Africa</h2>
             <div class="row g-4">
 
-                <!-- Branch Template -->
                 @foreach (var branch in new[] {
-                                new { Name = "Johannesburg - Head Office", Image="/images/branch-jhb.jpg", Address="Linbro Business Park, 16 Milkyway Ave, Frankenwald, Sandton, Gauteng, 2065", Phone="011 201 7777", Email="joburg@eliterentals.co.za", Map="https://www.google.com/maps?q=Linbro+Business+Park+Sandton+South+Africa&output=embed" },
-                                new { Name = "Durban Branch", Image="/images/branch-dbn.jpg", Address="Gateway Office Park, 21 Aurora Drive, Umhlanga Ridge, Durban, KwaZulu-Natal, 4319", Phone="031 555 8888", Email="durban@eliterentals.co.za", Map="https://www.google.com/maps?q=Umhlanga+Gateway+Office+Park+Durban+South+Africa&output=embed" },
-                                new { Name = "Cape Town Branch", Image="/images/branch-cpt.jpg", Address="Century City Business Park, 3 Bridgeway Rd, Century City, Cape Town, Western Cape, 7441", Phone="021 456 9000", Email="capetown@eliterentals.co.za", Map="https://www.google.com/maps?q=Century+City+Cape+Town+South+Africa&output=embed" },
-                                new { Name = "Port Elizabeth Branch", Image="/images/branch-pe.jpg", Address="Greenacres Office Park, 2 Ring Rd, Greenacres, Gqeberha (Port Elizabeth), Eastern Cape, 6045", Phone="041 555 6677", Email="pe@eliterentals.co.za", Map="https://www.google.com/maps?q=Greenacres+Office+Park+Port+Elizabeth+South+Africa&output=embed" },
-                                new { Name = "Bloemfontein Branch", Image="/images/branch-blm.jpg", Address="Westdene Business Centre, 94 Nelson Mandela Dr, Westdene, Bloemfontein, Free State, 9301", Phone="051 444 2211", Email="bloem@eliterentals.co.za", Map="https://www.google.com/maps?q=Westdene+Bloemfontein+South+Africa&output=embed" }
+                                new {
+                                Name = "Johannesburg - Head Office",
+                                Image="/images/branch-jhb.jpg",
+                                Address="Linbro Business Park, 8 Milkyway Ave, Frankenwald, Sandton, Gauteng, 2090",
+                                Phone="011 156 7562",
+                                Email="jhb@eliterentals.co.za",
+                                Map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3583.749009555916!2d28.1161275!3d-26.074457900000002!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1e956d003ff87a21%3A0xa35d69e64af9e427!2sElite%20Rentals%20-%20JHB%20Head%20Office!5e0!3m2!1sen!2sza!4v1763021715212!5m2!1sen!2sza"
+                                },
+                                new {
+                                Name = "Durban Branch",
+                                Image="/images/branch-dbn.jpg",
+                                Address="Island Business Park, Unit 10, 23 Flanders Dr, Mount Edgecombe, Durban, KwaZulu-Natal, 4300",
+                                Phone="011 201 4531",
+                                Email="dbn@eliterentals.co.za",
+                                Map="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d13861.277305942569!2d31.0520308!3d-29.7105081!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1ef70500160d0861%3A0xfd6a5a77d77bde7b!2sElite%20Rentals%20-%20KwaZulu%20Natal!5e0!3m2!1sen!2sza!4v1763021763600!5m2!1sen!2sza"
+                                },
+                                new {
+                                Name = "Cape Town Branch",
+                                Image="/images/branch-cpt.jpg",
+                                Address="Spearhead Business Park, A1 Cnr Freedom, Montague Dr, Cape Town, Western Cape, 7441",
+                                Phone="011 861 9045",
+                                Email="cpt@eliterentals.co.za",
+                                Map="https://www.google.com/maps/embed?pb=!1m14!1m8!1m3!1d6625.12787965842!2d18.5167757!3d-33.8751272!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1dcc5f0015ddf7f7%3A0xed499e5260069e7!2sElite%20Rentals%20-%20Cape%20Town!5e0!3m2!1sen!2sza!4v1763021788416!5m2!1sen!2sza"
+                                },
+                                new {
+                                Name = "Port Elizabeth Branch",
+                                Image="/images/branch-pe1.jpg",
+                                Address="United Business Park, 52A Pickering Street, Newton Park, Gqeberha (Port Elizabeth), Eastern Cape, 6055",
+                                Phone="011 979 7161",
+                                Email="pe@eliterentals.co.za",
+                                Map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3309.8401704581584!2d25.562182599999996!3d-33.9452387!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1e7ad1000df8f343%3A0x3236a0440df80b41!2sElite%20Rentals%20-%20Gqeberha%20(PE)!5e0!3m2!1sen!2sza!4v1763021809899!5m2!1sen!2sza"
+                                },
+                                new {
+                                Name = "Bloemfontein Branch",
+                                Image="/images/branch-blm.jpg",
+                                Address="Brandwag Park, Unit 2, McHardy Ave, Brandwag, Bloemfontein, Free State, 9301",
+                                Phone="011 401 3499",
+                                Email="blm@eliterentals.co.za",
+                                Map="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d3485.991235977824!2d26.198550299999994!3d-29.105940099999994!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x1e8fc50050ef8631%3A0x20776aea5140c3f2!2sElite%20Rentals%20-%20Bloemfontein!5e0!3m2!1sen!2sza!4v1763021831271!5m2!1sen!2sza"
+                                }
                                 })
                 {
                     <div class="col-md-6 col-lg-4">
@@ -84,13 +118,15 @@
                                 <p class="text-muted mb-2">@branch.Address</p>
                                 <p class="mb-1"><strong>Phone:</strong> @branch.Phone</p>
                                 <p class="mb-3"><strong>Email:</strong> @branch.Email</p>
+
+                                <!-- Embedded Map with Modal Trigger -->
                                 <div class="map-container rounded-3 overflow-hidden shadow-sm position-relative"
                                      data-bs-toggle="modal"
                                      data-bs-target="#mapModal"
                                      data-map="@branch.Map"
                                      data-title="@branch.Name"
                                      style="cursor:pointer;">
-                                    <iframe src="@branch.Map" width="100%" height="200" style="border:0; pointer-events:none;" allowfullscreen></iframe>
+                                    <iframe src="@branch.Map" width="100%" height="200" style="border:0; pointer-events:none;" allowfullscreen="" loading="lazy"></iframe>
                                     <div class="position-absolute top-0 start-0 w-100 h-100" style="background:rgba(0,0,0,0.1);"></div>
                                 </div>
                                 <p class="text-center mt-2 small text-primary fw-semibold">Click map to enlarge</p>
@@ -109,7 +145,7 @@
             <p class="mb-4" style="max-width:700px;margin:auto;">
                 Connect with your nearest Elite Rentals branch or send us a message — our team will get back to you within 24 hours.
             </p>
-            <a href="mailto:support@eliterentals.co.za" class="btn btn-light btn-lg rounded-pill shadow-sm">
+            <a href="mailto:info@eliterentals.co.za" class="btn btn-light btn-lg rounded-pill shadow-sm">
                 Email Us Directly
             </a>
         </div>
@@ -125,7 +161,7 @@
                 <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
             </div>
             <div class="modal-body p-0">
-                <iframe id="modalMapFrame" src="" width="100%" height="500" style="border:0;" allowfullscreen></iframe>
+                <iframe id="modalMapFrame" src="" width="100%" height="500" style="border:0;" allowfullscreen="" loading="lazy"></iframe>
             </div>
         </div>
     </div>
