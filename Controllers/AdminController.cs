@@ -510,22 +510,38 @@ namespace EliteRentals.Controllers
         }
 
         [HttpPost]
+        [ValidateAntiForgeryToken]
         public async Task<IActionResult> AddLease(LeaseCreateUpdateDto dto)
         {
-            var client = await CreateApiClient();
-            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
-            var resp = await client.PostAsync("api/lease", content);
-
-            if (!resp.IsSuccessStatusCode)
+            if (!ModelState.IsValid)
             {
-                TempData["Error"] = "Failed to create lease.";
                 ViewBag.Tenants = await FetchUnassignedTenants();
                 ViewBag.Properties = await FetchAvailableProperties();
                 return View(dto);
             }
 
-            return RedirectToAction("AdminLeases");
+            var client = await CreateApiClient();
+            var content = new StringContent(JsonSerializer.Serialize(dto), Encoding.UTF8, "application/json");
+
+            var resp = await client.PostAsync("api/lease", content);
+            var respBody = await resp.Content.ReadAsStringAsync();
+
+            Console.WriteLine($"Lease POST returned: {resp.StatusCode}, body: {respBody}");
+
+            if (resp.IsSuccessStatusCode)
+            {
+                // Show a toast after successful creation
+                TempData["Toast"] = "Lease created successfully!";
+                return RedirectToAction("AdminLeases");
+            }
+
+            // Handle errors gracefully
+            TempData["Error"] = $"Failed to create lease. ({resp.StatusCode}) {respBody}";
+            ViewBag.Tenants = await FetchUnassignedTenants();
+            ViewBag.Properties = await FetchAvailableProperties();
+            return View(dto);
         }
+
         // GET: Edit Lease
         [HttpGet]
         public async Task<IActionResult> EditLease(int id)

@@ -8,6 +8,15 @@
     <div class="row">
         @await Html.PartialAsync("_ManagerSidebar")
         <main class="col-md-9 ms-sm-auto col-lg-10 px-md-4 py-4">
+                        @if (TempData["Toast"] is string msg && !string.IsNullOrWhiteSpace(msg))
+{
+    <div class="alert alert-success py-2 mb-3">@msg</div>
+}
+
+@if (TempData["Error"] is string err && !string.IsNullOrWhiteSpace(err))
+{
+    <div class="alert alert-danger py-2 mb-3">@err</div>
+}
 
             <div class="d-flex justify-content-between align-items-center pb-2 mb-3 border-bottom">
                 <h2 class="h3">Lease Management</h2>
@@ -61,7 +70,6 @@
 <td>
     <a asp-action="ViewLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-info">View</a>
     <a asp-action="EditLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-warning">Edit</a>
-    <a asp-action="DeleteLease" asp-route-id="@lease.LeaseId" class="btn btn-sm btn-danger">Delete</a>
 <form asp-action="ArchiveLease" asp-route-id="@lease.LeaseId" method="post" class="d-inline">
     @Html.AntiForgeryToken()
     <button type="submit" class="btn btn-sm btn-secondary" 
