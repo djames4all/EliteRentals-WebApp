@@ -16,28 +16,35 @@
 
             <div class="card shadow-sm">
                 <div class="card-body">
-                    <dl class="row">
-                        <dt class="col-sm-3 text-secondary">Tenant</dt>
-                        <dd class="col-sm-9">@Model.TenantName</dd>
+                    <dl class="row mb-0">
+                        <dt class="col-sm-3 text-muted">Tenant</dt>
+                        <dd class="col-sm-9 fw-bold">@Model.TenantName</dd>
 
-                        <dt class="col-sm-3 text-secondary">Property</dt>
-                        <dd class="col-sm-9">@Model.PropertyTitle</dd>
+                        <dt class="col-sm-3 text-muted">Property</dt>
+                        <dd class="col-sm-9 fw-bold">@Model.PropertyTitle</dd>
 
-                        <dt class="col-sm-3 text-secondary">Start Date</dt>
-                        <dd class="col-sm-9">@Model.StartDate.ToString("yyyy-MM-dd")</dd>
+                        <dt class="col-sm-3 text-muted">Start Date</dt>
+                        <dd class="col-sm-9">@Model.StartDate:yyyy-MM-dd</dd>
 
-                        <dt class="col-sm-3 text-secondary">End Date</dt>
-                        <dd class="col-sm-9">@Model.EndDate.ToString("yyyy-MM-dd")</dd>
+                        <dt class="col-sm-3 text-muted">End Date</dt>
+                        <dd class="col-sm-9">@Model.EndDate:yyyy-MM-dd</dd>
 
-                        <dt class="col-sm-3 text-secondary">Deposit</dt>
-                        <dd class="col-sm-9">@Model.Deposit.ToString("C") ?? "N/A"</dd>
+                        <dt class="col-sm-3 text-muted">Deposit</dt>
+                        <dd class="col-sm-9">@Model.Deposit.ToString("C")</dd>
 
-                        <dt class="col-sm-3 text-secondary">Status</dt>
-                        <dd class="col-sm-9">@Model.Status</dd>
+                        <dt class="col-sm-3 text-muted">Status</dt>
+                        <dd class="col-sm-9">
+                            <span class="badge @(Model.Status switch {
+                                "Active" => "bg-success",
+                                "Pending Approval" => "bg-warning text-dark",
+                                "Terminated" => "bg-danger",
+                                _ => "bg-secondary"
+                            })">@Model.Status</span>
+                        </dd>
 
                         @if (Model.DocumentData?.Length > 0)
                         {
-                            <dt class="col-sm-3 text-secondary">Document</dt>
+                            <dt class="col-sm-3 text-muted">Document</dt>
                             <dd class="col-sm-9">
                                 <a asp-action="DownloadLeaseDocument" asp-route-id="@Model.LeaseId" class="btn btn-sm btn-outline-primary">
                                     Download

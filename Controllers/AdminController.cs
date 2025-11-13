@@ -105,18 +105,14 @@ namespace EliteRentals.Controllers
             var now = DateTime.UtcNow;
 
             // --- Occupancy Rate ---
-            var leasedPropertyIds = leases
-                .Where(l => l.Status?.Equals("Active", StringComparison.OrdinalIgnoreCase) == true)
-                .Select(l => l.PropertyId)
-                .Distinct()
-                .ToHashSet();
-
             var totalProperties = properties.Count;
-            var occupiedProperties = leasedPropertyIds.Count;
+            var occupiedProperties = properties.Count(p =>
+                p.Status?.Equals("Occupied", StringComparison.OrdinalIgnoreCase) == true);
 
             var occupancyRate = totalProperties > 0
                 ? (int)((occupiedProperties / (double)totalProperties) * 100)
                 : 0;
+
 
             // --- Overdue Payments ---
             var overduePayments = payments
