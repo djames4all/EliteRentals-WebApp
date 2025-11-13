@@ -46,21 +46,41 @@ namespace EliteRentals.Controllers
 
         [HttpPost]
         [ValidateAntiForgeryToken]
-        public async Task<IActionResult> ManagerPropertyCreate(PropertyUploadDto form, List<IFormFile>? images, CancellationToken ct)
+        public async Task<IActionResult> ManagerPropertyCreate(PropertyUploadDto dto, List<IFormFile>? images)
         {
-            NormalizeStatus(form);
-            if (!ModelState.IsValid) return View(form);
-
-            var id = await _api.CreatePropertyAsync(form, images, ct);
-            if (id == null)
+            if (!ModelState.IsValid)
             {
-                ModelState.AddModelError(string.Empty, "Could not create property. Try again.");
-                return View(form);
+                // Validation failed, stay on the form
+                return View(dto);
             }
 
-            TempData["ManagerPropertyMsg"] = "Property created successfully.";
-            return RedirectToAction(nameof(ManagerProperties));
+            try
+            {
+                // Call your API service to create the property
+                var propertyId = await _api.CreatePropertyAsync(dto, images);
+
+                if (propertyId.HasValue)
+                {
+                    // Creation succeeded → redirect to property list
+                    TempData["SuccessMessage"] = "Property created successfully!";
+                    return RedirectToAction("ManagerProperties");
+                }
+                else
+                {
+                    // Creation failed → show error on the same form
+                    ModelState.AddModelError(string.Empty, "Could not create property. Try again.");
+                    return View(dto);
+                }
+            }
+            catch (Exception ex)
+            {
+                // Optional: log ex
+                ModelState.AddModelError(string.Empty, "An unexpected error occurred. Try again.");
+                return View(dto);
+            }
         }
+
+
 
         // EDIT
         [HttpGet]

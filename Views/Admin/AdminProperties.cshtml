@@ -155,8 +155,8 @@
                                                    asp-action="TenantListingDetails"
                                                    asp-route-id="@p.PropertyId"
                                                    class="btn btn-info">View</a>
-
-                                                <form asp-action="DeleteProperty"
+                                                <form asp-action="AdminPropertyDelete"
+                                                      asp-controller="Admin"
                                                       asp-route-id="@p.PropertyId"
                                                       method="post"
                                                       class="d-inline">
@@ -167,6 +167,7 @@
                                                         Delete
                                                     </button>
                                                 </form>
+
                                             </div>
                                         </td>
                                     </tr>

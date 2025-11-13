@@ -17,7 +17,7 @@
 
 <div class="container-fluid">
   <div class="row">
-    @await Html.PartialAsync("_ManagerSidebar")  @* ensure <nav> has class="manager-sidebar" in the partial *@
+    @await Html.PartialAsync("_ManagerSidebar") 
 
     <main class="manager-main col px-0">
       <div class="d-flex justify-content-between align-items-center mb-3">
@@ -99,13 +99,19 @@
                             View
                           </a>
 
-                          <form asp-action="DeleteProperty" asp-route-id="@p.PropertyId" method="post" class="d-inline">
-                            @Html.AntiForgeryToken()
-                            <button class="btn btn-sm btn-outline-danger"
-                                    onclick="return confirm('Delete property #@p.PropertyId (@p.Title)?')">
-                              Delete
-                            </button>
-                          </form>
+                                            <form asp-action="ManagerPropertyDelete"
+                                                  asp-controller="PropertyManager"
+                                                  asp-route-id="@p.PropertyId"
+                                                  method="post"
+                                                  class="d-inline">
+                                                @Html.AntiForgeryToken()
+                                                <button type="submit"
+                                                        class="btn btn-sm btn-outline-danger me-1"
+                                                        onclick="return confirm('Delete property #@p.PropertyId (@p.Title)?')">
+                                                    Delete
+                                                </button>
+                                            </form>
+
                         </td>
                       </tr>
                   }

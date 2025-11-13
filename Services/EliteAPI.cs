@@ -75,17 +75,59 @@ namespace EliteRentals.Services
 
         private class RentalApplicationCreatedProxy { public int ApplicationId { get; set; } }
 
-        // -------- Manager: Properties (auth) --------
+        public class CreatedPropertyDto
+        {
+            public int PropertyId { get; set; }
+        }
+
         public async Task<int?> CreatePropertyAsync(PropertyUploadDto dto, List<IFormFile>? images, CancellationToken ct = default)
         {
             var c = Client(withAuth: true);
             using var form = BuildPropertyForm(dto, images);
             var resp = await c.PostAsync("api/Property", form, ct);
-            if (!resp.IsSuccessStatusCode) return null;
 
-            var created = await resp.Content.ReadFromJsonAsync<CreatedPropertyProxy>(cancellationToken: ct);
-            return created?.PropertyId ?? 0;
+            if (!resp.IsSuccessStatusCode)
+                return null;
+
+            var content = await resp.Content.ReadAsStringAsync(ct);
+            if (string.IsNullOrWhiteSpace(content))
+                return 0;
+
+            try
+            {
+                using var doc = JsonDocument.Parse(content);
+                if (doc.RootElement.TryGetProperty("propertyId", out var idProp))
+                    return idProp.GetInt32();
+
+                return 0;
+            }
+            catch
+            {
+                return 0;
+            }
         }
+
+        public async Task<bool> DeletePropertyAsync(int id, CancellationToken ct = default)
+        {
+            var c = Client(withAuth: true); // authenticated client (same as other methods)
+            var resp = await c.DeleteAsync($"api/Property/{id}", ct);
+
+            // If deletion was successful (204 NoContent or 200 OK)
+            if (resp.IsSuccessStatusCode)
+                return true;
+
+            // Optional: log or inspect body for error details
+            var error = await resp.Content.ReadAsStringAsync(ct);
+            Console.WriteLine($"DeletePropertyAsync failed: {resp.StatusCode} - {error}");
+
+            return false;
+        }
+
+
+
+
+
+
 
         public async Task<bool> UpdatePropertyAsync(int propertyId, PropertyUploadDto dto, List<IFormFile>? images, CancellationToken ct = default)
         {
@@ -95,12 +137,12 @@ namespace EliteRentals.Services
             return resp.IsSuccessStatusCode;
         }
 
-        public async Task<bool> DeletePropertyAsync(int propertyId, CancellationToken ct = default)
-        {
-            var c = Client(withAuth: true);
-            var resp = await c.DeleteAsync($"api/Property/{propertyId}", ct);
-            return resp.IsSuccessStatusCode;
-        }
+        //public async Task<bool> DeletePropertyAsync(int propertyId, CancellationToken ct = default)
+        //{
+        //    var c = Client(withAuth: true);
+        //    var resp = await c.DeleteAsync($"api/Property/{propertyId}", ct);
+        //    return resp.IsSuccessStatusCode;
+        //}
 
         private MultipartFormDataContent BuildPropertyForm(PropertyUploadDto dto, List<IFormFile>? images)
         {
