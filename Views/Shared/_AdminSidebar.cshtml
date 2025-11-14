@@ -5,47 +5,103 @@
 }
 
 <style>
-    :root{
-        --adm-sidebar-w: 240px;     /* rail width */
-        --adm-navbar-h: 56px;       /* match the height of the top navbar in _Layout.cshtml */
+    :root {
+        --adm-sidebar-w: 240px;
+        --adm-navbar-h: 56px;
+    }
+
+    body::before {
+        content: "";
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: var(--adm-sidebar-w);
+        height: 100vh;
+        background: #121315;
+        z-index: 0;
+        pointer-events: none;
+    }
+
+    header, .navbar, footer {
+        position: relative !important;
+        z-index: 1035 !important;
     }
 
     .adm-sidebar {
         position: fixed;
-        top: var(--adm-navbar-h);
+        top: 0;
         left: 0;
         bottom: 0;
         width: var(--adm-sidebar-w);
-        background: #212529;        /* bg-dark */
+        display: flex;
+        flex-direction: column;
+        justify-content: space-between;
+        background: transparent;
         color: #fff;
-        overflow-y: auto;
-        padding: 0.75rem 0;
-        z-index: 1020;              /* under navbar, above content */
+        z-index: 1;
     }
 
-    .adm-sidebar h4 { margin: 0.25rem 1rem 0.75rem; }
-    .adm-sidebar .nav-link { padding:.6rem 1rem; color:#fff; }
-    .adm-sidebar .nav-link.active {
-        border-left: 4px solid #dc3545;
-        background-color: rgba(220,53,69,.1);
-        font-weight: 500;
-    }
-    .adm-sidebar .nav-link:hover { background-color: rgba(255,255,255,.06); }
-
-    /* mobile: sidebar becomes normal flow (not fixed, full width) */
-    @@media (max-width: 767.98px){
-        .adm-sidebar {
-            position: static;
-            width: 100%;
+        .adm-sidebar::after {
+            content: "";
+            position: absolute;
             top: 0;
-            height: auto;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background: rgba(0,0,0,0.15);
+            pointer-events: none;
+            z-index: -1;
         }
+
+        .adm-sidebar h4 {
+            margin-top: 1.5rem;
+            margin-left: 1rem;
+            margin-bottom: 0.75rem;
+            color: #fff;
+        }
+
+        .adm-sidebar .nav-link {
+            padding: .6rem 1rem;
+            color: #fff;
+        }
+
+            .adm-sidebar .nav-link.active {
+                border-left: 4px solid #dc3545;
+                background-color: rgba(220,53,69,.12);
+                font-weight: 500;
+            }
+
+            .adm-sidebar .nav-link:hover {
+                background-color: rgba(255,255,255,.04);
+            }
+
+    .adm-sidebar-menu {
+        flex: 1;
+        overflow-y: auto;
+        padding-top: calc(var(--adm-navbar-h) + 0.75rem);
     }
+
+    .layout-body, .main-content, .container {
+        margin-left: var(--adm-sidebar-w);
+    }
+
+    /* REMOVE FOOTER ONLY WHEN SIDEBAR EXISTS */
+    footer {
+        display: none !important;
+    }
+
+    .adm-sidebar-footer {
+        text-align: center;
+        padding: 0.75rem 1rem;
+        font-size: 0.75rem;
+        opacity: 0.8;
+    }
+
 </style>
 
-<nav class="adm-sidebar">
-    <div class="position-sticky">
-        <h4 class="px-3 text-white">Admin</h4>
+<nav class="adm-sidebar" aria-label="Admin sidebar">
+    <div class="adm-sidebar-menu">
+        <h4 class="px-3">Admin</h4>
         <ul class="nav flex-column mt-4">
             <li class="nav-item">
                 <a class="nav-link @(title.Contains("dashboard") ? "active" : "")"
@@ -88,5 +144,9 @@
                    href="@Url.Action("AdminSettings", "Admin")">Settings</a>
             </li>
         </ul>
+    </div>
+
+    <div class="adm-sidebar-footer">
+        &copy; 2025 <strong>Elite Rentals</strong>. All Rights Reserved.
     </div>
 </nav>

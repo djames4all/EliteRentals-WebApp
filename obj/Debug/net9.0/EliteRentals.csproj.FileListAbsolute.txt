@@ -1521,6 +1521,7 @@ C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals
 C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.genruntimeconfig.cache
 C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\ref\EliteRentals.dll
 C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\compressed\5yxfrlaycq-vd2q8ecf7w.gz
+C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\compressed\7ej0cnzqq4-5ndr44a3kw.gz
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\bin\Debug\net9.0\appsettings.Development.json
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\bin\Debug\net9.0\appsettings.json
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\bin\Debug\net9.0\EliteRentals.staticwebassets.runtime.json
@@ -1828,4 +1829,3 @@ C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\refint\EliteRent
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.pdb
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\EliteRentals.genruntimeconfig.cache
 C:\Users\USER\Source\Repos\EliteRentals-WebApp\obj\Debug\net9.0\ref\EliteRentals.dll
-C:\Users\dasha\OneDrive - ADvTECH Ltd\INSY7315\EliteRentals Web App\EliteRentals-WebApp\obj\Debug\net9.0\compressed\7ej0cnzqq4-5ndr44a3kw.gz
