@@ -19,7 +19,7 @@
     <input type="hidden" id="currentUserId" value="@HttpContextAccessor.HttpContext?.Session.GetString("UserId")" />
 
     <header>
-        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-3">
+        <nav class="navbar navbar-expand-sm navbar-light bg-white border-bottom box-shadow mb-0">
             <div class="container-fluid">
 
                 <a class="navbar-brand d-flex align-items-center gap-2" asp-controller="Home" asp-action="Index">
@@ -110,7 +110,8 @@
         </nav>
     </header>
 
-    <div class="container">
+    <!-- Formatting-only: use fluid container for better width; nav untouched -->
+    <div class="container-fluid px-3 px-lg-4">
         <main role="main" class="pb-3">
             @RenderBody()
         </main>

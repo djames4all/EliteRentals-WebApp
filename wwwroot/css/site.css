@@ -338,3 +338,31 @@ footer {
         }
 
 
+.layout-wrapper {
+    min-height: calc(100vh - 56px); /* 56px ~ navbar height */
+}
+
+.sidebar {
+    width: 240px;
+    flex-shrink: 0;
+    background-color: #f8f9fa;
+    border-right: 1px solid #dee2e6;
+}
+
+.main-content {
+    padding: 1.5rem;
+    overflow-x: auto;
+}
+
+/* Optional: collapse sidebar on very small screens */
+@media (max-width: 768px) {
+    .layout-wrapper {
+        flex-direction: column;
+    }
+
+    .sidebar {
+        width: 100%;
+        border-right: none;
+        border-bottom: 1px solid #dee2e6;
+    }
+}
