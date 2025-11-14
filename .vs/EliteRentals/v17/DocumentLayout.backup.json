@@ -3,12 +3,24 @@
   "WorkspaceRootPath": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\views\\shared\\_managersidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\shared\\_managersidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\views\\admin\\admindashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\admin\\admindashboard.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
     },
     {
-      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\views\\shared\\_adminsidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
-      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\shared\\_adminsidebar.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\views\\home\\contactus.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:views\\home\\contactus.cshtml||{40D31677-CBC0-4297-A9EF-89D907823A98}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:controllers\\homecontroller.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\services\\inmemorycontactstore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:services\\inmemorycontactstore.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
+    },
+    {
+      "AbsoluteMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|c:\\users\\user\\source\\repos\\eliterentals-webapp\\models\\contactmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
+      "RelativeMoniker": "D:0:0:{E6C9D0EC-803A-45F0-8D70-D4444315B130}|EliteRentals.csproj|solutionrelative:models\\contactmessage.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
     }
   ],
   "DocumentGroupContainers": [
@@ -43,27 +55,66 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "_ManagerSidebar.cshtml",
-              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Shared\\_ManagerSidebar.cshtml",
-              "RelativeDocumentMoniker": "Views\\Shared\\_ManagerSidebar.cshtml",
-              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Shared\\_ManagerSidebar.cshtml",
-              "RelativeToolTip": "Views\\Shared\\_ManagerSidebar.cshtml",
-              "ViewState": "AgIAAHUAAAAAAAAAAAAiwIEAAAAtAAAAAAAAAA==",
+              "Title": "AdminDashboard.cshtml",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Admin\\AdminDashboard.cshtml",
+              "RelativeDocumentMoniker": "Views\\Admin\\AdminDashboard.cshtml",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Admin\\AdminDashboard.cshtml",
+              "RelativeToolTip": "Views\\Admin\\AdminDashboard.cshtml",
+              "ViewState": "AgIAAAcBAAAAAAAAAAAAABMBAAAWAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-14T08:40:46.7Z",
+              "WhenOpened": "2025-11-14T09:55:40.698Z",
               "EditorCaption": ""
             },
             {
               "$type": "Document",
               "DocumentIndex": 1,
-              "Title": "_AdminSidebar.cshtml",
-              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Shared\\_AdminSidebar.cshtml",
-              "RelativeDocumentMoniker": "Views\\Shared\\_AdminSidebar.cshtml",
-              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Shared\\_AdminSidebar.cshtml",
-              "RelativeToolTip": "Views\\Shared\\_AdminSidebar.cshtml",
-              "ViewState": "AgIAAG8AAAAAAAAAAAAcwH0AAAAhAAAAAAAAAA==",
+              "Title": "ContactUs.cshtml",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Home\\ContactUs.cshtml",
+              "RelativeDocumentMoniker": "Views\\Home\\ContactUs.cshtml",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Views\\Home\\ContactUs.cshtml",
+              "RelativeToolTip": "Views\\Home\\ContactUs.cshtml",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABIAAAAAAAAAAAAAAA==",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000759|",
-              "WhenOpened": "2025-11-14T00:44:49.909Z",
+              "WhenOpened": "2025-11-14T09:21:23.843Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 2,
+              "Title": "HomeController.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Controllers\\HomeController.cs",
+              "RelativeDocumentMoniker": "Controllers\\HomeController.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Controllers\\HomeController.cs",
+              "RelativeToolTip": "Controllers\\HomeController.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAABEAAAAXAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T09:20:33.995Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 3,
+              "Title": "InMemoryContactStore.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Services\\InMemoryContactStore.cs",
+              "RelativeDocumentMoniker": "Services\\InMemoryContactStore.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Services\\InMemoryContactStore.cs",
+              "RelativeToolTip": "Services\\InMemoryContactStore.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAcAAAAqAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T09:20:05.594Z",
+              "EditorCaption": ""
+            },
+            {
+              "$type": "Document",
+              "DocumentIndex": 4,
+              "Title": "ContactMessage.cs",
+              "DocumentMoniker": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Models\\ContactMessage.cs",
+              "RelativeDocumentMoniker": "Models\\ContactMessage.cs",
+              "ToolTip": "C:\\Users\\USER\\source\\repos\\EliteRentals-WebApp\\Models\\ContactMessage.cs",
+              "RelativeToolTip": "Models\\ContactMessage.cs",
+              "ViewState": "AgIAAAAAAAAAAAAAAAAAAAYAAAAtAAAAAAAAAA==",
+              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
+              "WhenOpened": "2025-11-14T09:19:43.822Z",
               "EditorCaption": ""
             }
           ]

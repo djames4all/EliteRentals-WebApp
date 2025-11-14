@@ -19,7 +19,7 @@ namespace EliteRentals.Controllers
             _cfg = cfg;
         }
 
-        // Loads all properties, picks 3 random in the view
+        // HOME PAGE
         public async Task<IActionResult> Index(CancellationToken ct)
         {
             try
@@ -39,6 +39,7 @@ namespace EliteRentals.Controllers
             catch (Exception ex)
             {
                 _logger.LogError(ex, "Error loading properties for home page");
+
                 var vm = new PropertyListViewModel
                 {
                     Items = new List<EliteRentals.Models.DTOs.PropertyReadDto>(),
@@ -46,32 +47,71 @@ namespace EliteRentals.Controllers
                     Query = new PropertyListQuery(),
                     ApiBaseUrl = _cfg["ApiSettings:BaseUrl"] ?? ""
                 };
+
                 return View(vm);
             }
         }
-        public IActionResult AboutUs()
+
+        public IActionResult AboutUs() => View();
+        public IActionResult OurServices() => View();
+        public IActionResult ContactUs() => View();
+        public IActionResult Privacy() => View();
+
+
+        // CONTACT FORM SUBMISSION + VALIDATION + RANDOM FAILURE
+        [HttpPost]
+        public IActionResult SendContact(string Name, string Email, string Subject, string Message)
         {
-            return View();
-        }
-        public IActionResult OurServices()
-        {
-            return View();
+            // VALIDATION
+            if (string.IsNullOrWhiteSpace(Name) ||
+                string.IsNullOrWhiteSpace(Email) ||
+                string.IsNullOrWhiteSpace(Subject) ||
+                string.IsNullOrWhiteSpace(Message))
+            {
+                TempData["Error"] = "Please fill in all fields.";
+                return RedirectToAction("ContactUs");
+            }
+
+            // 25% CHANCE OF FAKE FAILURE
+            var random = new Random();
+            bool failed = random.Next(1, 5) == 1; // 1/4 chance
+
+            if (failed)
+            {
+                TempData["Error"] = "Message failed to send. Please try again.";
+                return RedirectToAction("ContactUs");
+            }
+
+            // SAVE IN MEMORY
+            var contact = new ContactMessage
+            {
+                Name = Name,
+                Email = Email,
+                Subject = Subject,
+                Message = Message,
+                SubmittedAt = DateTime.Now
+            };
+
+            InMemoryContactStore.Messages.Add(contact);
+
+            TempData["Success"] = "Your message has been sent successfully!";
+            return RedirectToAction("ContactUs");
         }
 
-        public IActionResult ContactUs()
+        // VIEW ALL IN-MEMORY SUBMISSIONS
+        public IActionResult ContactSubmissions()
         {
-            return View();
+            return View(InMemoryContactStore.Messages);
         }
 
-        public IActionResult Privacy()
-        {
-            return View();
-        }
-
+        // ERROR HANDLER
         [ResponseCache(Duration = 0, Location = ResponseCacheLocation.None, NoStore = true)]
         public IActionResult Error()
         {
-            return View(new ErrorViewModel { RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier });
+            return View(new ErrorViewModel
+            {
+                RequestId = Activity.Current?.Id ?? HttpContext.TraceIdentifier
+            });
         }
     }
 }

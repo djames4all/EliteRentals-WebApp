@@ -1,0 +1,14 @@
+﻿@{
+    ViewData["Title"] = "Message Sent";
+}
+
+<div class="text-center mt-5">
+    <h2 class="text-success">Your message has been sent successfully!</h2>
+
+    <p class="mt-3">Thank you for contacting Elite Rentals.</p>
+
+    <a asp-action="ViewSubmission" asp-route-id="@ViewBag.Id"
+       class="btn btn-outline-primary mt-4">
+        View Your Submission
+    </a>
+</div>

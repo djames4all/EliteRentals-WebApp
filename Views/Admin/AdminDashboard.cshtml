@@ -5,13 +5,16 @@
 }
 
 <style>
-    /* KPI Card Styling */
+    /* IMPROVED KPI SHRINK-TO-FIT STYLING */
     .kpi-value {
-        white-space: nowrap;       /* Prevent line breaks */
-        overflow: hidden;          /* Hide overflow */
-        text-overflow: ellipsis;   /* Show ... if too long */
-        font-size: clamp(1.8rem, 2.5vw, 2.5rem); /* Scales for very large numbers */
-        font-weight: 700;
+        white-space: nowrap;
+        font-weight: 600; /* Slightly lighter for better fitting */
+        font-size: 2.4rem;
+        line-height: 1.1; /* Prevent vertical clipping */
+        display: inline-block; /* Needed for scaling */
+        transform-origin: left center;
+        max-width: 100%;
+        overflow: visible !important; /* Ensure clean scaling */
     }
 </style>
 
@@ -34,6 +37,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-3 mb-3">
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
@@ -42,6 +46,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-3 mb-3">
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
@@ -50,6 +55,7 @@
                         </div>
                     </div>
                 </div>
+
                 <div class="col-md-3 mb-3">
                     <div class="card text-center shadow-sm">
                         <div class="card-body">
@@ -127,7 +133,6 @@
                 </div>
             </div>
 
-
             <!-- Charts -->
             <div class="row mb-4">
                 <div class="col-lg-6 mb-3">
@@ -170,7 +175,7 @@
                 </div>
             </div>
 
-            <!-- Alerts & Notifications -->
+            <!-- Alerts -->
             <div class="card shadow-sm mb-4">
                 <div class="card-body">
                     <h5 class="card-title">Alerts & Notifications</h5>
@@ -205,6 +210,28 @@
 
 @section Scripts {
     <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+
+    <script>
+        /* FULLY FIXED SHRINK-TO-FIT KPI SCALING */
+        function fitKPIText() {
+            document.querySelectorAll('.kpi-value').forEach(el => {
+                el.style.transform = "scale(1)"; // reset scaling
+
+                const parent = el.parentElement;
+                const maxWidth = parent.clientWidth - 20;   // keep small padding
+                const textWidth = el.scrollWidth;
+
+                if (textWidth > maxWidth) {
+                    const scale = maxWidth / textWidth;
+                    el.style.transform = `scale(${scale})`;
+                }
+            });
+        }
+
+        window.addEventListener("load", fitKPIText);
+        window.addEventListener("resize", () => setTimeout(fitKPIText, 50));
+    </script>
+
     <script>
         // Rent Trends Chart
         const rentData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.RentTrends.Select(r => r.Amount)));
@@ -253,7 +280,7 @@
             }
         });
 
-               // Maintenance Aging Chart
+        // Maintenance Aging Chart
         const agingLabels = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MaintenanceAgingBuckets.Select(b => $"Week {b.WeeksOpen}")));
         const agingData = @Html.Raw(System.Text.Json.JsonSerializer.Serialize(Model.MaintenanceAgingBuckets.Select(b => b.Count)));
 
@@ -275,5 +302,6 @@
                 scales: { y: { beginAtZero: true, precision: 0 } }
             }
         });
+
     </script>
 }
